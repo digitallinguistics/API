@@ -17,7 +17,7 @@ app.set('view engine', 'handlebars');
 
 // middleware
 app.use(middleware.logUrl); // url logging for debugging
-app.use(less('/less'), middleware.lessOptions); // routing for LESS files
+app.use(less('/less', middleware.lessOptions)); // routing for LESS files
 app.use(express.static(__dirname + '/public')); // routing for static files
 
 // routing
