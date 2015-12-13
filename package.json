@@ -1,0 +1,38 @@
+{
+  "name": "dlx-api",
+  "version": "0.1.0",
+  "description": "Source code for the DLX database API",
+  "contributors": [
+    {
+      "name": "Daniel W. Hieber",
+      "email": "dhieber@umail.ucsb.edu",
+      "url": "http://www.danielhieber.com"
+    },
+    {
+      "name": "Patrick J. Hall"
+    }
+  ],
+  "license": "MIT",
+  "keywords": [
+    "Digital Linguistics",
+    "DLX",
+    "language documentation",
+    "language revitalization",
+    "linguistics",
+    "University of California, Santa Barbara"
+  ],
+  "homepage": "https://github.com/digitallinguistics/dlx-api#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/digitallinguistics/dlx-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/digitallinguistics/dlx-api/issues"
+  },
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.13.3",
+    "express-handlebars": "^2.0.1",
+    "less-middleware": "^2.0.1"
+  }
+}

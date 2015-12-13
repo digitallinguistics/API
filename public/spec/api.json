@@ -1,0 +1,542 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "DLX API",
+    "description": "The API for accessing the DLX database.",
+    "contact": {
+      "name": "Daniel W. Hieber",
+      "url": "https://github.com/digitallinguistics/dlx-api",
+      "email": "dhieber@umail.ucsb.edu"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "http://opensource.org/licenses/MIT"
+    },
+    "version": "1.0.0"
+  },
+  "basePath": "/v1",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "externalDocs": {
+    "description": "View source and additional information on Github.",
+    "url": "https://github.com/digitallinguistics/dlx-api"
+  },
+
+  "tags": [
+    { "name": "Collections", "description": "Operations on collections" },
+    { "name": "Items", "description": "Operations on items" },
+    { "name": "Subitems", "description": "Operations on subitems" }
+  ],
+
+  "securityDefinitions": {
+    "oauth": {
+      "type": "oauth2",
+      "flow": "implicit",
+      "authorizationUrl": "https://dlx.azurewebsites.net/auth",
+      "scopes": {}
+    }
+  },
+
+  "definitions": {
+
+    "dataResponse": {
+      "title": "Data Response",
+      "description": "The JSON response that is returned whenever the response contains data.",
+      "type": "object",
+      "required": ["status", "data"],
+      "additionalProperties": false,
+
+      "properties": {
+
+        "status": {
+          "title": "Status Code",
+          "description": "The HTTP status code, as an integer.",
+          "type": "integer",
+          "enum": [200, 201, 204, 207]
+        },
+
+        "data": {
+          "title": "Data",
+          "description": "The data returned from a successful request. The format of the `data` field depends on the request type. Requests to collections will return an array, while requests for individual resources will return an object."
+        }
+
+      }
+    },
+
+    "errorResponse": {
+      "title": "Error Response",
+      "description": "The JSON response that is returned whenever there is an error and no data is returned.",
+      "type": "object",
+      "required": ["status", "message", "details"],
+      "additionalProperties": false,
+
+      "properties": {
+
+        "status": {
+          "title": "Status Code",
+          "description": "The HTTP status code, as an integer.",
+          "type": "integer",
+          "enum": [400, 401, 403, 404, 405, 500]
+        },
+
+        "message": {
+          "title": "Message",
+          "description": "The generic error message for this status code.",
+          "type": "string"
+        },
+
+        "details": {
+          "title": "Detailed Error Message",
+          "description": "Additional information about this instance of the error. Most useful for debugging.",
+          "type": "string"
+        },
+
+        "id": {
+          "title": "Error Resource ID",
+          "description": "The ID of the resource which caused the error. Useful for identifying which resources were unauthorized or missing.",
+          "type": "integer"
+        }
+
+      }
+    }
+  },
+
+  "parameters": {
+
+    "accept": {
+      "name": "Accept",
+      "in": "header",
+      "description": "An `Accept` header indicating whether JSON or HTML should be returned. Defaults to HTML.",
+      "type": "string",
+      "default": "text/html",
+      "enum": ["application/json", "text/html"]
+    },
+
+    "ids": {
+      "name": "ids",
+      "in": "query",
+      "description": "A comma-separated array of numeric IDs for the resources to execute the operation on.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "integer" }
+    },
+
+    "operation": {
+      "name": "operation",
+      "in": "query",
+      "description": "The type of operation to perform with the POST request. The following list shows which operations may be performed on which types of resources:\n\n* bundle: `addMedia`, `removeMedia`, `addPermission`, `removePermission`, `addText`, `removeText`\n\n* language: none\n\n* lexicon: `addPermission`, `removePermission`\n\n* location: `addPermission`, `removePermission`\n\n* media: `addPermission`, `removePermission`\n\n* person: `addPermission`, `removePermission`\n\n* project: `addBundle`, `removeBundle`, `addLexicon`, `removeLexicon`, `addPermission`, `removePermission`\n\n* text: `addPermission`, `removePermission`\n\n* user: none",
+      "required": true,
+      "type": "string",
+      "enum": [
+        "addBundle",
+        "removeBundle",
+        "addLexicon",
+        "removeLexicon",
+        "addMedia",
+        "removeMedia",
+        "addPermission",
+        "removePermission",
+        "addText",
+        "removeText"
+      ]
+    },
+
+    "permission": {
+      "name": "permission",
+      "in": "query",
+      "description": "The permission type to add or remove.",
+      "type": "string",
+      "enum": ["owner", "contributor", "viewer"]
+    },
+
+    "resources": {
+      "name": "resources",
+      "in": "query",
+      "description": "A comma-separated list of IDs for the resources to associate or disassociate with an item.",
+      "type": "array",
+      "items": { "type": "integer" }
+    },
+
+    "users": {
+      "name": "users",
+      "in": "query",
+      "description": "A comma-separated list of email addresses for users to add or remove permissions for. The indicated users will be sent an email informing them of the change in permissions (if they are not a registered user of the DLX database, the email will provide an option for them to register).",
+      "type": "array",
+      "items": { "type": "string", "format": "email" }
+    },
+
+    "collection": {
+      "name": "collection",
+      "in": "path",
+      "description": "The name of the collection to send the request to.",
+      "required": true,
+      "type": "string",
+      "enum": [
+        "bundles",
+        "languages",
+        "lexicons",
+        "locations",
+        "media",
+        "persons",
+        "projects",
+        "texts",
+        "users"
+      ]
+    },
+
+    "item": {
+      "name": "item",
+      "in": "path",
+      "description": "The ID of the item to perform the operation on.",
+      "required": true,
+      "type": "integer"
+    },
+
+    "subitem": {
+      "name": "subitem",
+      "in": "path",
+      "description": "The ID of the subitem to perform the operation on.",
+      "required": true,
+      "type": "integer"
+    },
+
+    "body": {
+      "name": "data",
+      "in": "body",
+      "description": "An array of JSON objects to be upserted.",
+      "required": true,
+      "schema": {
+        "default": [],
+        "type": "array",
+        "items": { "type": "object" }
+      }
+    }
+
+  },
+
+  "responses": {
+
+    "200": {
+      "description": "Operation successful.",
+      "schema": { "$ref": "#/definitions/dataResponse" },
+      "examples": {
+        "application/json": {
+          "status": 200,
+          "data": [
+            { "id": "107", "link": "https://dlx.azurewebsites.net/texts/107/", "title": "Pear Story", "etc.": "etc."},
+            { "id": "108", "link": "https://dlx.azurewebsites.net/texts/108/", "title": "Frog where are you?", "etc.": "etc." }
+          ]
+        },
+        "text/html": "<div><h1>Pear Story</h1><ol><li>(Phrase 1)</li><li>(Phrase 2)</li><li>(etc.)</li></ol></div>"
+      }
+    },
+
+    "201": {
+      "description": "Upsert successful.",
+      "schema": { "$ref": "#/definitions/dataResponse" },
+      "examples": {
+        "application/json": {
+          "status": 201,
+          "data": [
+            { "id": "107", "link": "https://dlx.azurewebsites.net/texts/107/", "title": "Pear Story", "etc.": "etc."},
+            { "id": "108", "link": "https://dlx.azurewebsites.net/texts/108/", "title": "Frog where are you?", "etc.": "etc." }
+          ]
+        }
+      }
+    },
+
+    "204": {
+      "description": "Delete operation successful.",
+      "schema": { "$ref": "#/definitions/dataResponse" },
+      "examples": {
+        "application/json": {
+          "status": 204,
+          "data": "Delete operation successful."
+        }
+      }
+    },
+
+    "207": {
+      "description": "Some resources unauthorized or not found.",
+      "schema": { "$ref": "#/definitions/dataResponse" },
+      "examples": {
+        "application/json": {
+          "status": 207,
+          "data": [
+            { "status": "404", "message": "Not found.", "details": "The resource with the requested ID could not be found." },
+            { "id": "108", "link": "https://dlx.azurewebsites.net/texts/108/", "title": "Frog where are you?", "etc.": "etc." },
+            { "status": "401", "message": "Unauthorized", "details": "The user is not authorized to access this resource." },
+            { "id": "110", "link": "https://dlx.azurewebsites.net/texts/110/", "title": "How the world began", "etc.": "etc." }
+          ]
+        }
+      }
+    },
+
+    "400": {
+      "description": "Bad request. The request URL, headers, or body are invalid.",
+      "schema": { "$ref": "#/definitions/errorResponse" },
+      "examples": {
+        "application/json": {
+          "status": 400,
+          "message": "Bad request. The request URL, headers, or body are invalid.",
+          "details": "The request URL is missing the 'ids' parameter."
+        }
+      }
+    },
+
+    "401": {
+      "description": "`Authorization` header missing or invalid.",
+      "schema": { "$ref": "#/definitions/errorResponse" },
+      "headers": {
+        "WWW-Authenticate": {
+          "description": "This header is sent when the authorization token is invalid or expired.",
+          "type": "string"
+        }
+      },
+      "examples": {
+        "application/json": {
+          "status": 401,
+          "message": "Authorization header missing or invalid.",
+          "details": "The provided authorization token is invalid."
+        }
+      }
+    },
+
+    "403": {
+      "description": "Authorization token expired.",
+      "schema": { "$ref": "#/definitions/errorResponse" },
+      "headers": {
+        "WWW-Authenticate": {
+          "description": "This header is sent when the authorization token is invalid or expired.",
+          "type": "string"
+        }
+      },
+      "examples": {
+        "application/json": {
+          "status": 403,
+          "message": "Authorization token expired.",
+          "details": "The authorization token has expired."
+        }
+      }
+    },
+
+    "404": {
+      "description": "Not found.",
+      "schema": { "$ref": "#/definitions/errorResponse" },
+      "examples": {
+        "application/json": {
+          "status": 404,
+          "message": "Requested resources not found.",
+          "details": "The following IDs could not be retrieved: 1, 17, 24. Operation aborted."
+        }
+      }
+    },
+
+    "405": {
+      "description": "Method not allowed.",
+      "schema": { "$ref": "#/definitions/errorResponse" },
+      "examples": {
+        "application/json": {
+          "status": 405,
+          "message": "Method not allowed.",
+          "details": "DELETE operations cannot be performed on the users collection (user accounts may be deleted through the account portal: http://dlx.azurewebsites.net/account)."
+        }
+      }
+    },
+
+    "500": {
+      "description": "Internal server error. [Open an issue.](https://github.com/digitallinguistics/dlx-api/issues)",
+      "schema": { "$ref": "#/definitions/errorResponse" },
+      "examples": {
+        "application/json": {
+          "status": 500,
+          "message": "Internal server error. Open an issue at https://github.com/digitallinguistics/dlx-api/issues.",
+          "details": "Internal server error."
+        }
+      }
+    }
+
+  },
+
+  "paths": {
+
+    "/{collection}": {
+
+      "parameters": [
+        { "$ref": "#/parameters/collection" }
+      ],
+
+      "delete": {
+        "tags": ["Collections"],
+        "summary": "Deletes resources from the collection.",
+        "description": "The DELETE method on a collection deletes the requested resources from the collection. Takes a required querystring with an `ids` parameter containing a comma-separated list of the IDs of the resources to delete. The user must have `owner` permission for a resource in order to delete it (multiple users may be owners of the same resource). DELETE operations cannot be executed on the `users` collection (user accounts may be deleted through the [account page](http://dlx.azurewebsites.net/account)).",
+        "security": [{ "oauth": [] }],
+
+        "parameters": [
+          { "$ref": "#/parameters/ids" }
+        ],
+
+        "responses": {
+          "204": { "$ref": "#/responses/204" },
+          "207": { "$ref": "#/responses/207" },
+          "400": { "$ref": "#/responses/400" },
+          "401": { "$ref": "#/responses/401" },
+          "403": { "$ref": "#/responses/403" },
+          "404": { "$ref": "#/responses/404" },
+          "405": { "$ref": "#/responses/405" },
+          "500": { "$ref": "#/responses/500" }
+        }
+      },
+
+      "get": {
+        "tags": ["Collections"],
+        "summary": "Retrieves resources from the collection.",
+        "description": "The GET method on a collection retrieves all the requested resources that the user has access to.\n\nThe request may include an optional `ids` parameter in the querystring specifying a comma-separated list of IDs for the resources to retrieve.\n\nIf the request includes IDs that cannot be found in the database, or includes resources that the user does not have permissions to, an error object will be returned for that resource. Other resources will be returned as normal. Clients should therefore be prepared to check any responses they receive for error objects, or to filter error objects from the array of retrieved items.\n\nThe request should include an `Accept` header specifying one of two formats:\n\n* `text/html` (default): For requests for single items, this method returns a generic HTML rendering of that item, wrapped in a `<div></div>`. If the resource has its permissions set to `public`, the text/html response allows users to share a visual representation of a resource using the static link for that resource. For requests for the entire collection, a summary of the DLX resources in that collection will be returned. For requests for multiple resources, a list of links to the individual resources will be returned. \n\n* `application/json`: Returns a JSON response object with two attributes: `status` and `data`. The content of the `data` attribute will always be an array (though the array may be empty, or contain just a single resource).\n\nThe `Authorization` header is not required for any resource that is publicly available. However, requests for any protected resources without an `Authorization` header will return an error object for that resource. It is recommended to simply include the `Authorization` header with all requests.",
+        "produces": ["application/json", "text/html"],
+        "security": [],
+
+        "parameters": [
+          { "$ref": "#/parameters/ids" },
+          { "$ref": "#/parameters/accept" }
+        ],
+
+        "responses": {
+          "200": { "$ref": "#/responses/200" },
+          "207": { "$ref": "#/responses/207" },
+          "400": { "$ref": "#/responses/400" },
+          "401": { "$ref": "#/responses/401" },
+          "403": { "$ref": "#/responses/403" },
+          "404": { "$ref": "#/responses/404" },
+          "500": { "$ref": "#/responses/500" }
+        }
+      },
+
+      "put": {
+        "tags": ["Collections"],
+        "summary": "Upserts (creates or updates) items to the collection.",
+        "description": "A PUT request to the collection either creates or updates the resources included in the request body, provided that the user has appropriate permissions for those resources. The request body must contain an array of JSON objects to create or update. A resource is created if its object does not contain an `id` attribute; otherwise, the resource is updated with the new object.",
+        "security": [{ "oauth": [] }],
+
+        "parameters": [
+          { "$ref": "#/parameters/body" }
+        ],
+
+        "responses": {
+          "201": { "$ref": "#/responses/201" },
+          "207": { "$ref": "#/responses/207" },
+          "400": { "$ref": "#/responses/400" },
+          "401": { "$ref": "#/responses/401" },
+          "403": { "$ref": "#/responses/403" },
+          "404": { "$ref": "#/responses/404" },
+          "405": { "$ref": "#/responses/405" },
+          "500": { "$ref": "#/responses/500" }
+        }
+      }
+
+    },
+
+    "/{collection}/{item}": {
+
+      "parameters": [
+        { "$ref": "#/parameters/collection" },
+        { "$ref": "#/parameters/item" }
+      ],
+
+      "delete": {
+        "tags": ["Items"],
+        "summary": "Deletes the item.",
+        "description": "Deletes the resource.",
+        "security": [{ "oauth": [] }],
+
+        "responses": {
+          "204": { "$ref": "#/responses/204" },
+          "400": { "$ref": "#/responses/400" },
+          "401": { "$ref": "#/responses/401" },
+          "403": { "$ref": "#/responses/403" },
+          "404": { "$ref": "#/responses/404" },
+          "405": { "$ref": "#/responses/405" },
+          "500": { "$ref": "#/responses/500" }
+        }
+      },
+
+      "get": {
+        "tags": ["Items"],
+        "summary": "Retrieves the item.",
+        "description": "Retrieves the resource as either HTML or JSON.",
+        "security": [],
+
+        "parameters": [
+          { "$ref": "#/parameters/accept" }
+        ],
+
+        "responses": {
+          "200": { "$ref": "#/responses/200" },
+          "400": { "$ref": "#/responses/400" },
+          "401": { "$ref": "#/responses/401" },
+          "403": { "$ref": "#/responses/403" },
+          "404": { "$ref": "#/responses/404" },
+          "405": { "$ref": "#/responses/405" },
+          "500": { "$ref": "#/responses/500" }
+        }
+      },
+
+      "post": {
+        "tags": ["Items"],
+        "summary": "Updates permissions or associated resources for the item.",
+        "description": "Updates permissions or associated resources for this resource. The user must have `owner` permission for the resource, and either `owner` or `contributor` permission for the resources to associate with it. Requires a querystring with at least one parameter, `operation`. Additional parameters may be required depending on the type of operation: `users`, `resources`, and `permission` (see below for details regarding each parameter).",
+        "security": [{ "oauth": [] }],
+
+        "parameters": [
+          { "$ref": "#/parameters/operation" },
+          { "$ref": "#/parameters/permission" },
+          { "$ref": "#/parameters/resources" },
+          { "$ref": "#/parameters/users" }
+        ],
+
+        "responses": {
+          "200": { "$ref": "#/responses/200" },
+          "207": { "$ref": "#/responses/207" },
+          "400": { "$ref": "#/responses/400" },
+          "401": { "$ref": "#/responses/401" },
+          "403": { "$ref": "#/responses/403" },
+          "404": { "$ref": "#/responses/404" },
+          "405": { "$ref": "#/responses/405" },
+          "500": { "$ref": "#/responses/500" }
+        }
+      }
+
+    },
+
+    "/{collection}/{item}/{subitem}": {
+
+      "get": {
+        "tags": ["Subitems"],
+        "summary": "Retrieves the subitem.",
+        "description": "Retrieves a subitem within the resource as either HTML or JSON. Only some collections can return subitems. The available collections and their subitems are as follows:\n\n* bundles: items\n* lexicons: lexicon entry\n* texts: phrase",
+        "produces": ["application/json", "text/html"],
+        "security": [],
+
+        "parameters": [
+          { "$ref": "#/parameters/collection" },
+          { "$ref": "#/parameters/item" },
+          { "$ref": "#/parameters/subitem" },
+          { "$ref": "#/parameters/accept" }
+        ],
+
+        "responses": {
+          "200": { "$ref": "#/responses/200" },
+          "400": { "$ref": "#/responses/400" },
+          "401": { "$ref": "#/responses/401" },
+          "403": { "$ref": "#/responses/403" },
+          "404": { "$ref": "#/responses/404" },
+          "405": { "$ref": "#/responses/405" },
+          "500": { "$ref": "#/responses/500" }
+        }
+      }
+
+    }
+
+  }
+
+}
