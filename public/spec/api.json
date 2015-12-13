@@ -4,9 +4,8 @@
     "title": "DLX API",
     "description": "The API for accessing the DLX database.",
     "contact": {
-      "name": "Daniel W. Hieber",
-      "url": "https://github.com/digitallinguistics/dlx-api",
-      "email": "dhieber@umail.ucsb.edu"
+      "name": "DLX",
+      "url": "https://github.com/digitallinguistics/dlx-api"
     },
     "license": {
       "name": "MIT",
