@@ -1,6 +1,6 @@
 {
   "name": "dlx-api",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Source code for the DLX database API",
   "contributors": [
     {
@@ -33,6 +33,6 @@
   "dependencies": {
     "express": "^4.13.3",
     "express-handlebars": "^2.0.1",
-    "less-middleware": "^2.0.1"
+    "less": "^2.5.3"
   }
 }
