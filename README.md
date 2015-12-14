@@ -53,11 +53,11 @@ Some of the resources in the DLX database are publicly available, and require no
 ### Making Requests to the API
 
 #### URI Syntax
-- https://dlx.azurewebsites.net/{collection}
-- https://dlx.azurewebsites.net/{collection}/{itemID}
-- https://dlx.azurewebsites.net/bundles/{bundleID}/items/{itemID}
-- https://dlx.azurewebsites.net/texts/{textID}/phrases/{phraseID}
-- https://dlx.azurewebsites.net/lexicons/{lexiconID}/entry/{entryID}
+- https://dlx.azurewebsites.net/v1/{collection}
+- https://dlx.azurewebsites.net/v1/{collection}/{itemID}
+- https://dlx.azurewebsites.net/v1/bundles/{bundleID}/items/{itemID}
+- https://dlx.azurewebsites.net/v1/lexicons/{lexiconID}/entries/{entryID}
+- https://dlx.azurewebsites.net/v1/texts/{textID}/phrases/{phraseID}
 
 #### HTTPS
 All programmatic requests to the DLX API should use HTTPS protocol rather than HTTP.
@@ -68,6 +68,9 @@ The hostname for requests to the DLX API should always be `dlx.azurewebsites.net
 #### Headers
 - Accept
 - Authorization
+
+#### Path
+Requests to the DLX database should include the API version number in the URL, immediately following the hostname, e.g. `https://dlx.azurewebsites.net/v1/...`.
 
 #### Querystring
 #### Request Body
