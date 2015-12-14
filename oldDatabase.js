@@ -1,5 +1,3 @@
-'use strict';
-
 // private variables & functions
 
 function createPublicMethods() {
@@ -41,62 +39,10 @@ function registerProcs() {
   });
 }
 
-function validateEmail(email) {
-  var regexp = new RegExp('^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$', 'i');
-  return regexp.test(email);
-}
 
-function User(data) {
-  var id = ''; // also the user email
-
-  this.accessToken = '';
-  this.dlxToken = '';
-  this.refreshToken = '';
-  this.tokenExpiration = '';
-  this.tokenService = '';
-
-  this.affiliation = '';
-  this.firstName = '';
-  this.lastName = '';
-
-  this.dropboxID = '';
-  this.facebookID = '';
-  this.instagramID = '';
-  this.onedriveID = '';
-  this.twitterID = '';
-
-  if (data) {
-    Object.keys(this).forEach(key => this[key] = data[key] || this[key]);
-    id = validateEmail(data.id || data.email) ? (data.id || data.email) : '';
-  }
-
-  Object.defineProperties(this, {
-    'email': {
-      enumerable: true,
-
-      get: function () { return id; },
-
-      set: function (val) { this.id = val; }
-    },
-
-    'id': {
-      enumerable: true,
-
-      get: function () { return id; },
-
-      set: function (val) {
-        if (!validateEmail(val)) { return new TypeError('Invalid email ID.'); }
-        else { id = val; }
-      }
-    }
-  });
-
-}
 
 // database schema
 var db = {
-  collections: ['texts', 'users'],
-
   globalProcs: {
     'delete': {
       id: 'delete',
