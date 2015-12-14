@@ -7,7 +7,7 @@
 }
 #text-head {
   font-size: 80px;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Fira Sans';
   color: #ffffff;
   float: right;
   margin-right: 20%;
@@ -41,7 +41,7 @@ h1 {
 /* tag titles */
 .swagger-section .swagger-ui-wrap ul#resources li.resource div.heading h2 a {
   color: #393939;
-  font-family: 'Arvo', serif;
+  font-family: 'Fira Sans';
   font-size: 1.5em;
 }
 .swagger-section .swagger-ui-wrap ul#resources li.resource div.heading h2 a:hover {
@@ -53,7 +53,7 @@ h1 {
   display: block;
   clear: none;
   float: left;
-  font-family: 'Arvo', serif;
+  font-family: 'Fira Sans';
   font-weight: bold;
 }
 .navbar-default .navbar-collapse,
@@ -83,7 +83,7 @@ h1 {
 }
 .title1 {
   font-size: 80px;
-  font-family: 'Vollkorn', serif;
+  font-family: 'Fira Sans';
   color: #404040;
   text-align: center;
   padding-top: 40px;
@@ -116,10 +116,10 @@ h1 {
 }
 .text-faded {
   font-size: 25px;
-  font-family: 'Vollkorn', serif;
+  font-family: 'Fira Sans';
 }
 .section-heading {
-  font-family: 'Vollkorn', serif;
+  font-family: 'Fira Sans';
   font-size: 45px;
   padding-bottom: 10px;
 }
@@ -132,7 +132,7 @@ hr {
   padding-bottom: 200px;
 }
 .description li {
-  font-family: 'Vollkorn', serif;
+  font-family: 'Fira Sans';
   font-size: 25px;
   color: #525252;
   margin-left: 28%;
@@ -173,7 +173,7 @@ hr {
 }
 .curl {
   padding: 10px;
-  font-family: "Anonymous Pro", "Menlo", "Consolas", "Bitstream Vera Sans Mono", "Courier New", monospace;
+  font-family: 'Fira Sans Mono';
   font-size: 0.9em;
   max-height: 400px;
   margin-top: 5px;
@@ -186,7 +186,7 @@ hr {
   font-size: 1.1em;
   margin: 0;
   padding: 15px 0 5px;
-  font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Fira Sans';
   font-weight: 500;
   line-height: 1.1;
 }
@@ -202,14 +202,14 @@ h2 {
 }
 .markdown p {
   font-size: 15px;
-  font-family: 'Arvo', serif;
+  font-family: 'Fira Sans';
 }
 .swagger-section .swagger-ui-wrap .code {
   font-size: 15px;
-  font-family: 'Arvo', serif;
+  font-family: 'Fira Sans';
 }
 .swagger-section .swagger-ui-wrap b {
-  font-family: 'Arvo', serif;
+  font-family: 'Fira Sans';
 }
 #signin:hover {
   cursor: pointer;
@@ -233,7 +233,7 @@ h2 {
   text-transform: none;
   font-size: 15px;
   font-weight: normal;
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Fira Sans';
   font-style: italic;
   line-height: 20px;
   top: -2px;

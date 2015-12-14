@@ -4,9 +4,8 @@
     "title": "DLX API",
     "description": "The API for accessing the DLX database.",
     "contact": {
-      "name": "Daniel W. Hieber",
-      "url": "https://github.com/digitallinguistics/dlx-api",
-      "email": "dhieber@umail.ucsb.edu"
+      "name": "DLX",
+      "url": "https://github.com/digitallinguistics/dlx-api"
     },
     "license": {
       "name": "MIT",
@@ -186,7 +185,7 @@
     },
 
     "item": {
-      "name": "item",
+      "name": "itemID",
       "in": "path",
       "description": "The ID of the item to perform the operation on.",
       "required": true,
@@ -194,7 +193,7 @@
     },
 
     "subitem": {
-      "name": "subitem",
+      "name": "subitemID",
       "in": "path",
       "description": "The ID of the subitem to perform the operation on.",
       "required": true,
@@ -508,12 +507,41 @@
 
     },
 
-    "/{collection}/{item}/{subitem}": {
+    "/{collection}/bundles/{bundleID}/items/{itemID}": {
 
       "get": {
         "tags": ["Subitems"],
-        "summary": "Retrieves the subitem.",
-        "description": "Retrieves a subitem within the resource as either HTML or JSON. Only some collections can return subitems. The available collections and their subitems are as follows:\n\n* bundles: items\n* lexicons: lexicon entry\n* texts: phrase",
+        "summary": "Retrieves an item from a bundle.",
+        "description": "Retrieves an item in a bundle, and either returns HTML that allows the item to be played/viewed, or returns that item as data. The data format varies depending on the item type (JSON or blobs).",
+        "produces": ["application/json", "application/pdf", "audio/aiff", "audio/mpeg", "audio/wav", "image/jpeg", "image/png", "image/tiff", "text/html", "video/avi", "video/mpeg", "video/quicktime"],
+        "security": [],
+
+        "parameters": [
+          { "$ref": "#/parameters/collection" },
+          { "$ref": "#/parameters/item" },
+          { "$ref": "#/parameters/subitem" },
+          { "$ref": "#/parameters/accept" }
+        ],
+
+        "responses": {
+          "200": { "$ref": "#/responses/200" },
+          "400": { "$ref": "#/responses/400" },
+          "401": { "$ref": "#/responses/401" },
+          "403": { "$ref": "#/responses/403" },
+          "404": { "$ref": "#/responses/404" },
+          "405": { "$ref": "#/responses/405" },
+          "500": { "$ref": "#/responses/500" }
+        }
+      }
+
+    },
+
+    "/{collection}/lexicons/{lexiconID}/entries/{entryID}": {
+
+      "get": {
+        "tags": ["Subitems"],
+        "summary": "Retrieves an entry from a lexicon.",
+        "description": "Retrieves an entry from a lexicon and returns it as either HTML or JSON.",
         "produces": ["application/json", "text/html"],
         "security": [],
 
@@ -533,6 +561,35 @@
           "405": { "$ref": "#/responses/405" },
           "500": { "$ref": "#/responses/500" }
         }
+      },
+
+      "/{collection}/texts/{textID}/phrases/{phraseID}": {
+
+        "get": {
+          "tags": ["Subitems"],
+          "summary": "Retrieves a phrase from a text.",
+          "description": "Retrieves a phrase from a text and returns it as either HTML or JSON.",
+          "produces": ["application/json", "text/html"],
+          "security": [],
+
+          "parameters": [
+            { "$ref": "#/parameters/collection" },
+            { "$ref": "#/parameters/item" },
+            { "$ref": "#/parameters/subitem" },
+            { "$ref": "#/parameters/accept" }
+          ],
+
+          "responses": {
+            "200": { "$ref": "#/responses/200" },
+            "400": { "$ref": "#/responses/400" },
+            "401": { "$ref": "#/responses/401" },
+            "403": { "$ref": "#/responses/403" },
+            "404": { "$ref": "#/responses/404" },
+            "405": { "$ref": "#/responses/405" },
+            "500": { "$ref": "#/responses/500" }
+          }
+        }
+
       }
 
     }
