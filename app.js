@@ -1,4 +1,6 @@
 // node modules
+var cookieParser = require('cookie-parser');
+var credentials = require('./lib/credentials');
 var express = require('express');
 var expressHandlebars = require('express-handlebars');
 var http = require('http');
@@ -16,6 +18,7 @@ app.set('view engine', 'handlebars');
 // middleware
 app.use(middleware.logUrl); // url logging for debugging
 app.use(express.static(__dirname + '/public')); // routing for static files
+app.use(cookieParser(credentials.password));
 
 // routing
 require('./lib/router')(app);
