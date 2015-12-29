@@ -1,30 +1,23 @@
-# The DLX API
-This repository contains the source code and documentation for the API that provides access to the DLX database.
+# The Digital Linguistics (DLX) API
+This repository contains the source code and documentation for the DLX API, a service that allows software developers to programmatically access the DLX database. By sending requests to the API, developers can add, update, delete, or retrieve resources in the database using code. This page explains how to properly format requests to the DLX database, and how to authenticate users so that they may access resources with restricted permissions.
 
+## About the Database
 
-## Technical Notes
+### Collections &amp; Resource Types
+The DLX database contains several types of resources, such as texts, lexicons, and media. There are separate collections ('tables') for each type of resource in the database, shown below. The DLX API allows users to perform various operations on the resources in these collections, depending on the type of resource and whether the user has permission to perform that operation. For example, a user may add a text to the `texts` collection or, if they have `Owner` permission for that text, update or delete that text.
 
-* The DLX database uses [Azure Web Apps](https://azure.microsoft.com/en-us/services/app-service/api/) to provide the API, and [Azure DocumentDB](https://azure.microsoft.com/en-us/services/documentdb/) to store and query resources in the database.
+Each item in a collection must be formatted according to the Digital Linguistics (DLX) data format specification. This is a standard format developed by [Patrick J. Hall](http://www.linguistics.ucsb.edu/people/patrick-hall) &amp; [Daniel W. Hieber](http://danielhieber.com) ([University of California, Santa Barbara Linguistics](http://www.linguistics.ucsb.edu/)) for exchanging linguistic data on the web. You can read more about this format [here](http://digitallinguistics.github.io/). If the user requests to add a resource to the database that is improperly formatted, the request returns an error and the resource is not uploaded. Click on any resource type to see its DLX specification.
 
-* The DLX API server implements the [Implicit grant type](http://tools.ietf.org/html/rfc6749#section-4.2) of the [OAuth 2.0 specification](http://tools.ietf.org/html/rfc6749) for authentication. In the future the [Authorization Code grant type](http://tools.ietf.org/html/rfc6749#section-4.1) may be implemented as well. For a simple overview of the OAuth 2.0 authentication process, see [this post](http://aaronparecki.com/articles/2012/07/29/1/oauth2-simplified) by Aaron Parecki.
+Some types of resources contain subitems that may also be accessed with the API. For example, texts contain phrases, and so a user may request one or more phrases from a text, rather than having to request the entire text at once. Subitems in a collection are shown following a `>`.
 
-* Database resources are described in [JSON Schema](http://json-schema.org/) format. For more information on JSON Schema, check out this [excellent guide](http://spacetelescope.github.io/understanding-json-schema/) from the [Space Telescope Science Institute](http://www.stsci.edu/).
-
-* The API structure is described in [Swagger](http://swagger.io/specification/) format.
-
-
-## The Database
-
-### Database Structure
-* bundles > items
-* languages
-* lexicons > lexicon entries
-* locations
-* media
-* persons
-* projects
-* texts > phrases
-* users
+* [bundles](http://digitallinguistics.github.io/docs/bundle) > [items](http://digitallinguistics.github.io/docs/bundle#items)
+* [languages](http://digitallinguistics.github.io/docs/language)
+* [lexicons](http://digitallinguistics.github.io/docs/lexicon) > [lexicon entries](http://digitallinguistics.github.io/docs/lexicon#lexEntries)
+* [locations](http://digitallinguistics.github.io/docs/location)
+* [media](http://digitallinguistics.github.io/docs/media)
+* [persons](http://digitallinguistics.github.io/docs/person)
+* [projects](http://digitallinguistics.github.io/docs/project)
+* [texts](http://digitallinguistics.github.io/docs/text) > [phrases](http://digitallinguistics.github.io/docs/text#phrases)
 
 ### Database Permissions
 
@@ -96,3 +89,15 @@ Requests to the DLX database always return a JSON object with a `status` attribu
 * `included`: in the future, this attribute may be used to include related resources with the response
 * `message`: a generic error message for unsuccessful requests
 * `status`: contains the HTTP status code (as numeric)
+
+## Technical Notes
+
+* The DLX database uses [Azure Web Apps](https://azure.microsoft.com/en-us/services/app-service/api/) to provide the API, and [Azure DocumentDB](https://azure.microsoft.com/en-us/services/documentdb/) to store and query resources in the database.
+
+* The API server is written in [Node](https://nodejs.org/en/) using the [Express](https://www.npmjs.com/package/express) web framework.
+
+* The DLX API server implements the [Implicit grant type](http://tools.ietf.org/html/rfc6749#section-4.2) of the [OAuth 2.0 specification](http://tools.ietf.org/html/rfc6749) for authentication. In the future the [Authorization Code grant type](http://tools.ietf.org/html/rfc6749#section-4.1) may be implemented as well. For a simple overview of the OAuth 2.0 authentication process, see [this post](http://aaronparecki.com/articles/2012/07/29/1/oauth2-simplified) by Aaron Parecki.
+
+* Database resources are described in [JSON Schema](http://json-schema.org/) format. For more information on JSON Schema, check out this [excellent guide](http://spacetelescope.github.io/understanding-json-schema/) from the [Space Telescope Science Institute](http://www.stsci.edu/).
+
+* The API structure is described in [Swagger](http://swagger.io/specification/) format.
