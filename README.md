@@ -47,10 +47,10 @@ In addition to individual user permissions, resources can be made either Public 
 
 ## II. How to Use the API Service
 
-### a. Registering Your App with the API
+### A. Registering Your App with the API
 Before your app can interact with the DLX API, you'll need to register your app with the service. Do this by going to https://dlx.azurewebsites.net/developer and clicking `Register New Application`. Once your app is registered, you'll be provided with a client ID (the unique ID for your application). Save this ID - you'll need it to authenticate users later. You can also view your app's client ID at any time by returning to the API [developer page])(https://dlx.azurewebsites.net/developer).
 
-### b. Authenticating Users
+### B. Authenticating Users
 Some of the resources in the DLX database are publicly available, and require no special permission to access. Other resources are private, and require the user to be logged into the DLX database to access them. Any requests to create, edit, or delete resources also requires the user to be logged in. So before making these kinds of requests, you will need to authenticate the user with the API service following the steps below.
 
 *Technical Note:* The DLX API server implements the [Implicit grant type](http://tools.ietf.org/html/rfc6749#section-4.2) of the [OAuth 2.0 specification](http://tools.ietf.org/html/rfc6749) for authentication. (In the future the [Authorization Code grant type](http://tools.ietf.org/html/rfc6749#section-4.1) may be implemented as well.) Note that a `scope` parameter is *not* required during the authorization process (all access tokens have the same default scope). For a simple overview of the OAuth 2.0 authentication process, see [this post](http://aaronparecki.com/articles/2012/07/29/1/oauth2-simplified) by Aaron Parecki.
@@ -96,8 +96,8 @@ The lifetime of an API access token is 1 hour (3600 seconds). After the token ex
 ##### Handling Errors During Authentication
 Sometimes the request you made in Step 1 will return an error. This can happen for a variety of reasons - incorrectly formatted URLs, bad request parameters, etc. If this happens, the user will be returned to the redirect URL, along with two querystring parameters: an `error` parameter indicating the type of error, and an `error_description` parameter with a more detailed description of the problem. A `state` parameter is also included if a `state` was provided in Step 1. A list of possible values for the `error` parameter can be viewed [here](http://tools.ietf.org/html/rfc6749#section-4.2.2.1).
 
-### c. Making Requests to the API
-### d. Handling Responses from the API
+### C. Making Requests to the API
+### D. Handling Responses from the API
 
 
 
