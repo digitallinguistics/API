@@ -179,4 +179,4 @@ The following status codes are used in responses from the API. Your application 
 
 * Database resources are described in [JSON Schema](http://json-schema.org/) format. For more information on JSON Schema, check out this [excellent guide](http://spacetelescope.github.io/understanding-json-schema/) from the [Space Telescope Science Institute](http://www.stsci.edu/).
 
-* The API structure is described in [Swagger](http://swagger.io/specification/) format.
+* The API structure is described using the [Swagger](http://swagger.io/specification/) format for describing APIs.
