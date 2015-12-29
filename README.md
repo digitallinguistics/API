@@ -142,20 +142,22 @@ Many requests to the API take optional or required querstring parameters. These 
 The body of the request should contain any resources to be uploaded to the database, in the [DLX JSON data format](https://github.com/digitallinguistics/digitallinguistics.github.io).
 
 ### D. Handling Responses from the API
-<!-- todo -->
-Requests to the DLX database always return a JSON object with a `status` attribute and either a `data` attribute (for successful requests) or a `message` attribute (for errors). Attributes in the response body include:
+If the request is successful, the API will return a response with a `2xx` status and a JSON object in the response body. A `WWW-Authenticate` header may also be included for invalid authorization requests.
+
+Unsuccessful requests will return a response with a `4xx` or `5xx` status, as well as a JSON object in the response body containing additional details about the error.
+
+The response body may contain the following attributes:
 
 | Attribute  | Description |
 | ---------- | ----------- |
-| `data`     | an array containing the requested data for successful requests |
-| `details`  | a more specific error message for help in debugging unsuccessful requests |
-| `included` | in the future, this attribute may be used to include related resources with the response |
-| `message`  | a generic error message for unsuccessful requests   |
-| `status`   | contains the HTTP status code (as numeric) |
-
- \n\n* `application/json`: Returns a JSON response object with two attributes: `status` and `data`. The content of the `data` attribute will always be an array (though the array may be empty, or contain just a single resource).
+| `data`     | (2xx responses only) an array containing the requested data for successful requests |
+| `details`  | (4xx or 5xx responses only) a more specific error message for help in debugging unsuccessful requests |
+| `error`  | (4xx or 5xx responses only) a generic error message for unsuccessful requests   |
+| `included` | (2xx responses only) in the future, this attribute may be used to include related resources with the response |
+| `status`   | (all responses) contains the HTTP status code (as numeric) |
 
 #### Response Headers &amp; Status Codes
+The following status codes are used in responses from the API. Your application should be prepared to handle any of these response types.
 - 200: Operation successful.
 - 201: Upsert successful.
 - 204: Delete operation successful.
