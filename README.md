@@ -112,27 +112,37 @@ Some examples:
 
 A complete list of the operations that can be performed on each type of resource and collection is available [here](https://dlx.azurewebsites.net/docs/api).
 
-#### Request Format
-Below is information explaining how to format each part of your requests to the API.
+Because the API uses regular URLs, GET requests (but not other operations) can be made simply by typing the URL into the browser. Since GET requests return an HTML representation of the resource by default, the user will see an HTML page with the requested resources. If the resource has its permissions set to `public`, the text/html response allows users to share a visual representation of a resource using the static link for that resource. If its permissions are set to `private`, only authorized users will be able to view the HTML page. Unauthorized users will simply see an error message if they try to open the link. For requests to a collection, a summary of the DLX resources in that collection will be returned. For requests for multiple resources, a list of links to the individual resources will be returned.
 
-##### Protocol
+The other way to send requests to the API is to programmatically construct an HTTP request and send it to the appropriate URL. Below is information explaining how to format each part of your requests to the API.
+
+#### Parts of the Request
+
+* ##### Protocol
 All requests to the DLX API should use HTTPS protocol rather than HTTP.
 
-##### Host
+* ##### Host
 The hostname for requests to the DLX API should always be `dlx.azurewebsites.net`.
 
-##### Headers
+* ##### Headers
+Certain requests to the API take optional or required headers. The following headers are used:
+
+| Header        | Description |
+| ------------- | ----------- |
+| Accept        | Indicates whether the response should be an HTML (`text/html`) or JSON `application/json` representation of the resource(s). Defaults to `text/html`. |
+| Authorization | Required for most operations, and for accessing private resources. Should contain the access token you received from the API during authentication, in the format `bearer {access_token}`. |
+
+* ##### Path
+Requests to the DLX API should include the API version number immediately after the hostname, like so: `https://dlx.azurewebsites.net/v1/`. The rest of the path should follow the URL syntax outlined above. The current version of the API is `v1`.
+
+* ##### Querystring
+Many requests to the API take optional or required querstring parameters. These are added to the end of the URL following a `?`, in the format `{parameter}={value}`. For example, the URL https://dlx.azurewebsites.net/v1/texts?ids=1,2,17,43,44,62 will retrieve texts with IDs 1, 2, 17, 43, 44, and 62 from the database. Be sure to encode the querystring as a URI component (using a method such as JavaScript's `encodeURI Component`) to avoid errors due to spaces or special characters. For a complete list of which query parameters are accepted for which types of requests, visit the [API documentation](http://dlx.azurewebsites.net/docs/api).
+
+* ##### Body
+The body of the request should contain any resources to be uploaded to the database, in the [DLX JSON data format](https://github.com/digitallinguistics/digitallinguistics.github.io).
+
+### D. Handling Responses from the API
 <!-- todo -->
-* Accept
-* Authorization
-
-##### Path
-Requests to the DLX API should include the API version number in the URL, immediately following the hostname, like so: `https://dlx.azurewebsites.net/v1/`. The rest of the path should follow the URL syntax outlined above. The current version of the API is `v1`.
-
-##### Querystring
-<!-- todo -->
-
-##### Body
 Requests to the DLX database always return a JSON object with a `status` attribute and either a `data` attribute (for successful requests) or a `message` attribute (for errors). Attributes in the response body include:
 
 | Attribute  | Description |
@@ -143,8 +153,7 @@ Requests to the DLX database always return a JSON object with a `status` attribu
 | `message`  | a generic error message for unsuccessful requests   |
 | `status`   | contains the HTTP status code (as numeric) |
 
-### D. Handling Responses from the API
-<!-- todo -->
+ \n\n* `application/json`: Returns a JSON response object with two attributes: `status` and `data`. The content of the `data` attribute will always be an array (though the array may be empty, or contain just a single resource).
 
 #### Response Headers &amp; Status Codes
 - 200: Operation successful.
