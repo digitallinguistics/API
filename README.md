@@ -97,34 +97,55 @@ The lifetime of an API access token is 1 hour (3600 seconds). After the token ex
 Sometimes the request you made in Step 1 will return an error. This can happen for a variety of reasons - incorrectly formatted URLs, bad request parameters, etc. If this happens, the user will be returned to the redirect URL, along with two querystring parameters: an `error` parameter indicating the type of error, and an `error_description` parameter with a more detailed description of the problem. A `state` parameter is also included if a `state` was provided in Step 1. A list of possible values for the `error` parameter can be viewed [here](http://tools.ietf.org/html/rfc6749#section-4.2.2.1).
 
 ### C. Making Requests to the API
-### D. Handling Responses from the API
 
+#### URL Syntax
+Each resource and collection in the database corresponds to a different URL. Requests made to that URL can be used to perform various operations on that resource or collection. For example, the text with an ID of `17` can be retrieved by sending a GET request to https://dlx.azurewebsites.net/v1/texts/17, and a lexicon can be added to the database by sending a PUT request to https://dlx.azurewebsites.net/v1/lexicons. Below is a set of schemas showing how to format URLS for different types of operations:
 
+* Operations on a collection: https://dlx.azurewebsites.net/v1/{collection}
+* Operations on an item: https://dlx.azurewebsites.net/v1/{collection}/{itemId}
+* Operations on a subitem (not available for all collections): https://dlx.azurewebsites.net/v1/{collection}/{itemId}/{subItemType}/{subItemId}
 
-#### URI Syntax
-- https://dlx.azurewebsites.net/v1/{collection}
-- https://dlx.azurewebsites.net/v1/{collection}/{itemID}
-- https://dlx.azurewebsites.net/v1/bundles/{bundleID}/items/{itemID}
-- https://dlx.azurewebsites.net/v1/lexicons/{lexiconID}/entries/{entryID}
-- https://dlx.azurewebsites.net/v1/texts/{textID}/phrases/{phraseID}
+Some examples:
+- https://dlx.azurewebsites.net/v1/texts
+- https://dlx.azurewebsites.net/v1/texts/17
+- https://dlx.azurewebsites.net/v1/texts/17/phrases/4
 
-#### HTTPS
-All programmatic requests to the DLX API should use HTTPS protocol rather than HTTP.
+A complete list of the operations that can be performed on each type of resource and collection is available [here](https://dlx.azurewebsites.net/docs/api).
 
-#### Host
+#### Request Format
+Below is information explaining how to format each part of your requests to the API.
+
+##### Protocol
+All requests to the DLX API should use HTTPS protocol rather than HTTP.
+
+##### Host
 The hostname for requests to the DLX API should always be `dlx.azurewebsites.net`.
 
-#### Headers
-- Accept
-- Authorization
+##### Headers
+<!-- todo -->
+* Accept
+* Authorization
 
-#### Path
-Requests to the DLX database should include the API version number in the URL, immediately following the hostname, e.g. `https://dlx.azurewebsites.net/v1/...`.
+##### Path
+Requests to the DLX API should include the API version number in the URL, immediately following the hostname, like so: `https://dlx.azurewebsites.net/v1/`. The rest of the path should follow the URL syntax outlined above. The current version of the API is `v1`.
 
-#### Querystring
-#### Request Body
+##### Querystring
+<!-- todo -->
 
-### Getting Responses from the API
+##### Body
+Requests to the DLX database always return a JSON object with a `status` attribute and either a `data` attribute (for successful requests) or a `message` attribute (for errors). Attributes in the response body include:
+
+| Attribute  | Description |
+| ---------- | ----------- |
+| `data`     | an array containing the requested data for successful requests |
+| `details`  | a more specific error message for help in debugging unsuccessful requests |
+| `included` | in the future, this attribute may be used to include related resources with the response |
+| `message`  | a generic error message for unsuccessful requests   |
+| `status`   | contains the HTTP status code (as numeric) |
+
+### D. Handling Responses from the API
+<!-- todo -->
+
 #### Response Headers &amp; Status Codes
 - 200: Operation successful.
 - 201: Upsert successful.
@@ -137,16 +158,7 @@ Requests to the DLX database should include the API version number in the URL, i
 - 405: Method not allowed.
 - 500: Internal server error. [Open an issue.](https://github.com/digitallinguistics/dlx-api/issues)
 
-#### Response Body
-Requests to the DLX database always return a JSON object with a `status` attribute and either a `data` attribute (for successful requests) or a `message` attribute (for errors). Attributes in the response body include:
-
-* `data`: an array containing the requested data for successful requests
-* `details`: a more specific error message for help in debugging unsuccessful requests
-* `included`: in the future, this attribute may be used to include related resources with the response
-* `message`: a generic error message for unsuccessful requests
-* `status`: contains the HTTP status code (as numeric)
-
-## Technical Notes
+## III. Technical Notes
 
 * The DLX database uses [Azure Web Apps](https://azure.microsoft.com/en-us/services/app-service/api/) to provide the API, and [Azure DocumentDB](https://azure.microsoft.com/en-us/services/documentdb/) to store and query resources in the database.
 
