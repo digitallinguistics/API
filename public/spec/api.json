@@ -339,7 +339,7 @@
         "application/json": {
           "status": 405,
           "message": "Method not allowed.",
-          "details": "DELETE operations cannot be performed on the users collection (user accounts may be deleted through the account portal: http://dlx.azurewebsites.net/account)."
+          "details": "DELETE operations cannot be performed on the users collection (user accounts may be deleted through the account portal: https://dlx.azurewebsites.net/account)."
         }
       }
     },
@@ -369,7 +369,7 @@
       "delete": {
         "tags": ["Collections"],
         "summary": "Deletes resources from the collection.",
-        "description": "The DELETE method on a collection deletes the requested resources from the collection. Takes a required querystring with an `ids` parameter containing a comma-separated list of the IDs of the resources to delete. The user must have `owner` permission for a resource in order to delete it (multiple users may be owners of the same resource). DELETE operations cannot be executed on the `users` collection (user accounts may be deleted through the [account page](http://dlx.azurewebsites.net/account)).",
+        "description": "The DELETE method on a collection deletes the requested resources from the collection. Takes a required querystring with an `ids` parameter containing a comma-separated list of the IDs of the resources to delete. The user must have `owner` permission for a resource in order to delete it (multiple users may be owners of the same resource). DELETE operations cannot be executed on the `users` collection (user accounts may be deleted through the [account page](https://dlx.azurewebsites.net/account)).",
         "security": [{ "oauth": [] }],
 
         "parameters": [
