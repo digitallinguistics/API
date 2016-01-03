@@ -37,6 +37,7 @@ In addition to individual user permissions, resources can be made either Public 
 - Can be downloaded
 - Can be viewed
 - Can be shared on social media
+- Can be added to other users' projects
 - Cannot be edited without permission
 - Cannot be deleted without permission
 - Display pseudonyms rather than real names
