@@ -46,6 +46,8 @@ In addition to individual user permissions, resources can be made either Public 
 - Do not display personal information (except for public metadata)
 - Could possibly be plagiarized or copied without permission (as with any publication)
 
+Public resources can sometimes become Community resources. This happens when the Owner of the resource gives up the Owner permission, but opts to leave the resource Public. When this happens, the original Owner can no longer delete the resource or set its visibility to private. The resource may now only be deleted by a DLX Administrator (or perhaps in the future, some kind of Community Moderator).
+
 ## II. How to Use the API Service
 
 ### A. Registering Your App with the API
