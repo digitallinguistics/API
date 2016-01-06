@@ -1,7 +1,7 @@
 /* font declarations */
 @font-face {
   font-family: 'Fira Sans';
-  src: local('Fira Sans Medium'), url('//localhost:3000/fonts/FiraSans-Light.woff') format(woff), url('//localhost:3000/fonts/FiraSans-Light.ttf') format(truetype);
+  src: local('Fira Sans Light'), url('//localhost:3000/fonts/FiraSans-Light.woff') format(woff), url('//localhost:3000/fonts/FiraSans-Light.ttf') format(truetype);
   font-weight: normal;
   font-style: normal;
 }
