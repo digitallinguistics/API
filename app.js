@@ -27,12 +27,16 @@ require('./lib/router')(app);
 app.use(middleware.error404);
 app.use(middleware.error500);
 
-// compile LESS files
-middleware.compileLess();
+// generate CSS
+require('./lib/less');
 
 // start server
 var server = http.createServer(app);
 
 server.listen(app.get('port'), function () {
-  console.log('Server started on port ' + app.get('port') + ' at ' + new Date() + '. Press Ctrl+C to terminate.');
+  console.log(`Server started. Press Ctrl+C to terminate.
+  Port:   ${app.get('port')}
+  Time:   ${new Date()}
+  Node:   ${process.version}
+  Env:    ${global.env}`);
 });
