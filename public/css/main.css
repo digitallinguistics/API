@@ -1,3 +1,45 @@
 body {
   font-family: 'Fira Sans';
+  min-height: 100vh;
+  min-width: 100vw;
+}
+#header {
+  align-items: center;
+  padding: 0.5rem;
+}
+#header > h1 {
+  font-size: 2rem;
+  padding: 0rem 1rem;
+}
+#header #menuButton {
+  align-items: center;
+  cursor: pointer;
+  flex-direction: row;
+}
+#header #menuButton > p {
+  padding: 0rem 0.5rem;
+}
+#header #github > img {
+  height: 2rem;
+  padding: 0.25rem;
+  width: 2rem;
+}
+.mobile #nav {
+  display: none;
+}
+.mobile #nav > ul > li {
+  align-items: center;
+}
+.desktop #header,
+.desktop #nav > ul {
+  flex-direction: row;
+}
+.desktop #menuButton {
+  display: none;
+}
+.desktop #nav {
+  flex-grow: 1;
+}
+.desktop #nav > ul > li {
+  padding-right: 1rem;
 }
