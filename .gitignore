@@ -31,3 +31,4 @@ credentials.js
 
 # Ignore JSHint configuration
 .jshintrc
+*.css
