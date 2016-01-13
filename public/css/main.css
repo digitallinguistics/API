@@ -19,7 +19,14 @@ body {
 #header #menuButton > p {
   padding: 0rem 0.5rem;
 }
-#header #github > img {
+footer {
+  align-items: center;
+}
+#github > div {
+  align-items: center;
+  flex-direction: row;
+}
+#github > div > img {
   height: 2rem;
   padding: 0.25rem;
   width: 2rem;
