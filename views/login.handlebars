@@ -6,10 +6,19 @@
     <img id=bigLogo src=/img/tunnel.svg alt='DLX logo'>
   </a>
 
-  <h1>Log in to DLX</h1>
+  <h1>
+    <label for=loginToggle>
+      <p>Login</p>
+      <input id=loginToggle type=radio name=toggle value=login>
+    </label>
+    <label for=registerToggle>
+      <p>Register</p>
+      <input id=registerToggle type=radio name=toggle value=register>
+    </label>
+  </h1>
 
   <ul>
-    <li><a href={{authUrls.onedrive}}><img src=/img/onedrive.svg alt='login with Onedrive'></a></li>
+    <li><a href={{authUrls.onedrive}}><img id=onedrive src=/img/onedrive.svg alt='login with Onedrive'></a></li>
     <li>Additional login options coming soon!</li>
   </ul>
 

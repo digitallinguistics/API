@@ -5,30 +5,29 @@
 #login * {
   align-items: center;
 }
-#login > h1,
-#banner {
+#login > * {
   align-self: center;
 }
-#bigLogo {
+#login #bigLogo {
   height: 10rem;
   padding: 2.5rem;
 }
-#login > ul > li > a > img {
+#login #onedrive {
   height: 5rem;
 }
-#registerButton {
-  background-color: white;
-  border: 1px solid black;
+#login h1 {
+  background-color: #ccc;
   border-radius: 5px;
-  box-shadow: 0px 0px 3px #ccc;
+  color: white;
+  display: flex;
+  flex-direction: row;
+  font-size: 2rem;
+}
+#login h1 > label > p {
   cursor: pointer;
-  margin: 1rem;
   padding: 0.5rem;
+  text-shadow: 1px 1px 1px black;
 }
-#registerButton:hover {
-  box-shadow: 0px 0px 5px black;
-}
-h1 {
-  font-size: 150%;
-  font-weight: bold;
+#login h1 > label > input {
+  display: none;
 }
