@@ -34,7 +34,7 @@
   },
   "main": "app.js",
   "engines": {
-    "node": "5.4.0"
+    "node": "5.x"
   },
   "dependencies": {
     "cookie-parser": "^1.4.0",
