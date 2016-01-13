@@ -1,8 +1,48 @@
+// styling by class
+@wugbotBlue: #3399ff;
+
+.boldBlue {
+  color: @wugbotBlue;
+  font-weight: bold;
+}
+
+.field {
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 0.25rem 0.5rem;
+
+  &:focus { border: 1px solid @wugbotBlue; }
+
+}
+
+.header {
+  align-self: center;
+  font-weight: bold;
+  padding: 0rem 0.5rem;
+}
+
+input[type=email],
+input[type=text] {
+  .field;
+}
+
+.link {
+  border-bottom: 2px solid white;
+  &:link { .boldBlue; }
+  &:visited { .boldBlue; }
+  &:hover { border-bottom: 2px solid @wugbotBlue; }
+  &:active { .boldBlue; }
+}
+
+// styling by DOM
 body {
   font-family: 'Fira Sans';
   min-height: 100vh;
   min-width: 100vw;
 }
+
+main { flex-grow: 1; }
 
 #header {
   align-items: center;
@@ -21,6 +61,10 @@ body {
     > p { padding: 0rem 0.5rem; }
   }
 
+  > #nav > ul > li > a { .link; }
+
+  > #userName > a { .link; }
+
 }
 
 footer {
@@ -28,6 +72,8 @@ footer {
 }
 
 #github {
+
+  .link;
 
   > div {
     align-items: center;
@@ -45,6 +91,7 @@ footer {
 .mobile {
   #nav { display: none; }
   #nav > ul > li { align-items: center; }
+  #userName { display: none; }
 }
 
 .desktop {
