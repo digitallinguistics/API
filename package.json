@@ -33,11 +33,15 @@
     "url": "https://github.com/digitallinguistics/dlx-api/issues"
   },
   "main": "app.js",
+  "engines": {
+    "node": "5.x"
+  },
   "dependencies": {
     "cookie-parser": "^1.4.0",
-    "documentdb": "^1.4.0",
+    "documentdb": "^1.5.1",
     "express": "^4.13.3",
     "express-handlebars": "^2.0.1",
-    "less": "^2.5.3"
+    "less": "^2.5.3",
+    "uuid": "^2.0.1"
   }
 }

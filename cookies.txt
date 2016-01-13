@@ -1,0 +1,35 @@
+// renders account or login page depending on whether user is authenticated
+10 exports.account = function (req, res) {
+11
+
+12   var loginUser = function () {
+13     if (!req.signedCookies.session) {
+14       res.render('test', { test: 'Login Page' });
+15     } else {
+16       db.getSessionUser(req.signedCookies.session)
+17       .then(function (user) {
+18         res.cookie('session', req.signedCookies.session, { maxAge: 3660000, signed: true });
+19         res.render('test', { test: JSON.stringify(user, null, 2) });
+20       })
+21       .catch(logErrors);
+22     }
+23   };
+24
+
+25   switch (req.path) {
+26     case '/account':
+27       loginUser();
+28       break;
+29     case '/login':
+30       loginUser();
+31       break;
+32     case '/register':
+33       res.clearCookie('session');
+34       res.render('test', { test: 'Registration Page' });
+35       break;
+36     default:
+37       res.render('test', { test: 'Login Page' });
+38   }
+39
+
+40 };

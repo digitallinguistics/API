@@ -19,14 +19,18 @@
 <body>
 
   <header id=header class=sticky>
+
     <a href=/>
       <img id=logo src=/img/tunnel.svg alt='DLX logo'>
     </a>
+
     <h1><a href=/>DLX</a></h1>
+
     <div id=menuButton>
       <img src=/img/menu.svg alt='open/close menu'>
       <p>Menu</p>
     </div>
+
     <nav id=nav>
       <ul>
         <li><a href=/>Home</a></li>
@@ -34,10 +38,27 @@
         <li><a href=/developer>Developer</a></li>
       </ul>
     </nav>
-    <a id=github href=https://github.com/digitallinguistics/dlx-api><img src=/img/github.svg alt='see this project on GitHub'></a>
+
+    <div id=userName>
+      {{#if userName}}
+        <a href=/account>{{userName}}</a>
+      {{else}}
+        <a href=/login>Login</a>
+      {{/if}}
+    </div>
+
   </header>
 
   {{{body}}}
+
+  <footer id=footer>
+    <a id=github href=https://github.com/digitallinguistics/dlx-api>
+      <div>
+        <img src=/img/github.svg alt='see this project on GitHub'>
+        <p>View project on GitHub</p>
+      </div>
+    </a>
+  </footer>
 
   <script src=/js/main.js charset=utf-8></script>
   {{{sections.script}}}
