@@ -1,25 +1,4 @@
-{{#section 'style'}}
-<style>
-
-#footer,
-#header { display: none; }
-
-#login * { align-items: center; }
-
-#banner,
-#login h1 { align-self: center; }
-
-#bigLogo { height: 10rem; padding: 2.5rem; }
-
-#login > ul > li > a > img { height: 5rem; }
-
-h1 {
-  font-size: 150%;
-  font-weight: bold;
-}
-
-</style>
-{{/section}}
+{{#section 'style'}}<link rel=stylesheet href=/css/login.css charset=utf-8>{{/section}}
 
 <main id=login>
 
@@ -27,11 +6,18 @@ h1 {
     <img id=bigLogo src=/img/tunnel.svg alt='DLX logo'>
   </a>
 
-  <h1>Log in to DLX</h1>
+  <div id=loginOptions>
+    <h1>Log in to DLX</h1>
 
-  <ul>
-    <li><a href={{authUrls.onedrive}}><img src=/img/onedrive.svg alt='login with Onedrive'></a></li>
-    <li>Additional login options coming soon!</li>
-  </ul>
+    <ul>
+      <li><a href={{authUrls.onedrive}}><img src=/img/onedrive.svg alt='login with Onedrive'></a></li>
+      <li>Additional login options coming soon!</li>
+    </ul>
+  </div>
+
+  <div id=register>
+    <h1>Create a New Account</h1>
+    <form><button id=registerButton type=submit method=GET formaction=/register><img src=/img/tunnel.svg alt='click to register'></button></form>
+  </div>
 
 </main>

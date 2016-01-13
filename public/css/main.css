@@ -1,7 +1,57 @@
+.boldBlue {
+  color: #3399ff;
+  font-weight: bold;
+}
+.field {
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 0.25rem 0.5rem;
+}
+.field:focus {
+  border: 1px solid #3399ff;
+}
+.header {
+  align-self: center;
+  font-weight: bold;
+  padding: 0rem 0.5rem;
+}
+input[type=email],
+input[type=text] {
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 0.25rem 0.5rem;
+}
+input[type=email]:focus,
+input[type=text]:focus {
+  border: 1px solid #3399ff;
+}
+.link {
+  border-bottom: 2px solid white;
+}
+.link:link {
+  color: #3399ff;
+  font-weight: bold;
+}
+.link:visited {
+  color: #3399ff;
+  font-weight: bold;
+}
+.link:hover {
+  border-bottom: 2px solid #3399ff;
+}
+.link:active {
+  color: #3399ff;
+  font-weight: bold;
+}
 body {
   font-family: 'Fira Sans';
   min-height: 100vh;
   min-width: 100vw;
+}
+main {
+  flex-grow: 1;
 }
 #header {
   align-items: center;
@@ -19,8 +69,62 @@ body {
 #header #menuButton > p {
   padding: 0rem 0.5rem;
 }
+#header > #nav > ul > li > a {
+  border-bottom: 2px solid white;
+}
+#header > #nav > ul > li > a:link {
+  color: #3399ff;
+  font-weight: bold;
+}
+#header > #nav > ul > li > a:visited {
+  color: #3399ff;
+  font-weight: bold;
+}
+#header > #nav > ul > li > a:hover {
+  border-bottom: 2px solid #3399ff;
+}
+#header > #nav > ul > li > a:active {
+  color: #3399ff;
+  font-weight: bold;
+}
+#header > #userName > a {
+  border-bottom: 2px solid white;
+}
+#header > #userName > a:link {
+  color: #3399ff;
+  font-weight: bold;
+}
+#header > #userName > a:visited {
+  color: #3399ff;
+  font-weight: bold;
+}
+#header > #userName > a:hover {
+  border-bottom: 2px solid #3399ff;
+}
+#header > #userName > a:active {
+  color: #3399ff;
+  font-weight: bold;
+}
 footer {
   align-items: center;
+}
+#github {
+  border-bottom: 2px solid white;
+}
+#github:link {
+  color: #3399ff;
+  font-weight: bold;
+}
+#github:visited {
+  color: #3399ff;
+  font-weight: bold;
+}
+#github:hover {
+  border-bottom: 2px solid #3399ff;
+}
+#github:active {
+  color: #3399ff;
+  font-weight: bold;
 }
 #github > div {
   align-items: center;
@@ -36,6 +140,9 @@ footer {
 }
 .mobile #nav > ul > li {
   align-items: center;
+}
+.mobile #userName {
+  display: none;
 }
 .desktop #header,
 .desktop #nav > ul {

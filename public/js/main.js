@@ -1,6 +1,7 @@
 (function () {
 
   var nav = document.getElementById('nav');
+  var userName = document.getElementById('userName');
 
   var resize = function () {
 
@@ -13,16 +14,19 @@
       document.body.classList.add('mobile');
       document.body.classList.remove('desktop');
       nav.style.display = 'none';
+      userName.style.display = 'none';
     } else {
       document.body.classList.add('desktop');
       document.body.classList.remove('mobile');
       nav.style.display = 'flex';
+      userName.style.display = 'flex';
     }
 
   };
 
   var toggleMenu = function () {
     nav.style.display = getComputedStyle(nav).display === 'none' ? 'flex' : 'none';
+    userName.style.display = getComputedStyle(userName).display === 'none' ? 'flex' : 'none';
   };
 
   resize();

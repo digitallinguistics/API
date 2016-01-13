@@ -1,7 +1,13 @@
+{{#section 'style'}}
+<style>
+  #error p { padding: 0.5rem; }
+</style>
+{{/section}}
+
 <main id=error>
-  <h1>{{code}}: {{message}}</h1>
+  <h1 class=header>{{code}}: {{message}}</h1>
 
   {{#if noAccount}}
-    <p>No DLX account was found using that login. <a href=/login>Try logging in with a different service</a> or <a href=/register>register for a new account</a>.</p>
+    <p>No DLX account was found using that login. <a class=link href=/login>Try logging in with a different service</a> or <a class=link href=/register>register for a new account</a>.</p>
   {{/if}}
 </main>

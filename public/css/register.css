@@ -1,0 +1,32 @@
+#register h1 {
+  align-self: center;
+  font-weight: bold;
+  padding: 0rem 0.5rem;
+  font-size: 1.5rem;
+}
+#register > form {
+  align-self: center;
+}
+#register > form > label {
+  align-items: center;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0.5rem;
+}
+#register > form > label > p {
+  margin-right: 1rem;
+}
+#register > form > #submit {
+  align-self: center;
+  background-color: white;
+  border: 1.5px solid black;
+  border-radius: 5px;
+  padding: 0.25rem 0.5rem;
+}
+#register > form > #submit:hover {
+  color: #3399ff;
+  border: 1.5px solid #3399ff;
+}
+#register #submit {
+  cursor: pointer;
+}
