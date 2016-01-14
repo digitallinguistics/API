@@ -93,7 +93,7 @@ main {
 }
 #header > #userName > a {
   border-bottom: 2px solid white;
-  padding: 0rem 0.5rem;
+  padding: 0rem 0.25rem;
 }
 #header > #userName > a:link {
   color: #3399ff;
@@ -115,6 +115,7 @@ main {
   color: #3399ff;
   cursor: pointer;
   border-bottom: 1px solid white;
+  padding: 0rem 0.25rem;
 }
 #header > #userName > #logoutButton:hover {
   border-bottom: 1px solid #3399ff;
