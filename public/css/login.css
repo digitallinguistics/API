@@ -18,10 +18,12 @@
 #login h1 {
   background-color: #ccc;
   border-radius: 5px;
+  box-shadow: inset 0px 0px 2px black;
   color: white;
   display: flex;
   flex-direction: row;
   font-size: 2rem;
+  margin: 1rem;
 }
 #login h1 > label > p {
   cursor: pointer;
@@ -30,4 +32,12 @@
 }
 #login h1 > label > input {
   display: none;
+}
+#login h1 > label.selected {
+  background-color: #3399ff;
+  border-radius: 5px;
+  box-shadow: inset 0px 0px 3px 0px white;
+}
+#login h1 > label.selected > p {
+  text-shadow: none;
 }

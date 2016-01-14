@@ -1,4 +1,6 @@
-{{#section 'style'}}<link rel=stylesheet href=/css/login.css charset=utf-8>{{/section}}
+{{#section 'style'}}
+  <link rel=stylesheet href=/css/login.css charset=utf-8>
+{{/section}}
 
 <main id=login>
 
@@ -7,9 +9,9 @@
   </a>
 
   <h1>
-    <label for=loginToggle>
+    <label for=loginToggle class=selected>
       <p>Login</p>
-      <input id=loginToggle type=radio name=toggle value=login>
+      <input id=loginToggle type=radio name=toggle value=login checked>
     </label>
     <label for=registerToggle>
       <p>Register</p>
@@ -17,9 +19,52 @@
     </label>
   </h1>
 
+  <p>Choose a service to log in with:</p>
+
   <ul>
     <li><a href={{authUrls.onedrive}}><img id=onedrive src=/img/onedrive.svg alt='login with Onedrive'></a></li>
     <li>Additional login options coming soon!</li>
   </ul>
 
 </main>
+
+{{#section 'script'}}
+<script>
+
+  var loginLabel = document.querySelector('#login > h1 > label:first-child');
+  var registerLabel = document.querySelector('#login > h1 > label:last-child');
+  var loginInput = loginLabel.querySelector('input');
+  var registerInput = registerLabel.querySelector('input');
+  var labels = [loginLabel, registerLabel];
+  var inputs = [loginInput, loginLabel]
+
+  var register = function () {
+    if (window.location.href.includes('register=true')) {
+      loginLabel.classList.remove('selected');
+      registerLabel.classList.add('selected');
+      registerCookie();
+    } else {
+      deregisterCookie();
+    }
+  };
+
+  var registerCookie = function () { document.cookie = 'register=true;max-age=3600'; };
+  var deregisterCookie = function () { document.cookie = 'register=true;expires=Thu, 01 Jan 1970 00:00:01 GMT'; };
+
+  var toggleHeader = function (ev) {
+    if (ev.target.tagName === 'INPUT') {
+
+      labels.forEach(function (label) { label.classList.remove('selected'); });
+      ev.target.parentNode.classList.add('selected');
+
+      if (ev.target.value === 'register') { registerCookie(); }
+      else { deregisterCookie(); }
+
+    }
+  };
+
+  document.querySelector('#login > h1').addEventListener('click', toggleHeader);
+  window.addEventListener('load', register);
+
+</script>
+{{/section}}

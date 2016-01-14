@@ -1,4 +1,4 @@
-@import (reference) './public/less/login.less';
+@import (reference) './public/less/main.less';
 
 #footer,
 #header { display: none; }
@@ -16,10 +16,12 @@
   h1 {
     background-color: #ccc;
     border-radius: 5px;
+    box-shadow: inset 0px 0px 2px black;
     color: white;
     display: flex;
     flex-direction: row;
     font-size: 2rem;
+    margin: 1rem;
 
     > label {
 
@@ -29,9 +31,22 @@
         text-shadow: 1px 1px 1px black;
       }
 
-      > input {
-        display: none;
+      > input { display: none; }
+
+    }
+
+    > label.selected {
+      background-color: @wugbotBlue;
+      border-radius: 5px;
+      box-shadow: inset 0px 0px 3px 0px white;
+
+      > p {
+        text-shadow: none;
       }
+
+    }
+
+    > label:not(.selected) {
 
     }
 
