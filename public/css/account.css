@@ -1,0 +1,31 @@
+#account > h1 {
+  align-self: center;
+  font-size: 1.25rem;
+  font-weight: bold;
+  padding: 0rem 0.5rem;
+}
+#account > form > * {
+  margin: 0.5rem 1rem;
+}
+#account > form > button {
+  background-color: white;
+  border: 1.5px solid black;
+  border-radius: 5px;
+  padding: 0.25rem 0.5rem;
+}
+#account > form > button:hover:not(:disabled) {
+  color: #3399ff;
+  border: 1.5px solid #3399ff;
+}
+.desktop #account > form {
+  align-self: center;
+  max-width: 50%;
+}
+.desktop #account > form > label {
+  align-items: baseline;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.desktop #account > form > label > p {
+  margin-right: 2rem;
+}

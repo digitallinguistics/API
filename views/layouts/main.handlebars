@@ -41,7 +41,7 @@
 
     <div id=userName>
       {{#if user}}
-        {{#if user.name}}<a href=/account>{{user.name}}</a>{{/if}}
+        {{#if user.firstName}}<a href=/account>{{user.firstName}}</a>{{/if}}
         <button id=logoutButton type=button name=logout>(Logout)</button>
       {{else}}
         <a href=/login>Login / Register</a>

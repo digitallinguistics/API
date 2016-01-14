@@ -1,3 +1,27 @@
+{{#section 'style'}}<link rel=stylesheet href=/css/account.css charset=utf-8>{{/section}}
+
 <main id=account>
   <h1>Your Account</h1>
+
+  <form action=/account method=POST>
+
+    <label for=firstName>
+      <p>First Name (Given Name):</p>
+      <input type=text name=firstName value={{user.firstName}}>
+    </label>
+
+    <label for=lastName>
+      <p>Last Name (Family Name):</p>
+      <input type=text name=lastName value={{user.lastName}}>
+    </label>
+
+    <label for=affiliation>
+      <p>Affiliation:</p>
+      <input type=text name=affiliation value={{user.affiliation}}>
+    </label>
+
+    <button type=submit name=updateInfoButton disabled>Update Information</button>
+
+  </form>
+
 </main>
