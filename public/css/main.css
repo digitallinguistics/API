@@ -87,8 +87,13 @@ main {
   color: #3399ff;
   font-weight: bold;
 }
+#header > #userName {
+  align-items: baseline;
+  flex-direction: row;
+}
 #header > #userName > a {
   border-bottom: 2px solid white;
+  padding: 0rem 0.5rem;
 }
 #header > #userName > a:link {
   color: #3399ff;
@@ -104,6 +109,15 @@ main {
 #header > #userName > a:active {
   color: #3399ff;
   font-weight: bold;
+}
+#header > #userName > #logoutButton {
+  background-color: white;
+  color: #3399ff;
+  cursor: pointer;
+  border-bottom: 1px solid white;
+}
+#header > #userName > #logoutButton:hover {
+  border-bottom: 1px solid #3399ff;
 }
 footer {
   align-items: center;
