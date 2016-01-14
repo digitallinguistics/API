@@ -40,8 +40,8 @@
     </nav>
 
     <div id=userName>
-      {{#if userName}}
-        <a href=/account>{{userName}}</a>
+      {{#if user}}
+        {{#if user.name}}<a href=/account>{{user.name}}</a>{{/if}}
         <button id=logoutButton type=button name=logout>(Logout)</button>
       {{else}}
         <a href=/login>Login / Register</a>

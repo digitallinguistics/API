@@ -12,7 +12,7 @@
   height: 10rem;
   padding: 2.5rem;
 }
-#login #onedrive {
+#login #onedrive > a > img {
   height: 5rem;
 }
 #login h1 {

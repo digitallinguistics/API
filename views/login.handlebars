@@ -22,7 +22,7 @@
   <p>Choose a service to log in with:</p>
 
   <ul>
-    <li><a href={{authUrls.onedrive}}><img id=onedrive src=/img/onedrive.svg alt='login with Onedrive'></a></li>
+    <li id=onedrive><a href={{authUrls.onedrive}}><img src=/img/onedrive.svg alt='login with Onedrive'></a></li>
     <li>Additional login options coming soon!</li>
   </ul>
 
@@ -36,7 +36,7 @@
   var loginInput = loginLabel.querySelector('input');
   var registerInput = registerLabel.querySelector('input');
   var labels = [loginLabel, registerLabel];
-  var inputs = [loginInput, loginLabel]
+  var inputs = [loginInput, loginLabel];
 
   var register = function () {
     if (window.location.href.includes('register=true')) {
