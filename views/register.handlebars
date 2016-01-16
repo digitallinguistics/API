@@ -6,6 +6,8 @@
 
   <form autocomplete action=/register method=POST>
 
+    <input type=hidden name=state value={{state}}>
+
     <label for=firstName>
       <p>First Name (Given Name)</p>
       <input id=firstName type=text name=firstName>
