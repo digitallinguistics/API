@@ -1,3 +1,6 @@
+# WARNING
+This package is still under development. The version number will be incremented to v1.0.0 when this package is production-ready.
+
 # The Digital Linguistics (DLX) API
 This repository contains the source code and documentation for the DLX API, a service that allows software developers to programmatically access the DLX database. By sending requests to the API, developers can add, update, delete, or retrieve resources in the database using code. This page describes the structure of the DLX database and the resources in it, how to register your app with the API service, how to authenticate users so that they may access resources, how to properly format requests to the database, and how to handle responses from the database.
 
