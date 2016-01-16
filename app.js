@@ -6,6 +6,7 @@ var express = require('express');
 var expressHandlebars = require('express-handlebars');
 var http = require('http');
 var middleware = require('./lib/middleware');
+require('./config');
 
 var app = express(); // initialize Express app
 var handlebars = expressHandlebars.create(middleware.hbsOptions); // initialize Handlebars
