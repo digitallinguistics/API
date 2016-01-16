@@ -1,4 +1,6 @@
-{{#section 'style'}}<link rel=stylesheet href=/css/login.css charset=utf-8>{{/section}}
+{{#section 'style'}}
+  <link rel=stylesheet href=/css/login.css charset=utf-8>
+{{/section}}
 
 <main id=login>
 
@@ -6,18 +8,63 @@
     <img id=bigLogo src=/img/tunnel.svg alt='DLX logo'>
   </a>
 
-  <div id=loginOptions>
-    <h1>Log in to DLX</h1>
+  <h1>
+    <label for=loginToggle class=selected>
+      <p>Login</p>
+      <input id=loginToggle type=radio name=toggle value=login checked>
+    </label>
+    <label for=registerToggle>
+      <p>Register</p>
+      <input id=registerToggle type=radio name=toggle value=register>
+    </label>
+  </h1>
 
-    <ul>
-      <li><a href={{authUrls.onedrive}}><img src=/img/onedrive.svg alt='login with Onedrive'></a></li>
-      <li>Additional login options coming soon!</li>
-    </ul>
-  </div>
+  <p>Choose a service to log in / register with:</p>
 
-  <div id=register>
-    <h1>Create a New Account</h1>
-    <form><button id=registerButton type=submit method=GET formaction=/register><img src=/img/tunnel.svg alt='click to register'></button></form>
-  </div>
+  <ul>
+    <li id=onedrive><a href={{authUrls.onedrive}}><img src=/img/onedrive.svg alt='login with Onedrive'></a></li>
+    <li>Additional login options coming soon!</li>
+  </ul>
 
 </main>
+
+{{#section 'script'}}
+<script>
+
+  var loginLabel = document.querySelector('#login > h1 > label:first-child');
+  var registerLabel = document.querySelector('#login > h1 > label:last-child');
+  var loginInput = loginLabel.querySelector('input');
+  var registerInput = registerLabel.querySelector('input');
+  var labels = [loginLabel, registerLabel];
+  var inputs = [loginInput, loginLabel];
+
+  var register = function () {
+    if (window.location.href.includes('register=true')) {
+      loginLabel.classList.remove('selected');
+      registerLabel.classList.add('selected');
+      registerCookie();
+    } else {
+      deregisterCookie();
+    }
+  };
+
+  var registerCookie = function () { document.cookie = 'register=true;max-age=3600'; };
+  var deregisterCookie = function () { document.cookie = 'register=true;expires=Thu, 01 Jan 1970 00:00:01 GMT'; };
+
+  var toggleHeader = function (ev) {
+    if (ev.target.tagName === 'INPUT') {
+
+      labels.forEach(function (label) { label.classList.remove('selected'); });
+      ev.target.parentNode.classList.add('selected');
+
+      if (ev.target.value === 'register') { registerCookie(); }
+      else { deregisterCookie(); }
+
+    }
+  };
+
+  document.querySelector('#login > h1').addEventListener('click', toggleHeader);
+  window.addEventListener('load', register);
+
+</script>
+{{/section}}

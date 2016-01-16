@@ -1,33 +1,55 @@
-@import (reference) './public/less/login.less';
+@import (reference) './public/less/main.less';
 
 #footer,
 #header { display: none; }
 
-#login * { align-items: center; }
+#login {
 
-#login > div > h1,
-#banner { align-self: center; }
+  * { align-items: center; }
 
-#login > div { padding: 1rem; }
+  > * { align-self: center; }
 
-#bigLogo { height: 10rem; padding: 2.5rem; }
+  #bigLogo { height: 10rem; padding: 2.5rem; }
 
-#loginOptions > ul > li > a > img { height: 5rem; }
+  #onedrive > a > img { height: 5rem; }
 
-#registerButton {
-  background-color: white;
-  border: 1px solid black;
-  border-radius: 5px;
-  box-shadow: 0px 0px 3px #ccc;
-  cursor: pointer;
-  margin: 1rem;
-  padding: 0.5rem;
+  h1 {
+    background-color: #ccc;
+    border-radius: 5px;
+    box-shadow: inset 0px 0px 2px black;
+    color: white;
+    display: flex;
+    flex-direction: row;
+    font-size: 2rem;
+    margin: 1rem;
 
-  &:hover { box-shadow: 0px 0px 5px black; }
+    > label {
 
-}
+      > p {
+        cursor: pointer;
+        padding: 0.5rem;
+        text-shadow: 1px 1px 1px black;
+      }
 
-h1 {
-  font-size: 150%;
-  font-weight: bold;
+      > input { display: none; }
+
+    }
+
+    > label.selected {
+      background-color: @wugbotBlue;
+      border-radius: 5px;
+      box-shadow: inset 0px 0px 3px 0px white;
+
+      > p {
+        text-shadow: none;
+      }
+
+    }
+
+    > label:not(.selected) {
+
+    }
+
+  }
+
 }

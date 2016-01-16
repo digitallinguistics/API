@@ -6,6 +6,18 @@
   font-weight: bold;
 }
 
+.button {
+  background-color: white;
+  border: 1.5px solid black;
+  border-radius: 5px;
+  padding: 0.25rem 0.5rem;
+
+  &:hover:not(:disabled) {
+    color: @wugbotBlue;
+    border: 1.5px solid @wugbotBlue;
+  }
+}
+
 .field {
   background-color: white;
   border: 1px solid #ccc;
@@ -18,6 +30,7 @@
 
 .header {
   align-self: center;
+  font-size: 1.25rem;
   font-weight: bold;
   padding: 0rem 0.5rem;
 }
@@ -34,6 +47,8 @@ input[type=text] {
   &:hover { border-bottom: 2px solid @wugbotBlue; }
   &:active { .boldBlue; }
 }
+
+table {}
 
 // styling by DOM
 body {
@@ -63,7 +78,27 @@ main { flex-grow: 1; }
 
   > #nav > ul > li > a { .link; }
 
-  > #userName > a { .link; }
+  > #userName {
+    align-items: baseline;
+    flex-direction: row; }
+
+  > #userName > a {
+    .link;
+    margin: 0rem 0.25rem;
+  }
+
+  > #userName > #logoutButton {
+    background-color: white;
+    color: @wugbotBlue;
+    cursor: pointer;
+    border-bottom: 1px solid white;
+    margin: 0rem 0.25rem;
+
+    &:hover {
+      border-bottom: 1px solid @wugbotBlue;
+    }
+
+  }
 
 }
 

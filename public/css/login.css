@@ -5,33 +5,39 @@
 #login * {
   align-items: center;
 }
-#login > div > h1,
-#banner {
+#login > * {
   align-self: center;
 }
-#login > div {
-  padding: 1rem;
-}
-#bigLogo {
+#login #bigLogo {
   height: 10rem;
   padding: 2.5rem;
 }
-#loginOptions > ul > li > a > img {
+#login #onedrive > a > img {
   height: 5rem;
 }
-#registerButton {
-  background-color: white;
-  border: 1px solid black;
+#login h1 {
+  background-color: #ccc;
   border-radius: 5px;
-  box-shadow: 0px 0px 3px #ccc;
-  cursor: pointer;
+  box-shadow: inset 0px 0px 2px black;
+  color: white;
+  display: flex;
+  flex-direction: row;
+  font-size: 2rem;
   margin: 1rem;
+}
+#login h1 > label > p {
+  cursor: pointer;
   padding: 0.5rem;
+  text-shadow: 1px 1px 1px black;
 }
-#registerButton:hover {
-  box-shadow: 0px 0px 5px black;
+#login h1 > label > input {
+  display: none;
 }
-h1 {
-  font-size: 150%;
-  font-weight: bold;
+#login h1 > label.selected {
+  background-color: #3399ff;
+  border-radius: 5px;
+  box-shadow: inset 0px 0px 3px 0px white;
+}
+#login h1 > label.selected > p {
+  text-shadow: none;
 }

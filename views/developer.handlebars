@@ -1,0 +1,38 @@
+{{#section 'style'}}<link rel=stylesheet href=/css/developer.css charset=utf-8>{{/section}}
+
+<main id=developer>
+  <h1>Developer</h1>
+
+  <section id=apps>
+    <h2>My Apps</h2>
+
+    <table>
+      <thead>
+        <tr><td>Application Name</td><td>Application ID</td></tr>
+      </thead>
+      <tbody>
+        {{#each apps}}
+          <tr><td>{{appName}}</td><td>{{id}}</td></tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id=registration>
+    <h2>Register a New App</h2>
+
+    <form action=/developer method=POST>
+
+      <label for=appName>
+        <p>Application Name:</p>
+        <input id=appName type=text name=appName>
+      </label>
+
+      <button type=submit name=submitButton>Register Application</button>
+
+    </form>
+
+  </section>
+
+</main>

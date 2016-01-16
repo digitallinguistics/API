@@ -2,6 +2,16 @@
   color: #3399ff;
   font-weight: bold;
 }
+.button {
+  background-color: white;
+  border: 1.5px solid black;
+  border-radius: 5px;
+  padding: 0.25rem 0.5rem;
+}
+.button:hover:not(:disabled) {
+  color: #3399ff;
+  border: 1.5px solid #3399ff;
+}
 .field {
   background-color: white;
   border: 1px solid #ccc;
@@ -13,6 +23,7 @@
 }
 .header {
   align-self: center;
+  font-size: 1.25rem;
   font-weight: bold;
   padding: 0rem 0.5rem;
 }
@@ -87,8 +98,13 @@ main {
   color: #3399ff;
   font-weight: bold;
 }
+#header > #userName {
+  align-items: baseline;
+  flex-direction: row;
+}
 #header > #userName > a {
   border-bottom: 2px solid white;
+  margin: 0rem 0.25rem;
 }
 #header > #userName > a:link {
   color: #3399ff;
@@ -104,6 +120,16 @@ main {
 #header > #userName > a:active {
   color: #3399ff;
   font-weight: bold;
+}
+#header > #userName > #logoutButton {
+  background-color: white;
+  color: #3399ff;
+  cursor: pointer;
+  border-bottom: 1px solid white;
+  margin: 0rem 0.25rem;
+}
+#header > #userName > #logoutButton:hover {
+  border-bottom: 1px solid #3399ff;
 }
 footer {
   align-items: center;

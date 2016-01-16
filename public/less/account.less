@@ -1,0 +1,22 @@
+@import (reference) './public/less/main.less';
+
+#account {
+  > h1 { .header; }
+  > form > * { margin: 0.5rem 1rem; }
+  > form > button { .button; }
+}
+
+.mobile #account {}
+
+.desktop #account {
+  > form {
+    align-self: center;
+    max-width: 50%;
+  }
+  > form > label {
+    align-items: baseline;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  > form > label > p { margin-right: 2rem; }
+}

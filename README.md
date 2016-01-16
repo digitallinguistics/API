@@ -93,8 +93,10 @@ Your redirect page should include script that examines the URL, parses the hash,
 ##### 3. Include the access token in requests to the API
 For any requests that require the user to be logged in, you should now include the access token you received in Step 2 as part of the request. (You may include the access token in other requests as well; if the token is not required for a request, it is simply ignored.) To include the token with the request, simply add an `Authorization` header to the request, whose value is `bearer {access_token}`.
 
-##### 4. Request a new token when the old one expires
+##### 4. Request a new token when the old one expires (or before)
 The lifetime of an API access token is 1 hour (3600 seconds). After the token expires, attempts to access the API using the same token will return an error. When this happens, simply request a new token following Step 1 above. If the user is still logged into DLX, you will receive the new token automatically, without the user having to login again. Users are automatically logged out of DLX after 8 hours.
+
+If you request a new token before the old one expires, you will be sent a new one automatically (as long as the user is still logged in). Therefore you can keep the user logged in by simply requesting a new token every hour (or 59 minutes, etc.).
 
 ##### Handling Errors During Authentication
 Sometimes the request you made in Step 1 will return an error. This can happen for a variety of reasons - incorrectly formatted URLs, bad request parameters, etc. If this happens, the user will be returned to the redirect URL, along with two querystring parameters: an `error` parameter indicating the type of error, and an `error_description` parameter with a more detailed description of the problem. A `state` parameter is also included if a `state` was provided in Step 1. A list of possible values for the `error` parameter can be viewed [here](http://tools.ietf.org/html/rfc6749#section-4.2.2.1).

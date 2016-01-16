@@ -1,5 +1,6 @@
 #register h1 {
   align-self: center;
+  font-size: 1.25rem;
   font-weight: bold;
   padding: 0rem 0.5rem;
   font-size: 1.5rem;
@@ -23,7 +24,7 @@
   border-radius: 5px;
   padding: 0.25rem 0.5rem;
 }
-#register > form > #submit:hover {
+#register > form > #submit:hover:not(:disabled) {
   color: #3399ff;
   border: 1.5px solid #3399ff;
 }

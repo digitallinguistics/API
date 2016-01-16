@@ -4,10 +4,9 @@
 <main id=register>
   <h1>Create a New Account</h1>
 
-  <form autocomplete method=POST>
+  <form autocomplete action=/register method=POST>
 
-    <input type=hidden name=userId value={{userId}}>
-    <input type=hidden name=service value={{service}}>
+    <input type=hidden name=state value={{state}}>
 
     <label for=firstName>
       <p>First Name (Given Name)</p>
