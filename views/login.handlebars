@@ -39,7 +39,7 @@
   var inputs = [loginInput, loginLabel];
 
   var register = function () {
-    if (window.location.href.includes('register=true')) {
+    if (window.location.query.register) {
       loginLabel.classList.remove('selected');
       registerLabel.classList.add('selected');
       registerCookie();
