@@ -1,37 +1,37 @@
 /* font declarations */
 @font-face {
   font-family: 'Fira Sans';
-  src: local('Fira Sans Light'), url('//localhost:3000/fonts/FiraSans-Light.woff') format(woff), url('//localhost:3000/fonts/FiraSans-Light.ttf') format(truetype);
+  src: local('Fira Sans Light'), url('/fonts/FiraSans-Light.woff') format(woff), url('/fonts/FiraSans-Light.ttf') format(truetype);
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'Fira Sans';
-  src: local('Fira Sans Medium'), url('//localhost:3000/fonts/FiraSans-Medium.woff') format(woff), url('//localhost:3000/fonts/FiraSans-Medium.ttf') format(truetype);
+  src: local('Fira Sans Medium'), url('/fonts/FiraSans-Medium.woff') format(woff), url('/fonts/FiraSans-Medium.ttf') format(truetype);
   font-weight: bold;
   font-style: normal;
 }
 @font-face {
   font-family: 'Fira Sans';
-  src: local('Fira Sans Light Italic'), url('//localhost:3000/fonts/FiraSans-LightItalic.woff') format(woff), url('//localhost:3000/fonts/FiraSans-LightItalic.ttf') format(truetype);
+  src: local('Fira Sans Light Italic'), url('/fonts/FiraSans-LightItalic.woff') format(woff), url('/fonts/FiraSans-LightItalic.ttf') format(truetype);
   font-weight: normal;
   font-style: italic;
 }
 @font-face {
   font-family: 'Fira Sans';
-  src: local('Fira Sans Medium Italic'), url('//localhost:3000/fonts/FiraSans-MediumItalic.woff') format(woff), url('//localhost:3000/fonts/FiraSans-MediumItalic.ttf') format(truetype);
+  src: local('Fira Sans Medium Italic'), url('/fonts/FiraSans-MediumItalic.woff') format(woff), url('/fonts/FiraSans-MediumItalic.ttf') format(truetype);
   font-weight: bold;
   font-style: italic;
 }
 @font-face {
   font-family: 'Fira Sans Mono';
-  src: local('Fira Mono Regular'), url('//localhost:3000/fonts/FiraMono-Regular.woff') format(woff), url('//localhost:3000/fonts/FiraMono-Regular.ttf') format(truetype);
+  src: local('Fira Mono Regular'), url('/fonts/FiraMono-Regular.woff') format(woff), url('/fonts/FiraMono-Regular.ttf') format(truetype);
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'Fira Sans Mono';
-  src: local('Fira Mono Medium'), url('//localhost:3000/fonts/FiraMono-Medium.woff') format(woff), url('//localhost:3000/fonts/FiraMono-Medium.ttf') format(truetype);
+  src: local('Fira Mono Medium'), url('/fonts/FiraMono-Medium.woff') format(woff), url('/fonts/FiraMono-Medium.ttf') format(truetype);
   font-weight: bold;
   font-style: normal;
 }
