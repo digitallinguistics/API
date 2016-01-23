@@ -45,3 +45,5 @@ server.listen(app.get('port'), function () {
   Node:   ${process.version}
   Env:    ${global.env}`);
 });
+
+if (global.env === 'local') { require('./lib/dev'); }
