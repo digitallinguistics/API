@@ -172,7 +172,7 @@ The following status codes are used in responses from the API. Your application 
 - 207: Some resources unauthorized or not found.
 - 400: Bad request. The request URL, headers, or body are invalid.
 - 401: `Authorization` header missing or invalid.
-- 403: Authorization token expired.
+- 403: Unauthorized. (Insufficient user permissions or token expired.)
 - 404: Not found.
 - 405: Method not allowed.
 - 500: Internal server error. [Open an issue.](https://github.com/digitallinguistics/dlx-api/issues)
