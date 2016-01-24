@@ -22,8 +22,10 @@ app.set('view engine', 'handlebars'); // use Handlebars for templating
 app.use(middleware.logUrl); // url logging for debugging
 app.use(express.static(__dirname + '/public')); // routing for static files
 app.use(bodyParser.urlencoded({ extended: false })); // parse form data
+app.use(bodyParser.json()); // parse JSON data
 app.use(cookieParser(credentials.secret)); // cookie handling
 app.use(middleware.manageLogins); // adds login/logout-related methods to req and res objects
+app.use(middleware.authStatus);
 
 // routing
 require('./lib/router')(app);
