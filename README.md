@@ -97,7 +97,7 @@ Your redirect page should include script that examines the URL, parses the hash,
 For any requests that require the user to be logged in, you should now include the access token you received in Step 2 as part of the request. (You may include the access token in other requests as well; if the token is not required for a request, it is simply ignored.) To include the token with the request, simply add an `Authorization` header to the request, whose value is `bearer {access_token}`.
 
 ##### 4. Request a new token when the old one expires (or before)
-The lifetime of an API access token is 1 hour (3600 seconds). After the token expires, attempts to access the API using the same token will return an error. When this happens, simply request a new token following Step 1 above. If the user is still logged into DLX, you will receive the new token automatically, without the user having to login again. Users are automatically logged out of DLX after 8 hours.
+The lifetime of an API access token is 1 hour (3600 seconds). After the token expires, attempts to access the API using the same token will return an error. When this happens, simply request a new token following Step 1 above. If the user is still logged into DLX, you will receive the new token automatically, without the user having to login again. Users are automatically logged out of DLX if they have not been active in four hours.
 
 If you request a new token before the old one expires, you will be sent a new one automatically (as long as the user is still logged in). Therefore you can keep the user logged in by simply requesting a new token every hour (or 59 minutes, etc.).
 
@@ -159,7 +159,7 @@ The response body may contain the following attributes:
 | Attribute  | Description |
 | ---------- | ----------- |
 | `data`     | (2xx responses only) an array containing the requested data for successful requests |
-| `details`  | (4xx or 5xx responses only) a more specific error message for help in debugging unsuccessful requests |
+| `error_description`  | (4xx or 5xx responses only) a more specific error message for help in debugging unsuccessful requests |
 | `error`  | (4xx or 5xx responses only) a generic error message for unsuccessful requests   |
 | `included` | (2xx responses only) in the future, this attribute may be used to include related resources with the response |
 | `status`   | (all responses) contains the HTTP status code (as numeric) |
