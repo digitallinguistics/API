@@ -25,8 +25,9 @@ app.use(express.static(__dirname + '/public')); // routing for static files
 app.use(bodyParser.urlencoded({ extended: false })); // parse form data
 app.use(bodyParser.json()); // parse JSON data
 app.use(cookieParser(credentials.secret)); // cookie handling
-app.use(middleware.manageLogins); // adds login/logout-related methods to req and res objects
-app.use(middleware.authStatus);
+app.use(middleware.manageLogin); // adds login/logout-related methods to req and res objects
+app.use(middleware.manageQueries); // preformats the query parameters for easier use in handlers
+app.use(middleware.authStatus); // determines the authentication status of the user
 
 // routing
 require('./lib/router')(app);
