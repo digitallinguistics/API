@@ -50,3 +50,5 @@ server.listen(app.get('port'), function () {
 });
 
 if (global.env === 'local') { require('./lib/dev'); }
+
+console.log(encrypt('hello'));
