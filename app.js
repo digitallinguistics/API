@@ -1,4 +1,7 @@
 // node modules
+require('./lib/utils');
+require('./lib/config');
+require('./lib/responses');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var credentials = require('./lib/credentials');
@@ -6,8 +9,6 @@ var express = require('express');
 var expressHandlebars = require('express-handlebars');
 var http = require('http');
 var middleware = require('./lib/middleware');
-require('./lib/config');
-require('./lib/utils');
 
 var app = express(); // initialize Express app
 var handlebars = expressHandlebars.create(middleware.hbsOptions); // initialize Handlebars
