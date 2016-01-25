@@ -507,7 +507,7 @@
 
     },
 
-    "/{collection}/bundles/{bundleID}/items/{itemID}": {
+    "/bundles/{bundleID}/items/{itemID}": {
 
       "get": {
         "tags": ["Subitems"],
@@ -536,7 +536,7 @@
 
     },
 
-    "/{collection}/lexicons/{lexiconID}/entries/{entryID}": {
+    "/lexicons/{lexiconID}/entries/{entryID}": {
 
       "get": {
         "tags": ["Subitems"],
@@ -561,35 +561,35 @@
           "405": { "$ref": "#/responses/405" },
           "500": { "$ref": "#/responses/500" }
         }
-      },
+      }
 
-      "/{collection}/texts/{textID}/phrases/{phraseID}": {
+    },
 
-        "get": {
-          "tags": ["Subitems"],
-          "summary": "Retrieves a phrase from a text.",
-          "description": "Retrieves a phrase from a text and returns it as either HTML or JSON.",
-          "produces": ["application/json", "text/html"],
-          "security": [],
+    "/texts/{textID}/phrases/{phraseID}": {
 
-          "parameters": [
-            { "$ref": "#/parameters/collection" },
-            { "$ref": "#/parameters/item" },
-            { "$ref": "#/parameters/subitem" },
-            { "$ref": "#/parameters/accept" }
-          ],
+      "get": {
+        "tags": ["Subitems"],
+        "summary": "Retrieves a phrase from a text.",
+        "description": "Retrieves a phrase from a text and returns it as either HTML or JSON.",
+        "produces": ["application/json", "text/html"],
+        "security": [],
 
-          "responses": {
-            "200": { "$ref": "#/responses/200" },
-            "400": { "$ref": "#/responses/400" },
-            "401": { "$ref": "#/responses/401" },
-            "403": { "$ref": "#/responses/403" },
-            "404": { "$ref": "#/responses/404" },
-            "405": { "$ref": "#/responses/405" },
-            "500": { "$ref": "#/responses/500" }
-          }
+        "parameters": [
+          { "$ref": "#/parameters/collection" },
+          { "$ref": "#/parameters/item" },
+          { "$ref": "#/parameters/subitem" },
+          { "$ref": "#/parameters/accept" }
+        ],
+
+        "responses": {
+          "200": { "$ref": "#/responses/200" },
+          "400": { "$ref": "#/responses/400" },
+          "401": { "$ref": "#/responses/401" },
+          "403": { "$ref": "#/responses/403" },
+          "404": { "$ref": "#/responses/404" },
+          "405": { "$ref": "#/responses/405" },
+          "500": { "$ref": "#/responses/500" }
         }
-
       }
 
     }
