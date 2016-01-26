@@ -175,6 +175,7 @@ The following status codes are used in responses from the API. Your application 
 - 403: Unauthorized. (Insufficient user permissions.)
 - 404: Not found.
 - 405: Method not allowed.
+- 409: Data conflict.
 - 419: Authorization token expired.
 - 500: Internal server error. [Open an issue.](https://github.com/digitallinguistics/dlx-api/issues)
 
