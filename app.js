@@ -2,16 +2,17 @@
 require('./lib/utils');
 require('./lib/config');
 require('./lib/responses');
-var bodyParser = require('body-parser');
-var cookieParser = require('cookie-parser');
-var credentials = require('./lib/credentials');
-var express = require('express');
-var expressHandlebars = require('express-handlebars');
-var http = require('http');
-var middleware = require('./lib/middleware');
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const credentials = require('./lib/credentials');
+const db = require('./lib/db');
+const express = require('express');
+const expressHandlebars = require('express-handlebars');
+const http = require('http');
+const middleware = require('./lib/middleware');
 
-var app = express(); // initialize Express app
-var handlebars = expressHandlebars.create(middleware.hbsOptions); // initialize Handlebars
+const app = express(); // initialize Express app
+const handlebars = expressHandlebars.create(middleware.hbsOptions); // initialize Handlebars
 
 app.disable('x-powered-by'); // hide server information in the response
 app.enable('trust proxy'); // trust the Azure proxy server
@@ -40,15 +41,20 @@ app.use(middleware.error500);
 // generate CSS
 require('./lib/less');
 
-// start server
-var server = http.createServer(app);
+db.ready().then(() => {
 
-server.listen(app.get('port'), function () {
-  console.log(`Server started. Press Ctrl+C to terminate.
-  Port:   ${app.get('port')}
-  Time:   ${new Date()}
-  Node:   ${process.version}
-  Env:    ${global.env}`);
-});
+  // start server
+  const server = http.createServer(app);
+
+  server.listen(app.get('port'), function () {
+    console.log(`Server started. Press Ctrl+C to terminate.
+      Port:   ${app.get('port')}
+      Time:   ${new Date()}
+      Node:   ${process.version}
+      Env:    ${global.env}`);
+    });
+
+}).catch(err => console.error(err));
+
 
 if (global.env === 'local') { require('./lib/dev'); }
