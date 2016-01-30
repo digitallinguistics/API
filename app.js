@@ -45,6 +45,5 @@ db.ready().then(() => {
       Env:    ${global.env}`);
     });
 
+    if (global.env === 'local') { require('./lib/dev'); }
 }).catch(err => console.error(err));
-
-if (global.env === 'local') { require('./lib/dev'); }
