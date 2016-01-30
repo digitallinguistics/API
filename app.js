@@ -39,10 +39,11 @@ db.ready().then(() => {
 
   server.listen(app.get('port'), () => {
     console.log(`Server started. Press Ctrl+C to terminate.
-      Port:   ${app.get('port')}
-      Time:   ${new Date()}
-      Node:   ${process.version}
-      Env:    ${global.env}`);
+      Project:  dlx-api
+      Port:     ${app.get('port')}
+      Time:     ${new Date()}
+      Node:     ${process.version}
+      Env:      ${global.env}`);
     });
 
     if (global.env === 'local') { require('./lib/dev'); }
