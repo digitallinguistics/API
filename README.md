@@ -6,6 +6,8 @@ This repository contains the source code and documentation for the DLx API, a se
 
 If you are writing your application using JavaScript or Node, consider using our [JavaScript SDK](https://github.com/digitallinguistics/dlx-js#readme) or [Node SDK](https://github.com/digitallinguistics/dlx-node#readme), which contains a number of convenient methods for interacting with the DLx API, and handle most of the details on this page.
 
+Project milestones are named for the major functionality they add or change. Project releases are each named for a different animal in Swahili.
+
 ## I. About the Database
 
 ### Collections &amp; Resource Types
