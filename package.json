@@ -36,6 +36,9 @@
   "engines": {
     "node": "5.x"
   },
+  "scripts": {
+    "test": "jasmine JASMINE_CONFIG_PATH=jasmine.json"
+  },
   "dependencies": {
     "body-parser": "^1.14.2",
     "documentdb": "^1.5.1",
