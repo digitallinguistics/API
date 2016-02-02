@@ -1,19 +1,22 @@
-const assert = require('chai').assert;
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 const db = require('../lib/db');
-const expect = require('chai').expect;
+
+const assert = chai.assert;
+const expect = chai.expect;
+
+chai.use(chaiAsPromised);
 
 /* jshint expr: true */
 describe('the database API (db.js)', function () {
 
-  this.timeout(15000);
+  this.timeout(5000);
 
   before(function (done) {
-    db.ready().then(() => {
-      setTimeout(done, 2000);
-    });
+    db.ready().then(() => done());
   });
 
-  it('can create a document', function () {
+  it('can create a document', function (done) {
 
     const text = {
       title: 'How the world began',
@@ -25,19 +28,50 @@ describe('the database API (db.js)', function () {
       ]
     };
 
-    return db.create('texts', text, { createId: true })
-    .then(res => {
-      expect(res).to.be.an.instanceof(Object);
-      expect(res).not.to.be.an.instanceof(Array);
-      expect(Number.isInteger(+res.id)).to.be.true;
-    }).catch(err => {
-      console.error(err);
-      assert.fail(err);
-    });
+    const res = db.create('texts', text, { createId: true });
+
+    expect(res).to.eventually.be.an('object');
+    expect(res).to.eventually.not.be.an('array');
+    expect(res).to.eventually.have.property('id')
+      .that.satisfy(function (str) { return Number.isInteger(+str); });
+    done();
 
   });
 
-  it('can create multiple documents');
+  it('can create multiple documents', function (done) {
+
+    const texts = [
+      {
+        title: 'How the Indian came',
+        phrases: [
+          {
+            transcription: 'Wetkš hus naːnčaːkamankš weyt hi hokmiʔi.',
+            translation: 'Then he left his brothers.'
+          }
+        ]
+      },
+      {
+        title: 'ɔ́moísɛ́kɛ́ ɔ́sɔːkɛ́rɛ́tɛ́ chísɛ́ɛsɛ́',
+        phrases: [
+          {
+            transcription: 'ɔ́moísɛ́kɛ́ ɔ́sɔːkɛ́rɛ́tɛ́ chísɛ́ɛsɛ́',
+            translation: 'A girl who got married to dogs'
+          }
+        ]
+      }
+    ];
+
+    const res = db.create('texts', texts);
+
+    expect(res).to.eventually.be.instanceof(Array);
+    expect(res).to.eventually.have.length(2);
+    expect(res).to.eventually.have.property('id')
+      .that.is.not.a('number');
+    expect(res).to.eventually.have.property('id')
+      .that.match(/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i);
+    done();
+
+  });
 
   it('can delete a document');
 
