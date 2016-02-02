@@ -37,14 +37,18 @@
     "node": "5.x"
   },
   "scripts": {
-    "test": "jasmine JASMINE_CONFIG_PATH=jasmine.json"
+    "test": "mocha"
   },
   "dependencies": {
     "body-parser": "^1.14.2",
     "documentdb": "^1.5.1",
     "express": "^4.13.3",
     "express-handlebars": "^2.0.1",
-    "less": "^2.5.3",
     "uuid": "^2.0.1"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.2.0",
+    "mocha": "^2.4.5"
   }
 }
