@@ -1,19 +1,17 @@
 const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const db = require('../lib/db');
 
 const assert = chai.assert;
 const expect = chai.expect;
 
-chai.use(chaiAsPromised);
-
 /* jshint expr: true */
 describe('the database API (db.js)', function () {
 
-  this.timeout(5000);
+  this.timeout(10000);
+  const results = [];
 
-  before(function (done) {
-    db.ready().then(() => done());
+  before(function () {
+    return db.ready().then(() => console.log('Database ready.'));
   });
 
   it('can create a document', function (done) {
@@ -28,13 +26,16 @@ describe('the database API (db.js)', function () {
       ]
     };
 
-    const res = db.create('texts', text, { createId: true });
-
-    expect(res).to.eventually.be.an('object');
-    expect(res).to.eventually.not.be.an('array');
-    expect(res).to.eventually.have.property('id')
-      .that.satisfy(function (str) { return Number.isInteger(+str); });
-    done();
+    db.create('users', text, { createId: true })
+    .then(res => {
+      expect(res).to.be.instanceof(Object);
+      expect(res).to.not.be.instanceof(Array);
+      expect(res).to.have.property('id').that.satisfy(function (id) {
+        return Number.isInteger(+id);
+      });
+      results.push(res);
+      done();
+    }).catch(err => assert.fail(err));
 
   });
 
@@ -61,15 +62,15 @@ describe('the database API (db.js)', function () {
       }
     ];
 
-    const res = db.create('texts', texts);
-
-    expect(res).to.eventually.be.instanceof(Array);
-    expect(res).to.eventually.have.length(2);
-    expect(res).to.eventually.have.property('id')
-      .that.is.not.a('number');
-    expect(res).to.eventually.have.property('id')
-      .that.match(/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i);
-    done();
+    db.create('texts', texts)
+    .then(res => {
+      expect(res).to.be.instanceof(Array);
+      expect(res).to.have.length(2);
+      expect(res[0]).to.have.property('id')
+        .that.match(/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i);
+      results.push(...res);
+      done();
+    }).catch(err => assert.fail(err));
 
   });
 
