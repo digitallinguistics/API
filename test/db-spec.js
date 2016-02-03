@@ -139,16 +139,17 @@ describe('the database API', function () {
   });
 
   it('can upsert multiple existing documents', function (done) {
+    this.results.forEach(text => text.speaker = 'John Smith');
     this.db.upsert(this.collection, this.results)
     .then(res => {
       expect(res instanceof Array).toBe(true);
-      res.forEach(text => {
+      res.forEach((text, i, arr) => {
         const orig = this.results.filter(item => item.id === text.id)[0];
         expect(orig).toBeDefined();
         expect(orig._rid).toEqual(text._rid);
         expect(text.speaker).toBe('John Smith');
+        if (i === arr.length-1) { done(); }
       });
-      done();
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
@@ -208,7 +209,6 @@ describe('the database API', function () {
   });
 
   it('can upsert an existing document as a new document', function (done) {
-    this.results.forEach(text => text.speaker = 'John Smith');
     this.db.upsert(this.collection, this.results[0], { createId: true })
     .then(res => {
       expect(res instanceof Array).toBe(false);
