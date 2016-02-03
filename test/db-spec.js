@@ -9,7 +9,7 @@ describe('the database API', function () {
 
     this.users = [
       { id: 'me@example.com', firstName: 'John', lastName: 'Doe', services: { onedrive: '12345' } },
-      { id: 'me@test.com', firstName: 'Jane', lastName: 'Doe', services: { facebook: '67890' } }
+      { id: 'me@test.com', firstName: 'Jane', lastName: 'Doe', services: { onedrive: '67890' } }
     ];
 
     this.results = [];
@@ -175,21 +175,30 @@ describe('the database API', function () {
     });
   });
 
-  xit('can get a user by service ID', function (done) {
-
-    const serviceId = this.users.filter(user => user.services.onedrive)[0].services.onedrive;
-
-    this.db.getById('users', serviceId, { idType: 'serviceId', service: 'onedrive' })
+  it('can get a user by service ID', function (done) {
+    const serviceId = this.users[0].services.onedrive;
+    this.db.getById('users', serviceId, { id_type: 'service_id', service: 'onedrive' })
     .then(res => {
       expect(res instanceof Object).toBe(true);
       expect(res._rid).toEqual(this.users[0]._rid);
       expect(res.id).toEqual(this.users[0].id);
       done();
     }).catch(fail);
-
   });
 
-  it('can get multiple users by service ID');
+  it('can get multiple users by service ID', function (done) {
+
+    const serviceIds = this.users.map(user => user.services.onedrive);
+
+    this.db.getById('users', serviceIds, { idType: 'serviceId', service: 'onedrive' })
+    .then(res => {
+      expect(res instanceof Array).toBe(true);
+      expect(this.users).toContain(res[0]);
+      expect(this.users).toContain(res[1]);
+      done();
+    }).catch(fail);
+
+  });
 
   it('can get a user by email ID');
 
