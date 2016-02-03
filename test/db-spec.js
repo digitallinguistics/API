@@ -36,8 +36,8 @@ describe('the database API', function () {
       this.results.push(res);
       done();
     }).catch(err => {
-      done();
       console.error(err);
+      done();
     });
 
   });
@@ -73,8 +73,8 @@ describe('the database API', function () {
       this.results.push(...res);
       done();
     }).catch(err => {
-      done();
       console.error(err);
+      done();
     });
 
   });
@@ -85,8 +85,8 @@ describe('the database API', function () {
       expect(text).toEqual(this.results[1]);
       done();
     }).catch(err => {
-      done();
       console.error(err);
+      done();
     });
   });
 
@@ -100,8 +100,8 @@ describe('the database API', function () {
       expect(rids.includes(res[1]._rid)).toBe(true);
       done();
     }).catch(err => {
-      done();
       console.error(err);
+      done();
     });
   });
 
@@ -111,8 +111,8 @@ describe('the database API', function () {
       expect(text).toEqual(this.results[0]);
       done();
     }).catch(err => {
-      done();
       console.error(err);
+      done();
     });
   });
 
@@ -125,8 +125,8 @@ describe('the database API', function () {
       expect(this.results).toContain(res[0]);
       done();
     }).catch(err => {
-      done();
       console.error(err);
+      done();
     });
   });
 
@@ -138,13 +138,27 @@ describe('the database API', function () {
       this.results.splice(2, 1);
       done(0);
     }).catch(err => {
-      done();
       console.error(err);
+      done();
     });
 
   });
 
-  it('can delete multiple documents');
+  it('can delete multiple documents', function (done) {
+
+    const ids = this.results.map(text => text._rid);
+
+    this.db.delete(this.collection, ids)
+    .then(res => {
+      expect(res instanceof Array).toBe(true);
+      expect(res.every(response => response.status === 204)).toBe(true);
+      done();
+    }).catch(err => {
+      console.error(err);
+      done();
+    });
+
+  });
 
   it('can create users with email IDs');
 
