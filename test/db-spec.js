@@ -1,47 +1,21 @@
-const chai = require('chai');
-const db = require('../lib/db');
+describe('the database API', function () {
 
-const assert = chai.assert;
-const expect = chai.expect;
+  beforeAll(function (done) {
 
-/* jshint expr: true */
-describe('the database API (db.js)', function () {
+    this.db = require('../lib/db');
 
-  this.timeout(10000);
-  const results = [];
+    this.results = [];
 
-  before(function () {
-    return db.ready().then(() => console.log('Database ready.'));
-  });
-
-  it('can create a document', function (done) {
-
-    const text = {
-      title: 'How the world began',
-      phrases: [
-        {
-          transcription: 'waštʼunkʼu ʔasi',
-          translation: 'one day a man'
-        }
-      ]
-    };
-
-    db.create('users', text, { createId: true })
-    .then(res => {
-      expect(res).to.be.instanceof(Object);
-      expect(res).to.not.be.instanceof(Array);
-      expect(res).to.have.property('id').that.satisfy(function (id) {
-        return Number.isInteger(+id);
-      });
-      results.push(res);
-      done();
-    }).catch(err => assert.fail(err));
-
-  });
-
-  it('can create multiple documents', function (done) {
-
-    const texts = [
+    this.texts = [
+      {
+        title: 'How the world began',
+        phrases: [
+          {
+            transcription: 'waštʼunkʼu ʔasi',
+            translation: 'one day a man'
+          }
+        ]
+      },
       {
         title: 'How the Indian came',
         phrases: [
@@ -62,21 +36,29 @@ describe('the database API (db.js)', function () {
       }
     ];
 
-    db.create('texts', texts)
-    .then(res => {
-      expect(res).to.be.instanceof(Array);
-      expect(res).to.have.length(2);
-      expect(res[0]).to.have.property('id')
-        .that.match(/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i);
-      results.push(...res);
-      done();
-    }).catch(err => assert.fail(err));
+    this.db.ready().then(done);
 
   });
 
-  it('can delete a document');
+  it('can create a document', function (done) {
+    this.db.create('users', this.texts[0], { createId: true })
+    .then(res => {
+      expect(res instanceof Object).toBe(true);
+      expect(res instanceof Array).toBe(false);
+      expect(Number.isInteger(+res.id)).toBe(true);
+      done();
+    }).catch(err => console.error(err));
+  });
 
-  it('can delete multiple documents');
+  it('can create multiple documents', function (done) {
+    this.db.create('texts', this.texts)
+    .then(res => {
+      expect(res instanceof Array).toBe(true);
+      expect(res.length).toEqual(3);
+      expect(res[0].id).toMatch(/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i);
+      done();
+    }).catch(err => console.error(err));
+  });
 
   it('can get a document');
 
@@ -85,6 +67,10 @@ describe('the database API (db.js)', function () {
   it('can get a document by ID');
 
   it('can get multiple documents by ID');
+
+  it('can delete a document');
+
+  it('can delete multiple documents');
 
   it('can get a user by service ID');
 
@@ -101,5 +87,7 @@ describe('the database API (db.js)', function () {
   it('can upsert an existing document');
 
   it('can upsert multiple existing documents');
+
+  it('can handle many requests in sequence');
 
 });
