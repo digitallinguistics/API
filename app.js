@@ -1,7 +1,6 @@
 // node modules
 require('./lib/utils');
 require('./lib/config');
-require('./lib/responses');
 const bodyParser = require('body-parser');
 const db = require('./lib/db');
 const express = require('express');
