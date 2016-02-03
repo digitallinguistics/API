@@ -36,12 +36,17 @@
   "engines": {
     "node": "5.x"
   },
+  "scripts": {
+    "test": "jasmine JASMINE_CONFIG_PATH=jasmine.json"
+  },
   "dependencies": {
     "body-parser": "^1.14.2",
     "documentdb": "^1.5.1",
     "express": "^4.13.3",
     "express-handlebars": "^2.0.1",
-    "less": "^2.5.3",
     "uuid": "^2.0.1"
+  },
+  "devDependencies": {
+    "jasmine": "^2.4.1"
   }
 }
