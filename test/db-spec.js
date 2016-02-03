@@ -101,7 +101,8 @@ describe('the database API', function () {
   });
 
   it('can get multiple documents by ID', function (done) {
-    this.db.getById('texts', this.results)
+    const ids = this.results.map(text => text.id);
+    this.db.getById('texts', ids)
     .then(res => {
       expect(res instanceof Array).toBe(true);
       expect(res.length).toEqual(this.results.length);
