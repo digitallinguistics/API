@@ -43,7 +43,7 @@ describe('the database API', function () {
 
   });
 
-  it('can create a document', function (done) {
+  xit('can create a document', function (done) {
 
     const text = {
       title: 'How the world began',
@@ -65,7 +65,7 @@ describe('the database API', function () {
 
   });
 
-  it('can create multiple documents', function (done) {
+  xit('can create multiple documents', function (done) {
 
     const texts = [
       {
@@ -138,30 +138,90 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can upsert a new document', function (done) {
+  xit('can upsert multiple existing documents', function (done) {
+    this.db.upsert(this.collection, this.results)
+    .then(res => {
+      expect(res instanceof Array).toBe(true);
+      res.forEach(text => {
+        const orig = this.results.filter(item => item.id === text.id)[0];
+        expect(orig).toBeDefined();
+        expect(orig._rid).toEqual(text._rid);
+        expect(text.speaker).toBe('John Smith');
+      });
+      done();
+    }).catch(err => fail(JSON.stringify(err, null, 2)));
+  });
 
-    this.results.forEach(text => text.speaker = 'John');
+  xit('can upsert a new document', function (done) {
 
+    const text = {
+      title: 'Jambo means hello',
+      phrases: [
+        { token: 'jambo', gloss: 'hello' },
+        { token: 'kwa heri', gloss: 'goodbye' }
+      ]
+    };
+
+    this.db.upsert(this.collection, text)
+    .then(res => {
+      expect(res).toBeDefined();
+      expect(res instanceof Array).toBe(false);
+      expect(res._rid).toBeDefined();
+      done();
+    }).catch(err => fail(JSON.stringify(err, null, 2)));
+
+  });
+
+  xit('can upsert multiple new documents', function (done) {
+
+    const texts = [
+      {
+        title: 'How the Indian came',
+        phrases: [
+          {
+            transcription: 'Wetkš hus naːnčaːkamankš weyt hi hokmiʔi.',
+            translation: 'Then he left his brothers.'
+          }
+        ]
+      },
+      {
+        title: 'ɔ́moísɛ́kɛ́ ɔ́sɔːkɛ́rɛ́tɛ́ chísɛ́ɛsɛ́',
+        phrases: [
+          {
+            transcription: 'ɔ́moísɛ́kɛ́ ɔ́sɔːkɛ́rɛ́tɛ́ chísɛ́ɛsɛ́',
+            translation: 'A girl who got married to dogs'
+          }
+        ]
+      }
+    ];
+
+    this.db.upsert(this.collection, texts)
+    .then(res => {
+      expect(res).toBeDefined();
+      expect(res instanceof Array).toBe(true);
+      expect(res[1]._rid).toBeDefined();
+      const titles = texts.map(text => text.title);
+      expect(titles).toContain(res[0].title);
+      done();
+    }).catch(err => fail(JSON.stringify(err, null, 2)));
+
+  });
+
+  xit('can upsert an existing document as a new document', function (done) {
+    this.results.forEach(text => text.speaker = 'John Smith');
     this.db.upsert(this.collection, this.results[0], { createId: true })
     .then(res => {
       expect(res instanceof Array).toBe(false);
-      expect(res.speaker).toBe('John');
+      expect(res.speaker).toBe('John Smith');
       expect(res.title).toEqual(this.results[0].title);
       expect(res.id).not.toEqual(this.results[0].id);
       expect(res._rid).not.toEqual(this.results[0]._rid);
       this.results.push(res);
       done();
     }).catch(err => fail(JSON.stringify(err, null, 2)));
-
   });
 
-  it('can upsert multiple new documents');
-
-  it('can upsert an existing document');
-
-  it('can upsert multiple existing documents');
-
-  it('can delete a document', function (done) {
+  xit('can delete a document', function (done) {
     this.db.delete(this.collection, this.results[2]._rid)
     .then(res => {
       expect(res.status).toBe(204);
@@ -170,7 +230,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can delete multiple documents', function (done) {
+  xit('can delete multiple documents', function (done) {
     const ids = this.results.map(text => text._rid);
     this.db.delete(this.collection, ids)
     .then(res => {
