@@ -37,7 +37,13 @@ describe('the database API', function () {
       tasks.push(deleteUsers);
     }
 
-    // const deleteDocs = this.db.delete('lexEntries', this.results.map(lexEntry => lexEntry._rid));
+    const deleteTexts = this.db.delete('texts', this.results.map(text => text._rid))
+    .then(res => {
+      if (res.every(response => response.status === 204)) { console.log('\nTexts deleted.'); }
+      else { console.error('Problem deleting texts.'); }
+    }).catch(err => console.error(err));
+
+    tasks.push(deleteTexts);
 
     Promise.all(tasks).then(done).catch(err => console.error(err));
 
@@ -236,7 +242,7 @@ describe('the database API', function () {
     .then(res => {
       expect(res instanceof Array).toBe(true);
       expect(res.every(response => response.status === 204)).toBe(true);
-      this.results = [];
+      this.results.splice(0);
       done();
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
