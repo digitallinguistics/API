@@ -175,7 +175,7 @@ describe('the database API', function () {
     });
   });
 
-  it('can get a user by service ID', function (done) {
+  xit('can get a user by service ID', function (done) {
     const serviceId = this.users[0].services.onedrive;
     this.db.getById('users', serviceId, { id_type: 'service_id', service: 'onedrive' })
     .then(res => {
@@ -186,10 +186,8 @@ describe('the database API', function () {
     }).catch(fail);
   });
 
-  it('can get multiple users by service ID', function (done) {
-
+  xit('can get multiple users by service ID', function (done) {
     const serviceIds = this.users.map(user => user.services.onedrive);
-
     this.db.getById('users', serviceIds, { idType: 'serviceId', service: 'onedrive' })
     .then(res => {
       expect(res instanceof Array).toBe(true);
@@ -197,10 +195,18 @@ describe('the database API', function () {
       expect(this.users).toContain(res[1]);
       done();
     }).catch(fail);
-
   });
 
-  it('can get a user by email ID');
+  xit('can get a user by email ID', function (done) {
+    const emails = this.users.map(user => user.id);
+    this.db.getById('users', emails)
+    .then(res => {
+      expect(res instanceof Array).toBe(true);
+      expect(this.users).toContain(res[0]);
+      expect(this.users).toContain(res[1]);
+      done();
+    }).catch(fail);
+  });
 
   it('can get multiple users by email ID');
 
