@@ -22,7 +22,7 @@ app.use(middleware.logUrl); // url logging for debugging
 app.use(express.static(__dirname + '/public')); // routing for static files
 app.use(middleware.parser); // handles Content-Type header, Authorization header, and queries
 app.use(bodyParser.urlencoded({ extended: false })); // parse form data
-app.use(bodyParser.json()); // parse JSON data
+app.use(bodyParsejsonResponse()); // parse JSON data
 
 // routing
 require('./lib/router')(app);
