@@ -197,7 +197,16 @@ describe('the database API', function () {
     }).catch(fail);
   });
 
-  xit('can get a user by email ID', function (done) {
+  xit('can get multiple users by email ID', function (done) {
+    const email = this.users[0].id;
+    this.db.getById('users', email)
+    .then(res => {
+      expect(this.users).toContain(res);
+      done();
+    }).catch(fail);
+  });
+
+  xit('can get multiple users by email ID', function (done) {
     const emails = this.users.map(user => user.id);
     this.db.getById('users', emails)
     .then(res => {
@@ -207,8 +216,6 @@ describe('the database API', function () {
       done();
     }).catch(fail);
   });
-
-  it('can get multiple users by email ID');
 
   it('can upsert a new document');
 
