@@ -8,7 +8,10 @@ describe('the database API', function () {
 
     this.results = [];
 
-    this.db.ready().then(done);
+    this.db.ready().then(() => {
+      console.log('Database ready.');
+      done();
+    });
 
   });
 
@@ -24,7 +27,7 @@ describe('the database API', function () {
       ]
     };
 
-    this.db.create('users', text, { createId: true })
+    this.db.create('texts', text, { createId: true })
     .then(res => {
       expect(res instanceof Object).toBe(true);
       expect(res instanceof Array).toBe(false);
@@ -89,9 +92,23 @@ describe('the database API', function () {
     }).catch(err => console.error(err));
   });
 
-  it('can get a document by ID');
+  it('can get a document by ID', function (done) {
+    this.db.getById('texts', this.results[0].id, { idType: 'id' })
+    .then(text => {
+      expect(text).toEqual(this.results[0]);
+      done();
+    }).catch(err => console.error(err));
+  });
 
-  it('can get multiple documents by ID');
+  it('can get multiple documents by ID', function (done) {
+    this.db.getById('texts', this.results)
+    .then(res => {
+      expect(res instanceof Array).toBe(true);
+      expect(res.length).toEqual(this.results.length);
+      expect(this.results).toContain(res[0]);
+      done();
+    }).catch(err => console.error(err));
+  });
 
   it('can delete a document');
 
