@@ -23,21 +23,27 @@ describe('the database API', function () {
 
   afterAll(function (done) {
 
-    const rids = this.users.map(user => user._rid);
+    const tasks = [];
 
-    const deleteUsers = this.db.delete('users', rids)
-    .then(res => {
-      if (res.every(response => response.status === 204)) { console.log('\nUsers deleted.'); }
-      else { console.error('Problem deleting users.'); }
-    }).catch(err => console.error('Error in afterAll:', err));
+    if (this.users && this.users.length > 0 && this.users[0]._rid) {
+      const rids = this.users.map(user => user._rid);
+
+      const deleteUsers = this.db.delete('users', rids)
+      .then(res => {
+        if (res.every(response => response.status === 204)) { console.log('\nUsers deleted.'); }
+        else { console.error('Problem deleting users.'); }
+      }).catch(err => console.error('Error in afterAll:', err));
+
+      tasks.push(deleteUsers);
+    }
 
     // const deleteDocs = this.db.delete('lexEntries', this.results.map(lexEntry => lexEntry._rid));
 
-    Promise.all([deleteUsers]).then(done).catch(err => console.error(err));
+    Promise.all(tasks).then(done).catch(err => console.error(err));
 
   });
 
-  xit('can create a document', function (done) {
+  it('can create a document', function (done) {
 
     const text = {
       title: 'How the world began',
@@ -51,16 +57,15 @@ describe('the database API', function () {
 
     this.db.create(this.collection, text, { createId: true })
     .then(res => {
-      expect(res instanceof Object).toBe(true);
       expect(res instanceof Array).toBe(false);
       expect(Number.isInteger(+res.id)).toBe(true);
       this.results.push(res);
       done();
-    }).catch(err => { fail(err); done(); });
+    }).catch(err => fail(JSON.stringify(err, null, 2)));
 
   });
 
-  xit('can create multiple documents', function (done) {
+  it('can create multiple documents', function (done) {
 
     const texts = [
       {
@@ -90,7 +95,7 @@ describe('the database API', function () {
       expect(res[0].id).toMatch(/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i);
       this.results.push(...res);
       done();
-    }).catch(fail);
+    }).catch(err => fail(JSON.stringify(err, null, 2)));
 
   });
 
@@ -99,7 +104,7 @@ describe('the database API', function () {
     .then(text => {
       expect(text).toEqual(this.results[1]);
       done();
-    }).catch(fail);
+    }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
   xit('can get multiple documents', function (done) {
@@ -111,7 +116,7 @@ describe('the database API', function () {
       expect(rids.includes(res[0]._rid)).toBe(true);
       expect(rids.includes(res[1]._rid)).toBe(true);
       done();
-    }).catch(fail);
+    }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
   xit('can get a document by ID', function (done) {
@@ -119,7 +124,7 @@ describe('the database API', function () {
     .then(text => {
       expect(text).toEqual(this.results[0]);
       done();
-    }).catch(fail);
+    }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
   xit('can get multiple documents by ID', function (done) {
@@ -130,19 +135,42 @@ describe('the database API', function () {
       expect(res.length).toEqual(this.results.length);
       expect(this.results).toContain(res[0]);
       done();
-    }).catch(fail);
+    }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  xit('can delete a document', function (done) {
+  it('can upsert a new document', function (done) {
+
+    this.results.forEach(text => text.speaker = 'John');
+
+    this.db.upsert(this.collection, this.results[0], { createId: true })
+    .then(res => {
+      expect(res instanceof Array).toBe(false);
+      expect(res.speaker).toBe('John');
+      expect(res.title).toEqual(this.results[0].title);
+      expect(res.id).not.toEqual(this.results[0].id);
+      expect(res._rid).not.toEqual(this.results[0]._rid);
+      this.results.push(res);
+      done();
+    }).catch(err => fail(JSON.stringify(err, null, 2)));
+
+  });
+
+  it('can upsert multiple new documents');
+
+  it('can upsert an existing document');
+
+  it('can upsert multiple existing documents');
+
+  it('can delete a document', function (done) {
     this.db.delete(this.collection, this.results[2]._rid)
     .then(res => {
       expect(res.status).toBe(204);
       this.results.splice(2, 1);
       done(0);
-    }).catch(fail);
+    }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  xit('can delete multiple documents', function (done) {
+  it('can delete multiple documents', function (done) {
     const ids = this.results.map(text => text._rid);
     this.db.delete(this.collection, ids)
     .then(res => {
@@ -150,10 +178,10 @@ describe('the database API', function () {
       expect(res.every(response => response.status === 204)).toBe(true);
       this.results = [];
       done();
-    }).catch(fail);
+    }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can create users with email IDs', function (done) {
+  xit('can create users with email IDs', function (done) {
     this.db.create('users', this.users)
     .then(res => {
       expect(res instanceof Array).toBe(true);
@@ -163,7 +191,7 @@ describe('the database API', function () {
       this.users.splice(0);
       this.users.push(...res);
       done();
-    }).catch(fail);
+    }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
   xit('returns a 409 error when creating a user whose email already exists', function (done) {
@@ -179,11 +207,11 @@ describe('the database API', function () {
     const serviceId = this.users[0].services.onedrive;
     this.db.getById('users', serviceId, { id_type: 'service_id', service: 'onedrive' })
     .then(res => {
-      expect(res instanceof Object).toBe(true);
+      expect(res instanceof Array).toBe(false);
       expect(res._rid).toEqual(this.users[0]._rid);
       expect(res.id).toEqual(this.users[0].id);
       done();
-    }).catch(fail);
+    }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
   xit('can get multiple users by service ID', function (done) {
@@ -194,7 +222,7 @@ describe('the database API', function () {
       expect(this.users).toContain(res[0]);
       expect(this.users).toContain(res[1]);
       done();
-    }).catch(fail);
+    }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
   xit('can get multiple users by email ID', function (done) {
@@ -203,7 +231,7 @@ describe('the database API', function () {
     .then(res => {
       expect(this.users).toContain(res);
       done();
-    }).catch(fail);
+    }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
   xit('can get multiple users by email ID', function (done) {
@@ -214,16 +242,8 @@ describe('the database API', function () {
       expect(this.users).toContain(res[0]);
       expect(this.users).toContain(res[1]);
       done();
-    }).catch(fail);
+    }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
-
-  it('can upsert a new document');
-
-  it('can upsert multiple new documents');
-
-  it('can upsert an existing document');
-
-  it('can upsert multiple existing documents');
 
   xit('can handle throttled requests (many requests in sequence)', function (done) {
 
