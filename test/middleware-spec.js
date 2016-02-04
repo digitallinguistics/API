@@ -13,36 +13,35 @@ const handle = handler => {
 describe('middleware', function () {
 
   beforeAll(function (done) {
-    this.baseUrl = `http://localhost:${config.port}/v1`;
+    this.apiUrl = `${config.url}/v1`;
     done();
   });
 
   it('returns a 404 response when the route cannot be found', function (done) {
-
     const handler = data => {
       expect(data.status).toEqual(404);
       done();
     };
-
-    http.get(`${this.baseUrl}/jambo`, handle(handler));
-
+    http.get(`${config.url}/jambo`, handle(handler));
   });
 
-  it('returns a 405 response for the `apps` collection', function (done) {
+  it('returns a 401 response when the Bearer token is incorrectly formatted', function (done) {
 
     const handler = data => {
-      console.log(data);
-      expect(data.status).toEqual(405);
+      expect(data.status).toEqual(401);
       done();
     };
 
-    http.get(`${this.baseUrl}/apps`, handle(handler));
+    const opts = {
+      hostname: 'localhost',
+      path: '/v1/texts',
+      port: 3000,
+      headers: { Authorization: 'Bearer a1b2c3d4e5' }
+    };
+
+    const req = http.request(opts, handle(handler));
+    req.end();
 
   });
-
-  it('returns a 405 response for DELETE requests to `users`');
-  it('returns a 405 response for GET requests to `users`');
-  it('returns a 405 response for PUT requests to `users`');
-  it('returns a 500 response when the token is incorrectly formatted');
 
 });
