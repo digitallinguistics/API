@@ -37,7 +37,8 @@ const closeServer = () => server.close();
 // starts the server
 const startServer = () => {
   server.listen(app.get('port'), () => {
-    console.log(`Server started. Press Ctrl+C to terminate.
+    console.log(`
+      Server started. Press Ctrl+C to terminate.
       Project:  dlx-api
       Port:     ${app.get('port')}
       Time:     ${new Date()}
@@ -50,5 +51,10 @@ const startServer = () => {
 exports.closeServer = closeServer;
 exports.startServer = startServer;
 
-// initialize the DocumentDB database
-db.ready().then(exports.startServer).catch(err => console.error(err));
+if ((global.env === 'local' && require.main === module) || (global.env !== 'local')) {
+  // initialize the DocumentDB database and start the server
+  db.ready().then(startServer).catch(err => console.error(err));
+} else {
+  // export a function to initialize the DocumentDB database and start the server
+  exports.ready = () => db.ready().then(startServer).catch(err => console.error(err));
+}
