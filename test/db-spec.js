@@ -2,7 +2,11 @@ const app = require('../app');
 
 describe('the database API', function () {
 
+  console.log('Starting database tests.');
+
   beforeAll(function (done) {
+
+    process.env.PORT = 3000;
 
     app.ready().then(() => {
 

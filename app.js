@@ -1,7 +1,7 @@
 // node modules
 require('./lib/utils');
-require('./lib/config');
 const bodyParser = require('body-parser');
+const config = require('./lib/config');
 const db = require('./lib/db');
 const express = require('express');
 const http = require('http');
@@ -12,7 +12,7 @@ const app = express(); // initialize Express app
 
 app.disable('x-powered-by'); // hide server information in the response
 app.enable('trust proxy'); // trust the Azure proxy server
-app.set('port', process.env.PORT || 3000); // set local port to 3000
+app.set('port', config.port); // set local port to 3000
 
 // middleware
 app.use(middleware.logUrl); // url logging for debugging
