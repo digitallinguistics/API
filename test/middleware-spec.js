@@ -13,7 +13,7 @@ const handle = handler => {
 describe('middleware', function () {
 
   beforeAll(function (done) {
-    this.baseUrl = `http://localhost:${config.port}`;
+    this.baseUrl = `http://localhost:${config.port}/v1`;
     done();
   });
 
@@ -28,7 +28,18 @@ describe('middleware', function () {
 
   });
 
-  it('returns a 405 response for the `apps` collection');
+  it('returns a 405 response for the `apps` collection', function (done) {
+
+    const handler = data => {
+      console.log(data);
+      expect(data.status).toEqual(405);
+      done();
+    };
+
+    http.get(`${this.baseUrl}/apps`, handle(handler));
+
+  });
+
   it('returns a 405 response for DELETE requests to `users`');
   it('returns a 405 response for GET requests to `users`');
   it('returns a 405 response for PUT requests to `users`');

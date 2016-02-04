@@ -28,7 +28,7 @@ require('./lib/router')(app);
 app.use(middleware.error404);
 app.use(middleware.error500);
 
-db.ready().then(() => {
+const startServer = () => {
 
   // create a server
   const server = http.createServer(app);
@@ -44,6 +44,12 @@ db.ready().then(() => {
       Env:      ${global.env}`);
     });
 
-    exports.end = () => server.close();
+  exports.end = () => server.close();
 
-}).catch(err => console.error(err));
+};
+
+if ((global.env == 'local' && require.main === module) || (global.env !== 'local')) {
+  db.ready().then(startServer).catch(err => console.log(err));
+} else {
+  exports.start = () => db.ready().then(startServer).catch(err => console.log(err));
+}
