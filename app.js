@@ -6,6 +6,7 @@ const db = require('./lib/db');
 const express = require('express');
 const http = require('http');
 const middleware = require('./lib/middleware');
+if (global.env === 'local') { require('./lib/dev'); }
 
 const app = express(); // initialize Express app
 
@@ -27,11 +28,14 @@ require('./lib/router')(app);
 app.use(middleware.error404);
 app.use(middleware.error500);
 
-db.ready().then(() => {
+// create a server
+const server = http.createServer(app);
 
-  // start server
-  const server = http.createServer(app);
+// closes the server
+const closeServer = () => server.close();
 
+// starts the server
+const startServer = () => {
   server.listen(app.get('port'), () => {
     console.log(`Server started. Press Ctrl+C to terminate.
       Project:  dlx-api
@@ -39,8 +43,12 @@ db.ready().then(() => {
       Time:     ${new Date()}
       Node:     ${process.version}
       Env:      ${global.env}`);
-    });
+  });
+};
 
-  if (global.env === 'local') { require('./lib/dev'); }
+// exports server start/close functionality
+exports.closeServer = closeServer;
+exports.startServer = startServer;
 
-}).catch(err => console.error(err));
+// initialize the DocumentDB database
+db.ready().then(exports.startServer).catch(err => console.error(err));
