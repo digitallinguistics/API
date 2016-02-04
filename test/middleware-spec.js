@@ -1,23 +1,41 @@
 const app = require('../app');
+const http = require('http');
+
+const handle = handler => {
+  return res => {
+    var data = '';
+    res.on('error', err => console.error(err));
+    res.on('data', chunk => data += chunk);
+    res.on('end', () => handler(data));
+  };
+};
 
 describe('middleware', function () {
 
-  console.log('Starting middleware tests.');
-
   beforeAll(function (done) {
-    process.env.PORT = 3002;
-    app.ready().then(() => {
-      console.log('App ready.');
-      this.db = require('../lib/db');
+    const init = () => {
+      this.baseUrl = `http://localhost:${app.port}`;
       done();
-    }).catch(err => console.error(err));
+    };
+    app.ready().then(init).catch(err => console.error(err));
   });
 
   afterAll(function () {
     app.closeServer();
   });
 
-  it('returns a 404 response when the route cannot be found');
+  it('returns a 404 response when the route cannot be found', function (done) {
+
+    const handler = data => {
+      console.log(data);
+      expect(data.status).toEqual(404);
+      done();
+    };
+
+    http.get(`${this.baseUrl}/jambo`, handle(handler));
+
+  });
+
   it('returns a 405 response for the `apps` collection');
   it('returns a 405 response for DELETE requests to `users`');
   it('returns a 405 response for GET requests to `users`');

@@ -57,4 +57,5 @@ if ((global.env === 'local' && require.main === module) || (global.env !== 'loca
 } else {
   // export a function to initialize the DocumentDB database and start the server
   exports.ready = () => db.ready().then(startServer).catch(err => console.error(err));
+  exports.port = app.get('port');
 }

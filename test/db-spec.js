@@ -2,29 +2,21 @@ const app = require('../app');
 
 describe('the database API', function () {
 
-  console.log('Starting database tests.');
-
   beforeAll(function (done) {
 
-    process.env.PORT = 3000;
-
-    app.ready().then(() => {
-
-      console.log('App ready.');
-
+    const init = () => {
       this.db = require('../lib/db');
+      this.baseUrl = `http://localhost:${app.port}`;
       this.collection = 'texts';
-
       this.users = [
         { id: 'me@example.com', firstName: 'John', lastName: 'Doe', services: { onedrive: '12345' } },
         { id: 'me@test.com', firstName: 'Jane', lastName: 'Doe', services: { onedrive: '67890' } }
       ];
-
       this.results = [];
-
       done();
+    };
 
-    }).catch(err => console.error(err));
+    app.ready().then(init).catch(err => console.error(err));
 
   });
 
@@ -58,7 +50,7 @@ describe('the database API', function () {
 
   });
 
-  it('can create a document', function (done) {
+  xit('can create a document', function (done) {
 
     const text = {
       title: 'How the world began',
@@ -80,7 +72,7 @@ describe('the database API', function () {
 
   });
 
-  it('can create multiple documents', function (done) {
+  xit('can create multiple documents', function (done) {
 
     const texts = [
       {
@@ -114,7 +106,7 @@ describe('the database API', function () {
 
   });
 
-  it('can get a document', function (done) {
+  xit('can get a document', function (done) {
     this.db.get(this.collection, this.results[1]._rid)
     .then(text => {
       expect(text).toEqual(this.results[1]);
@@ -122,7 +114,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can get multiple documents', function (done) {
+  xit('can get multiple documents', function (done) {
     const rids = this.results.slice(1).map(text => text._rid);
     this.db.get(this.collection, rids)
     .then(res => {
@@ -134,7 +126,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can get a document by ID', function (done) {
+  xit('can get a document by ID', function (done) {
     this.db.getById(this.collection, this.results[0].id, { idType: 'id' })
     .then(text => {
       expect(text).toEqual(this.results[0]);
@@ -142,7 +134,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can get multiple documents by ID', function (done) {
+  xit('can get multiple documents by ID', function (done) {
     const ids = this.results.map(text => text.id);
     this.db.getById(this.collection, ids)
     .then(res => {
@@ -153,7 +145,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can upsert multiple existing documents', function (done) {
+  xit('can upsert multiple existing documents', function (done) {
     this.results.forEach(text => text.speaker = 'John Smith');
     this.db.upsert(this.collection, this.results)
     .then(res => {
@@ -168,7 +160,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can upsert a new document', function (done) {
+  xit('can upsert a new document', function (done) {
 
     const text = {
       title: 'Jambo means hello',
@@ -188,7 +180,7 @@ describe('the database API', function () {
 
   });
 
-  it('can upsert multiple new documents', function (done) {
+  xit('can upsert multiple new documents', function (done) {
 
     const texts = [
       {
@@ -223,7 +215,7 @@ describe('the database API', function () {
 
   });
 
-  it('can upsert an existing document as a new document', function (done) {
+  xit('can upsert an existing document as a new document', function (done) {
     this.db.upsert(this.collection, this.results[0], { createId: true })
     .then(res => {
       expect(res instanceof Array).toBe(false);
@@ -236,7 +228,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can delete a document', function (done) {
+  xit('can delete a document', function (done) {
     this.db.delete(this.collection, this.results[2]._rid)
     .then(res => {
       expect(res.status).toBe(204);
@@ -245,7 +237,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can delete multiple documents', function (done) {
+  xit('can delete multiple documents', function (done) {
     const ids = this.results.map(text => text._rid);
     this.db.delete(this.collection, ids)
     .then(res => {
@@ -256,7 +248,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can create users with email IDs', function (done) {
+  xit('can create users with email IDs', function (done) {
     this.db.create('users', this.users)
     .then(res => {
       expect(res instanceof Array).toBe(true);
@@ -273,7 +265,7 @@ describe('the database API', function () {
     });
   });
 
-  it('returns a 409 error when creating a user whose email already exists', function (done) {
+  xit('returns a 409 error when creating a user whose email already exists', function (done) {
     this.db.create('users', this.users)
     .then(res => fail('Error not thrown. Received response:', res))
     .catch(err => {
@@ -282,7 +274,7 @@ describe('the database API', function () {
     });
   });
 
-  it('can get a user by service ID', function (done) {
+  xit('can get a user by service ID', function (done) {
     const serviceId = this.users[0].services.onedrive;
     this.db.getById('users', serviceId, { id_type: 'service_id', service: 'onedrive' })
     .then(res => {
@@ -293,7 +285,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can get multiple users by service ID', function (done) {
+  xit('can get multiple users by service ID', function (done) {
     const serviceIds = this.users.map(user => user.services.onedrive);
     this.db.getById('users', serviceIds, { idType: 'serviceId', service: 'onedrive' })
     .then(res => {
@@ -304,7 +296,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can get multiple users by email ID', function (done) {
+  xit('can get multiple users by email ID', function (done) {
     const email = this.users[0].id;
     this.db.getById('users', email)
     .then(res => {
@@ -313,7 +305,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can get multiple users by email ID', function (done) {
+  xit('can get multiple users by email ID', function (done) {
     const emails = this.users.map(user => user.id);
     this.db.getById('users', emails)
     .then(res => {

@@ -2,15 +2,8 @@ const app = require('../app');
 
 describe('the API', function () {
 
-  console.log('Starting API tests.');
-
   beforeAll(function (done) {
-    process.env.PORT = 3001;
-    app.ready().then(() => {
-      console.log('App ready.');
-      this.db = require('../lib/db');
-      done();
-    }).catch(err => console.error(err));
+    app.ready().then(done).catch(err => console.error(err));
   });
 
   afterAll(function () {
