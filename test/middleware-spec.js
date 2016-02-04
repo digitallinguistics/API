@@ -6,7 +6,7 @@ const handle = handler => {
     var data = '';
     res.on('error', err => console.error(err));
     res.on('data', chunk => data += chunk);
-    res.on('end', () => handler(data));
+    res.on('end', () => handler(JSON.parse(data)));
   };
 };
 
@@ -20,7 +20,6 @@ describe('middleware', function () {
   it('returns a 404 response when the route cannot be found', function (done) {
 
     const handler = data => {
-      console.log(data);
       expect(data.status).toEqual(404);
       done();
     };

@@ -44,6 +44,6 @@ db.ready().then(() => {
       Env:      ${global.env}`);
     });
 
-    exports.end = server.close;
+    exports.end = () => server.close();
 
 }).catch(err => console.error(err));
