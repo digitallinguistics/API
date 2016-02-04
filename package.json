@@ -37,7 +37,7 @@
     "node": "5.x"
   },
   "scripts": {
-    "test": "jasmine JASMINE_CONFIG_PATH=jasmine.json"
+    "test": "node lib/jasmine.js"
   },
   "dependencies": {
     "body-parser": "^1.14.2",

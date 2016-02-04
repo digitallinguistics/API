@@ -1,14 +1,4 @@
-const app = require('../app');
-
 describe('the API', function () {
-
-  beforeAll(function (done) {
-    app.ready().then(done).catch(err => console.error(err));
-  });
-
-  afterAll(function () {
-    app.closeServer();
-  });
 
   describe('GET /auth', function () {
 

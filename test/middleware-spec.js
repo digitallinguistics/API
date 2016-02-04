@@ -1,4 +1,4 @@
-const app = require('../app');
+const config = require('../lib/config');
 const http = require('http');
 
 const handle = handler => {
@@ -13,15 +13,8 @@ const handle = handler => {
 describe('middleware', function () {
 
   beforeAll(function (done) {
-    const init = () => {
-      this.baseUrl = `http://localhost:${app.port}`;
-      done();
-    };
-    app.ready().then(init).catch(err => console.error(err));
-  });
-
-  afterAll(function () {
-    app.closeServer();
+    this.baseUrl = `http://localhost:${config.port}`;
+    done();
   });
 
   it('returns a 404 response when the route cannot be found', function (done) {

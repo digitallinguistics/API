@@ -28,14 +28,12 @@ require('./lib/router')(app);
 app.use(middleware.error404);
 app.use(middleware.error500);
 
-// create a server
-const server = http.createServer(app);
+db.ready().then(() => {
 
-// closes the server
-const closeServer = () => server.close();
+  // create a server
+  const server = http.createServer(app);
 
-// starts the server
-const startServer = () => {
+  // listen on port
   server.listen(app.get('port'), () => {
     console.log(`
       Server started. Press Ctrl+C to terminate.
@@ -44,18 +42,8 @@ const startServer = () => {
       Time:     ${new Date()}
       Node:     ${process.version}
       Env:      ${global.env}`);
-  });
-};
+    });
 
-// exports server start/close functionality
-exports.closeServer = closeServer;
-exports.startServer = startServer;
+    exports.end = server.close;
 
-if ((global.env === 'local' && require.main === module) || (global.env !== 'local')) {
-  // initialize the DocumentDB database and start the server
-  db.ready().then(startServer).catch(err => console.error(err));
-} else {
-  // export a function to initialize the DocumentDB database and start the server
-  exports.ready = () => db.ready().then(startServer).catch(err => console.error(err));
-  exports.port = app.get('port');
-}
+}).catch(err => console.error(err));

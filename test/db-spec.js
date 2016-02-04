@@ -1,23 +1,14 @@
-const app = require('../app');
-
 describe('the database API', function () {
 
   beforeAll(function (done) {
-
-    const init = () => {
-      this.db = require('../lib/db');
-      this.baseUrl = `http://localhost:${app.port}`;
-      this.collection = 'texts';
-      this.users = [
-        { id: 'me@example.com', firstName: 'John', lastName: 'Doe', services: { onedrive: '12345' } },
-        { id: 'me@test.com', firstName: 'Jane', lastName: 'Doe', services: { onedrive: '67890' } }
-      ];
-      this.results = [];
-      done();
-    };
-
-    app.ready().then(init).catch(err => console.error(err));
-
+    this.db = require('../lib/db');
+    this.collection = 'texts';
+    this.users = [
+      { id: 'me@example.com', firstName: 'John', lastName: 'Doe', services: { onedrive: '12345' } },
+      { id: 'me@test.com', firstName: 'Jane', lastName: 'Doe', services: { onedrive: '67890' } }
+    ];
+    this.results = [];
+    done();
   });
 
   afterAll(function (done) {
@@ -43,10 +34,7 @@ describe('the database API', function () {
       tasks.push(deleteUsers);
     }
 
-    Promise.all(tasks).then(() => {
-      app.closeServer();
-      done();
-    }).catch(err => console.error(err));
+    Promise.all(tasks).then(done).catch(err => console.error(err));
 
   });
 
