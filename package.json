@@ -43,7 +43,6 @@
     "body-parser": "^1.14.2",
     "documentdb": "^1.5.1",
     "express": "^4.13.3",
-    "express-handlebars": "^2.0.1",
     "uuid": "^2.0.1"
   },
   "devDependencies": {
