@@ -2,6 +2,8 @@
 require('./lib/utils');
 const bodyParser = require('body-parser');
 const config = require('./lib/config');
+const cookieParser = require('cookie-parser');
+const credentials = require('./lib/credentials');
 const db = require('./lib/db');
 const express = require('express');
 const http = require('http');
@@ -16,6 +18,7 @@ app.set('port', config.port); // set local port to 3000
 
 // middleware
 app.use(middleware.logUrl); // url logging for debugging
+app.use(cookieParser(credentials.secret)); // parse cookies
 app.use(express.static(__dirname + '/public')); // routing for static files
 app.use(middleware.parser); // handles Content-Type header, Authorization header, and queries
 app.use(bodyParser.urlencoded({ extended: false })); // parse form data

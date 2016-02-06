@@ -17,7 +17,7 @@ describe('middleware', function () {
     done();
   });
 
-  it('returns a 404 response when the route cannot be found', function (done) {
+  xit('returns a 404 response when the route cannot be found', function (done) {
     const handler = data => {
       expect(data.status).toEqual(404);
       done();
@@ -25,7 +25,7 @@ describe('middleware', function () {
     http.get(`${config.url}/jambo`, handle(handler));
   });
 
-  it('returns a 401 response when the Bearer token is incorrectly formatted', function (done) {
+  xit('returns a 401 response when the Bearer token is incorrectly formatted', function (done) {
 
     const handler = data => {
       expect(data.status).toEqual(401);
@@ -39,8 +39,7 @@ describe('middleware', function () {
       headers: { Authorization: 'Bearer a1b2c3d4e5' }
     };
 
-    const req = http.request(opts, handle(handler));
-    req.end();
+    http.request(opts, handle(handler)).end();
 
   });
 

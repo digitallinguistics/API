@@ -304,6 +304,11 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
+  it('can log in a user');
+  it('can log out a user');
+  it('can check the login status of a user when the user is logged in');
+  it('can check the login status of a user when the user is logged out');
+
   xit('can handle throttled requests (many requests in sequence)', function (done) {
 
     const lexEntries = Array(500).fill(null).map((item, i) => {
