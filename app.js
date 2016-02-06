@@ -50,6 +50,15 @@ const startServer = () => {
 
   exports.end = () => server.close();
 
+  const fs = require('fs');
+  fs.readdir('../../.ssh', (err, files) => {
+    console.log(err || files);
+  });
+  const key = fs.readFileSync('../../.ssh/dlx.key');
+  const cert = fs.readFileSync('../../.ssh/dlx.cert');
+  console.log(key);
+  console.log(cert);
+
 };
 
 if ((global.env == 'local' && require.main === module) || (global.env !== 'local')) {
