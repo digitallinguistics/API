@@ -54,8 +54,11 @@ const startServer = () => {
 
 };
 
-if ((global.env == 'local' && require.main === module) || (global.env !== 'local')) {
-  db.ready().then(startServer).catch(err => console.log(err));
-} else {
-  exports.start = () => db.ready().then(startServer).catch(err => console.log(err));
-}
+
+db.ready().then(startServer).catch(err => console.log(err));
+
+// if ((global.env == 'local' && require.main === module) || (global.env !== 'local')) {
+//   db.ready().then(startServer).catch(err => console.log(err));
+// } else {
+//   exports.start = () => db.ready().then(startServer).catch(err => console.log(err));
+// }
