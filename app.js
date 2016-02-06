@@ -37,12 +37,13 @@ const startServer = () => {
   const server = http.createServer(app);
 
   // listen on port
+  /* jshint -W058 */
   server.listen(app.get('port'), () => {
     console.log(`
       Server started. Press Ctrl+C to terminate.
       Project:  dlx-api
       Port:     ${app.get('port')}
-      Time:     ${new Date()}
+      Time:     ${new Date}
       Node:     ${process.version}
       Env:      ${global.env}`);
     });
