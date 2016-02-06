@@ -3,7 +3,7 @@ require('./lib/utils');
 const bodyParser = require('body-parser');
 const config = require('./lib/config');
 const cookieParser = require('cookie-parser');
-const credentials = require('./lib/credentials');
+const credentials = require('./lib/credentials'); // TODO: remember to upload this with SFTP
 const db = require('./lib/db');
 const express = require('express');
 const http = require('http');
@@ -50,16 +50,9 @@ const startServer = () => {
 
   exports.end = () => server.close();
 
-  const fs = require('fs');
-  fs.readdir('../../.ssh', (err, files) => {
-    console.log(err || files);
-  });
-  const key = fs.readFileSync('../../.ssh/dlx.key');
-  const cert = fs.readFileSync('../../.ssh/dlx.cert');
-  console.log(key);
-  console.log(cert);
-
 };
+
+startServer();
 
 if ((global.env == 'local' && require.main === module) || (global.env !== 'local')) {
   db.ready().then(startServer).catch(err => console.log(err));

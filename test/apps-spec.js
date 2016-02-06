@@ -7,7 +7,7 @@ describe('/apps', function () {
   const options = props => {
     props = props || {};
     const defaults = {
-      auth: 'dlx-org:' + credentials.secret,
+      auth: `${credentials.user}:${credentials.secret}`,
       hostname: 'localhost',
       path: '/v1/apps',
       port: 3000
