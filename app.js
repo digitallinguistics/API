@@ -3,7 +3,7 @@ require('./lib/utils');
 const bodyParser = require('body-parser');
 const config = require('./lib/config');
 const cookieParser = require('cookie-parser');
-// const credentials = require('./lib/credentials');
+const credentials = require('./lib/credentials');
 const http = require('http');
 
 http.createServer(function (req, res) {
