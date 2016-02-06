@@ -33,6 +33,21 @@ app.use(middleware.error500);
 
 console.log('Trying to start.');
 
+// create a server
+const server = http.createServer(app);
+
+// listen on port
+/* jshint -W058 */
+server.listen(app.get('port'), () => {
+  console.log(`
+    Server started. Press Ctrl+C to terminate.
+    Project:  dlx-api
+    Port:     ${app.get('port')}
+    Time:     ${new Date}
+    Node:     ${process.version}
+    Env:      ${global.env}`);
+  });
+
 const startServer = () => {
 
   // create a server
@@ -53,9 +68,6 @@ const startServer = () => {
   exports.end = () => server.close();
 
 };
-
-
-db.ready().then(startServer).catch(err => console.log(err));
 
 // if ((global.env == 'local' && require.main === module) || (global.env !== 'local')) {
 //   db.ready().then(startServer).catch(err => console.log(err));
