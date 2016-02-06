@@ -31,11 +31,6 @@ require('./lib/router')(app);
 app.use(middleware.error404);
 app.use(middleware.error500);
 
-app.use((req, res) => {
-  console.log(req.url);
-  res.status(200);
-});
-
 const startServer = () => {
 
   // create a server
