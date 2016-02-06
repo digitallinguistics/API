@@ -56,7 +56,7 @@ describe('the API', function () {
       });
 
       this.app = { id: '12345', description: 'Test app.' };
-      this.user = { id: 'me@example.com', firstName: 'Danny', lastName: 'Hieber' };
+      this.user = { id: 'danny@danielhieber.com', firstName: 'Danny', lastName: 'Hieber' };
 
       const task = () => db.create('apps', this.app).then(app => {
         this.app = app;
