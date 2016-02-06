@@ -1,49 +1,38 @@
-require('../lib/utils');
-
 describe('the database API', function () {
 
   beforeAll(function (done) {
-
     this.db = require('../lib/db');
     this.collection = 'texts';
-
     this.users = [
       { id: 'me@example.com', firstName: 'John', lastName: 'Doe', services: { onedrive: '12345' } },
       { id: 'me@test.com', firstName: 'Jane', lastName: 'Doe', services: { onedrive: '67890' } }
     ];
-
     this.results = [];
-
-    this.db.ready().then(() => {
-      console.log('Database ready.');
-      done();
-    }).catch(err => console.error(err));
-
+    done();
   });
 
   afterAll(function (done) {
 
     const tasks = [];
 
-    if (this.users && this.users.length > 0 && this.users[0]._rid) {
-      const rids = this.users.map(user => user._rid);
-
-      const deleteUsers = this.db.delete('users', rids)
+    if (this.results && this.results.length > 0) {
+      const deleteTexts = this.db.delete('texts', this.results.map(text => text._rid))
       .then(res => {
-        if (res.every(response => response.status === 204)) { console.log('\nUsers deleted.'); }
-        else { console.error('Problem deleting users.'); }
-      }).catch(err => console.error('Error in afterAll:', err));
-
-      tasks.push(deleteUsers);
+        if (res.every(response => response.status === 204)) { console.log('\nTexts deleted.'); }
+        else { console.error('\nProblem deleting texts.'); }
+      }).catch(err => console.error(err));
+      tasks.push(deleteTexts);
     }
 
-    const deleteTexts = this.db.delete('texts', this.results.map(text => text._rid))
-    .then(res => {
-      if (res.every(response => response.status === 204)) { console.log('\nTexts deleted.'); }
-      else { console.error('Problem deleting texts.'); }
-    }).catch(err => console.error(err));
-
-    tasks.push(deleteTexts);
+    if (this.users && this.users.length > 0 && this.users[0]._rid) {
+      const deleteUsers = this.db.getById('users', this.users.map(user => user.id))
+      .then(users => users.map(user => user._rid))
+      .then(rids => this.db.delete('users', rids).then(res => {
+        if (res.every(response => response.status === 204)) { console.log('\nUsers deleted.'); }
+        else { console.error('\nProblem deleting users.'); }
+      }));
+      tasks.push(deleteUsers);
+    }
 
     Promise.all(tasks).then(done).catch(err => console.error(err));
 
@@ -257,7 +246,10 @@ describe('the database API', function () {
       this.users.splice(0);
       this.users.push(...res);
       done();
-    }).catch(err => fail(JSON.stringify(err, null, 2)));
+    }).catch(err => {
+      if (err.status == 409) { fail('\nTest user already exists.'); }
+      else { fail(err); }
+    });
   });
 
   it('returns a 409 error when creating a user whose email already exists', function (done) {
@@ -311,7 +303,33 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
+  it('can log in a user', function (done) {
+    this.db.login(this.users[0]._rid)
+    .then(res => {
+      expect(res.status).toEqual(200);
+      this.db.get('users', this.users[0]._rid)
+      .then(user => {
+        expect(user.lastActive).toBeGreaterThan(Date.now() - 10000);
+        done();
+      }).catch(err => fail(err));
+    }).catch(err => fail(err));
+  });
+
+  it('can log out a user', function (done) {
+    this.db.logout(this.users[0]._rid)
+    .then(res => {
+      expect(res.status).toEqual(200);
+      this.db.get('users', this.users[0]._rid)
+      .then(user => {
+        expect(user.lastActive).toBeLessThan(Date.now() - 10000);
+        done();
+      }).catch(err => fail(err));
+    }).catch(err => fail(err));
+  });
+
   it('can handle throttled requests (many requests in sequence)', function (done) {
+
+    pending('This is a stress test that should only be run occasionally.');
 
     const lexEntries = Array(500).fill(null).map((item, i) => {
       return { id: i + '', token: 'jambo', gloss: 'hello' };
@@ -319,6 +337,7 @@ describe('the database API', function () {
 
     this.db.upsert('lexEntries', lexEntries)
     .then(res => {
+
       expect(res instanceof Array).toBe(true);
       expect(res.length).toEqual(lexEntries.length);
 
@@ -330,6 +349,6 @@ describe('the database API', function () {
 
     }).catch(err => fail(JSON.stringify(err, null, 2)));
 
-  }, 30000);
+  }, 180000);
 
 });

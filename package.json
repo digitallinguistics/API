@@ -37,12 +37,14 @@
     "node": "5.x"
   },
   "scripts": {
-    "test": "jasmine JASMINE_CONFIG_PATH=jasmine.json"
+    "test": "node lib/jasmine.js"
   },
   "dependencies": {
     "body-parser": "^1.14.2",
+    "cookie-parser": "^1.4.1",
     "documentdb": "^1.5.1",
     "express": "^4.13.3",
+    "jsonwebtoken": "^5.5.4",
     "uuid": "^2.0.1"
   },
   "devDependencies": {

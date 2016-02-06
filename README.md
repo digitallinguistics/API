@@ -99,9 +99,11 @@ Your redirect page should include script that examines the URL, parses the hash,
 For any requests that require the user to be logged in, you should now include the access token you received in Step 2 as part of the request. (You may include the access token in other requests as well; if the token is not required for a request, it is simply ignored.) To include the token with the request, simply add an `Authorization` header to the request, whose value is `bearer {access_token}`.
 
 ##### 4. Request a new token when the old one expires (or before)
-The lifetime of an API access token is 1 hour (3600 seconds). After the token expires, attempts to access the API using the same token will return an error. When this happens, simply request a new token following Step 1 above. If the user is still logged into DLx, you will receive the new token automatically, without the user having to login again. Users are automatically logged out of DLx if they have not been active in four hours.
+The lifetime of an API access token is 1 hour (3600 seconds). After the token expires, attempts to access the API using the same token will return an error. When this happens, simply request a new token following Step 1 above.
 
-If you request a new token before the old one expires, you will be sent a new one automatically (as long as the user is still logged in). Therefore you can keep the user logged in by simply requesting a new token every hour (or 59 minutes, etc.).
+If you request a new token before the old one expires, and the user is still logged in, you will be sent a new token automatically, without the user having to login again. Therefore you can keep the user logged in by simply requesting a new token every hour (or 59 minutes). Users are automatically logged out of DLx if they have not been active in four hours.
+
+When you make an authorization request, the DLx server attempts to identify the user by one of two means: a `dlx` cookie, and the authentication header. If neither of these is present in the authentication request, the DLx server will be unable to identify the user, and so the user will be asked to log in regardless of whether the DLx token is expired or the user is already logged in.
 
 ##### Handling Errors During Authentication
 Sometimes the request you made in Step 1 will return an error. This can happen for a variety of reasons - incorrectly formatted URLs, bad request parameters, etc. If this happens, the user will be returned to the redirect URL, along with two querystring parameters: an `error` parameter indicating the type of error, and an `error_description` parameter with a more detailed description of the problem. A `state` parameter is also included if a `state` was provided in Step 1. A list of possible values for the `error` parameter can be viewed [here](http://tools.ietf.org/html/rfc6749#section-4.2.2.1).
@@ -193,7 +195,15 @@ The following status codes are used in responses from the API. Your application 
 
 * The API structure is described using the [Swagger](http://swagger.io/specification/) format for describing APIs.
 
+* The API uses [JSON Web Tokens (JWT)](http://jwt.io/) for its access tokens.
+
+* Unit testing is done using [Jasmine](http://jasmine.github.io/). To run the tests in the repository, enter `npm test` in the command line.
+
 ### Canonical Order of Parameters
 
 * In database calls: (coll, ids/items, opts)
 * In passing response parameters: (err, status, responseObject)
+
+### Cheat Sheet
+* Token lifespan: 1 hour
+* Login lifespan: 4 hours
