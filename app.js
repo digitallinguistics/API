@@ -3,7 +3,7 @@ require('./lib/utils');
 const bodyParser = require('body-parser');
 const config = require('./lib/config');
 const cookieParser = require('cookie-parser');
-const credentials = require('./lib/credentials'); // upload this with FTP
+const credentials = require('./lib/credentials'); // TODO: remember to upload this with SFTP
 const db = require('./lib/db');
 const express = require('express');
 const http = require('http');
