@@ -1,18 +1,23 @@
 'use strict';
 
+const credentials = require('../lib/credentials');
 const db = require('../lib/db');
 const http = require('http');
+const jwt = require('jsonwebtoken');
 const qs = require('querystring');
 const URL = require('url');
 const User = require('../lib/models/user');
 
-const handle = handler => {
-  return res => {
+const makeRequest = (opts, handler) => {
+  const req = http.request(opts, res => {
     var data = '';
-    res.on('error', err => console.error(err));
     res.on('data', chunk => data += chunk);
     res.on('end', () => handler(JSON.parse(data)));
-  };
+    res.on('error', err => {
+      if (err.status == 429) { setTimeout(req, (+res.headers['x-ms-retry-after-ms']) + 1); }
+      else { fail(err); }
+    });
+  }).end();
 };
 
 describe('the API', function () {
@@ -21,20 +26,34 @@ describe('the API', function () {
 
     beforeAll(function (done) {
 
-      this.checkLoginPage = (res, done) => {
-        var data = '';
-        res.on('data', chunk => data += chunk);
-        res.on('error', err => fail(convertResponse(err)));
-        res.on('end', () => {
-          expect(res.headers.location).toBeDefined();
-          const url = URL.parse(res.headers.location);
-          expect(url.pathname).toBe('/login');
-          const q = qs.parse(url.query);
-          expect(q.redirect).toBe('https://api.digitallinguistics.org/oauth');
-          expect(+q.state).toEqual(this.query.raw.state);
-          done();
-        });
-      };
+      this.checkLoginPage = opts => new Promise((resolve, reject) => {
+        const task = () => {
+          http.request(opts, res => {
+            var data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('error', err => {
+              err = JSON.parse(err);
+              if (err.status == 429) { setTimeout(task, 500); }
+              else { fail(err); reject(err); }
+            });
+            res.on('end', () => {
+              if (!res.headers.location) {
+                const err = JSON.parse(data);
+                if (err.status == 429) { setTimeout(task, 500); }
+                else { fail(err); reject(err); }
+              } else {
+                const url = URL.parse(res.headers.location);
+                expect(url.pathname).toBe('/login');
+                const q = qs.parse(url.query);
+                expect(q.redirect).toBe('https://api.digitallinguistics.org/oauth');
+                expect(+q.state).toEqual(this.query.raw.state);
+                resolve();
+              }
+            });
+          }).end();
+        };
+        task();
+      });
 
       this.app = { id: '12345', description: 'Test app.' };
       this.user = { id: 'me@example.com', firstName: 'Danny', lastName: 'Hieber' };
@@ -69,12 +88,14 @@ describe('the API', function () {
 
         })();
 
+        return;
+
       }).then(() => db.upsert('users', this.user))
       .then(user => {
         this.user = new User(user);
         this.user.updateToken();
 
-        this.options = (props) => {
+        this.options = props => {
           props = props || {};
           const defaults = {
             hostname: 'localhost',
@@ -91,30 +112,36 @@ describe('the API', function () {
       }).then(done)
       .catch(err => {
         if (err.status == 409) { this.app.id = ((+this.app.id) + 1) + ''; task(); }
+        else if (err.status == 429) { setTimeout(task, 500); }
         else { console.error(err); }
       });
 
       task();
 
-    });
+    }, 10000);
 
     afterAll(function (done) {
-      db.delete('apps', this.app._rid).then(res => {
+      const task = () => db.delete('apps', this.app._rid).then(res => {
         if (res.status !== 204) { console.error(res); }
         done();
-      }).catch(err => console.error(err));
+      }).catch(err => {
+        if (err.status == 429) { setTimeout(task, 500); }
+        else { fail(err); }
+        done();
+      });
+      task();
     });
 
-    xit('returns a 404 response if the method is not GET', function (done) {
+    it('returns a 404 response if the method is not GET', function (done) {
       const handler = data => {
         expect(data.status).toEqual(404);
         done();
       };
       const opts = this.options({ method: 'POST' });
-      http.request(opts, handle(handler)).end();
+      makeRequest(opts, handler);
     });
 
-    xit('returns a 400 response when missing the `client_id` parameter', function (done) {
+    it('returns a 400 response when missing the `client_id` parameter', function (done) {
       const handler = data => {
         expect(data.status).toEqual(400);
         expect(data.error_description.includes('client_id')).toBe(true);
@@ -123,40 +150,40 @@ describe('the API', function () {
       const q = this.query.raw;
       delete q.client_id;
       const opts = this.options({ path: `/auth?${qs.stringify(q)}` });
-      http.request(opts, handle(handler)).end();
+      makeRequest(opts, handler);
     });
 
-    xit('returns a 400 response when missing the `redirect_uri` parameter', function (done) {
+    it('returns a 400 response when missing the `redirect_uri` parameter', function (done) {
       const handler = data => {
         expect(data.status).toEqual(400);
         expect(data.error_description.includes('redirect_uri')).toBe(true);
         done();
       };
       const opts = this.options({ path: `/auth?${this.query({ redirect_uri: undefined })}` });
-      http.request(opts, handle(handler)).end();
+      makeRequest(opts, handler);
     });
 
-    xit('returns a 400 response when missing the `response_type` parameter', function (done) {
+    it('returns a 400 response when missing the `response_type` parameter', function (done) {
       const handler = data => {
         expect(data.status).toEqual(400);
         expect(data.error_description.includes('response_type')).toBe(true);
         done();
       };
       const opts = this.options({ path: `/auth?${this.query({ response_type: null })}` });
-      http.request(opts, handle(handler)).end();
+      makeRequest(opts, handler);
     });
 
-    xit('returns a 400 response when the `response_type` parameter is not `token`', function (done) {
+    it('returns a 400 response when the `response_type` parameter is not `token`', function (done) {
       const handler = data => {
         expect(data.status).toEqual(400);
         expect(data.error_description.includes('response_type')).toBe(true);
         done();
       };
       const opts = this.options({ path: `/auth?${this.query({ response_type: 'code' })}`});
-      http.request(opts, handle(handler)).end();
+      makeRequest(opts, handler);
     });
 
-    xit('returns an error if the client app is not registered/found', function (done) {
+    it('returns an error if the client app is not registered/found', function (done) {
       const handler = data => {
         expect(data.status).toEqual(404);
         done();
@@ -164,38 +191,66 @@ describe('the API', function () {
       const q = this.query.raw;
       q.client_id += '2';
       const opts = this.options({ path: `/auth?${qs.stringify(q)}` });
-      http.request(opts, handle(handler)).end();
+      makeRequest(opts, handler);
     });
 
-    xit('renders the login page if the DLx cookie is missing', function (done) {
-      // this test uses the DLx token in the authorization header as a proxy for the dlx cookie
+    // this test uses the DLx token in the authorization header as a proxy for the dlx cookie
+    it('renders the login page if the DLx cookie is missing', function (done) {
       const opts = this.options({ headers: {} });
-      http.request(opts, res => this.checkLoginPage(res, done)).end();
+      this.checkLoginPage(opts).then(done).catch(err => fail(err));
     });
 
-    xit('returns an error if the DLx cookie is invalid', function (done) {
-      // this test uses the DLx token in the authorization header as a proxy for the dlx cookie
+    // this test uses the DLx token in the authorization header as a proxy for the dlx cookie
+    it('returns an error if the DLx cookie is invalid', function (done) {
       const handler = data => {
         expect(data.status).toEqual(401);
         done();
       };
       const token = this.user.dlxToken + 'hello';
       const opts = this.options({ headers: { Authorization: `Bearer ${token}` } });
-      http.request(opts, handle(handler)).end();
+      makeRequest(opts, handler);
     });
 
-    it('renders the login page if the DLx cookie is expired');
     // this test uses the DLx token in the authorization header as a proxy for the dlx cookie
-
-    xit('renders the login page if the DLx cookie is present but the user is not logged in to DLx', function (done) {
-      // this test uses the DLx token in the authorization header as a proxy for the dlx cookie
+    it('renders the login page if the DLx cookie is expired', function (done) {
+      const payload = { rid: this.user.rid };
+      const token = jwt.sign(payload, credentials.secret, { expiresIn: 0 });
+      const opts = this.options({ headers: { Authorization: `Bearer ${token}` } });
+      this.checkLoginPage(opts).then(done).catch(err => fail(err));
     });
 
-    xit('returns a DLx token if the user is logged in and the token is not expired', function (done) {
-      // TODO: create a temporary user
-      // TODO: the state parameter should be included in the response querystring
-      // TODO: the DLx token should be included in the response querystring
-      done();
+    // this test uses the DLx token in the authorization header as a proxy for the dlx cookie
+    it('renders the login page if the DLx cookie is present but the user is not logged in to DLx', function (done) {
+      this.user.lastActive = 1;
+      db.upsert('users', this.user)
+      .then(() => {
+        const opts = this.options();
+        this.checkLoginPage(opts).then(done).catch(err => fail(err));
+      }).catch(err => fail(err));
+    });
+
+    it('returns a DLx token if the user is logged in and the token is not expired', function (done) {
+      this.user.lastActive = Date.now();
+      db.upsert('users', this.user)
+      .then(() => {
+        const opts = this.options();
+        http.request(opts, res => {
+          var data = '';
+          res.on('error', err => fail(err));
+          res.on('data', chunk => data += chunk);
+          res.on('end', () => {
+            const url = URL.parse(res.headers.location);
+            const query = qs.parse(url.query);
+            expect(+query.state).toEqual(this.query.raw.state);
+            expect(typeof query.access_token).toBe('string');
+            jwt.verify(query.access_token, credentials.secret, (err, payload) => {
+              expect(err).toBeNull();
+              expect(payload.rid).toEqual(this.user.rid);
+              done();
+            });
+          });
+        }).end();
+      }).catch(err => fail(err));
     });
 
   });
