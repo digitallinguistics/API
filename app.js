@@ -5,15 +5,16 @@
 // const cookieParser = require('cookie-parser');
 // const credentials = require('./lib/credentials');
 // const db = require('./lib/db');
-// const express = require('express');
+const express = require('express');
 const http = require('http');
 // const middleware = require('./lib/middleware');
 // if (global.env === 'local') { require('./lib/dev'); }
-//
-// const app = express(); // initialize Express app
-//
-// app.disable('x-powered-by'); // hide server information in the response
-// app.enable('trust proxy'); // trust the Azure proxy server
+
+const app = express(); // initialize Express app
+
+app.disable('x-powered-by'); // hide server information in the response
+app.enable('trust proxy'); // trust the Azure proxy server
+app.set('port', process.env.PORT);
 // app.set('port', config.port); // set local port to 3000
 //
 // // middleware
@@ -31,6 +32,11 @@ const http = require('http');
 // app.use(middleware.error404);
 // app.use(middleware.error500);
 
+app.use((req, res) => {
+  console.log(req.url);
+  res.status(200);
+});
+
 const startServer = () => {
 
   // create a server
@@ -39,15 +45,14 @@ const startServer = () => {
 
   // listen on port
   /* jshint -W058 */
-  server.listen(process.env.PORT, () => {
-    // console.log(`
-    //   Server started. Press Ctrl+C to terminate.
-    //   Project:  dlx-api
-    //   Port:     ${app.get('port')}
-    //   Time:     ${new Date}
-    //   Node:     ${process.version}
-    //   Env:      ${global.env}`);
-    console.log('Server running.');
+  server.listen(app.get('port'), () => {
+    console.log(`
+      Server started. Press Ctrl+C to terminate.
+      Project:  dlx-api
+      Port:     ${app.get('port')}
+      Time:     ${new Date}
+      Node:     ${process.version}
+      Env:      ${global.env}`);
     });
 
   exports.end = () => server.close();
