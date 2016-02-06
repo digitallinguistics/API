@@ -239,15 +239,20 @@ describe('the API', function () {
           res.on('error', err => fail(err));
           res.on('data', chunk => data += chunk);
           res.on('end', () => {
-            const url = URL.parse(res.headers.location);
-            const query = qs.parse(url.query);
-            expect(+query.state).toEqual(this.query.raw.state);
-            expect(typeof query.access_token).toBe('string');
-            jwt.verify(query.access_token, credentials.secret, (err, payload) => {
-              expect(err).toBeNull();
-              expect(payload.rid).toEqual(this.user.rid);
-              done();
-            });
+            if (!res.headers.location) {
+              const err = JSON.parse(data);
+              if (err.status == 500) { fail(err); }
+            } else {
+              const url = URL.parse(res.headers.location);
+              const query = qs.parse(url.query);
+              expect(+query.state).toEqual(this.query.raw.state);
+              expect(typeof query.access_token).toBe('string');
+              jwt.verify(query.access_token, credentials.secret, (err, payload) => {
+                expect(err).toBeNull();
+                expect(payload.rid).toEqual(this.user.rid);
+                done();
+              });
+            }
           });
         }).end();
       }).catch(err => fail(err));

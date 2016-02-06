@@ -303,10 +303,29 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can log in a user');
-  it('can log out a user');
-  it('can check the login status of a user when the user is logged in');
-  it('can check the login status of a user when the user is logged out');
+  it('can log in a user', function (done) {
+    this.db.login(this.users[0]._rid)
+    .then(res => {
+      expect(res.status).toEqual(200);
+      this.db.get('users', this.users[0]._rid)
+      .then(user => {
+        expect(user.lastActive).toBeGreaterThan(Date.now() - 10000);
+        done();
+      }).catch(err => fail(err));
+    }).catch(err => fail(err));
+  });
+
+  it('can log out a user', function (done) {
+    this.db.logout(this.users[0]._rid)
+    .then(res => {
+      expect(res.status).toEqual(200);
+      this.db.get('users', this.users[0]._rid)
+      .then(user => {
+        expect(user.lastActive).toBeLessThan(Date.now() - 10000);
+        done();
+      }).catch(err => fail(err));
+    }).catch(err => fail(err));
+  });
 
   it('can handle throttled requests (many requests in sequence)', function (done) {
 
