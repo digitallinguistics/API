@@ -10,6 +10,7 @@ const http = require('http');
 const middleware = require('./lib/middleware');
 if (global.env === 'local') { require('./lib/dev'); }
 
+
 const app = express(); // initialize Express app
 
 app.disable('x-powered-by'); // hide server information in the response
@@ -51,8 +52,6 @@ const startServer = () => {
   exports.end = () => server.close();
 
 };
-
-startServer();
 
 if ((global.env == 'local' && require.main === module) || (global.env !== 'local')) {
   db.ready().then(startServer).catch(err => console.log(err));

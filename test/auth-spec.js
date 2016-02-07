@@ -91,7 +91,7 @@ describe('/auth', function () {
     }).then(() => db.upsert('users', this.user))
     .then(user => {
       this.user = new User(user);
-      this.user.updateToken();
+      // TODO: create new user token here and pass it to the Authorization header below
 
       this.options = props => {
         props = props || {};
