@@ -78,7 +78,15 @@ describe('/oauth', function () {
     makeRequest(opts, handler);
   });
 
-  it('returns a 401 response if the service claim is missing');
+  it('returns a 401 response if the service claim is missing', function (done) {
+    const handler = result => {
+      expect(result.status).toEqual(401);
+      done();
+    };
+    const t = token(null, { service: undefined });
+    const opts = options({ headers: { Authorization: `Bearer ${t}` } });
+    makeRequest(opts, handler);
+  });
 
   it('returns a 401 response if the JWT ID (state) is missing');
 
