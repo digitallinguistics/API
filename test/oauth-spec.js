@@ -83,12 +83,20 @@ describe('/oauth', function () {
       expect(result.status).toEqual(401);
       done();
     };
-    const t = token(null, { service: undefined });
+    const t = token({ service: undefined });
     const opts = options({ headers: { Authorization: `Bearer ${t}` } });
     makeRequest(opts, handler);
   });
 
-  it('returns a 401 response if the JWT ID (state) is missing');
+  it('returns a 401 response if the JWT ID (state) is missing', function (done) {
+    const handler = result => {
+      expect(result.status).toEqual(401);
+      done();
+    };
+    const t = token(null, { jwtid: undefined });
+    const opts = options({ headers: { Authorization:`Bearer ${t}` } });
+    makeRequest(opts, handler);
+  });
 
   it('returns a 403 response if the scope is not `db`');
 
