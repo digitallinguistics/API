@@ -1,6 +1,8 @@
 const credentials = require('../lib/credentials');
+const db = require('../lib/db');
 const http = require('http');
 const jwt = require('jsonwebtoken');
+const User = require('../lib/models/user');
 
 describe('/oauth', function () {
 
@@ -11,7 +13,7 @@ describe('/oauth', function () {
       audience: 'https://api.digitallinguistics.org',
       expiresIn: 300,
       jwtid: '1234567890',
-      subject: '010101'
+      subject: 'testy@testing.test'
     };
     payload = payload || {};
     opts = opts || {};
@@ -42,8 +44,19 @@ describe('/oauth', function () {
     }).end();
   };
 
-  beforeAll(function () {
-    console.log('OAuth: starting');
+  beforeAll(function (done) {
+    const user = new User({
+      id: 'testy@testing.test',
+      firstName: 'Testy',
+      lastName: 'McTester',
+      services: {
+        onedrive: '1234567890'
+      }
+    });
+    db.upsert('users', user).then(user => {
+      this.user = new User(user);
+      done();
+    }).catch(err => console.error(err));
   });
 
   afterAll(function () {
@@ -118,7 +131,15 @@ describe('/oauth', function () {
     makeRequest(opts, handler);
   });
 
-  it('returns a 405 response for non-POST requests');
+  it('returns a 405 response for non-POST requests', function (done) {
+    const handler = result => {
+      console.log(result);
+      expect(result.status).toEqual(405);
+      done();
+    };
+    const opts = options({ method: 'GET' });
+    makeRequest(opts, handler);
+  });
 
   // should include the original state as well as a DLx token in the querystring
   it('redirects to the original redirect URI if the token is valid');

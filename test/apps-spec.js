@@ -65,8 +65,8 @@ describe('/apps', function () {
 
     db.delete('apps', this.app.rid)
     .then(res => {
-      if (res.status == 204) { console.log('\nApps: test app deleted'); }
-      else { console.error('\nApps: problem deleting test app'); }
+      if (res.status == 204) { console.log('Apps: test app deleted'); }
+      else { console.error('Apps: problem deleting test app'); }
       console.log('Apps: finished');
       done();
     }).catch(err => console.error('Apps: problem deleting test app:', err));
@@ -74,7 +74,7 @@ describe('/apps', function () {
   });
 
   it('returns a 401 response if DLx token is absent', function (done) {
-    const opts = options({ auth: undefined });
+    const opts = options({ headers: {} });
     const handler = data => {
       expect(data.status).toEqual(401);
       done();
