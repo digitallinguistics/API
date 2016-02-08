@@ -1,8 +1,7 @@
 describe('the database API', function () {
 
-  console.log('Starting database spec.');
-
   beforeAll(function (done) {
+    console.log('Database: starting');
     this.db = require('../lib/db');
     this.collection = 'texts';
     this.users = [
@@ -20,8 +19,8 @@ describe('the database API', function () {
     if (this.results && this.results.length > 0) {
       const deleteTexts = this.db.delete('texts', this.results.map(text => text._rid))
       .then(res => {
-        if (res.every(response => response.status === 204)) { console.log('\nTexts deleted.'); }
-        else { console.error('\nProblem deleting texts.'); }
+        if (res.every(response => response.status === 204)) { console.log('Texts deleted.'); }
+        else { console.error('Problem deleting texts.'); }
       }).catch(err => console.error(err));
       tasks.push(deleteTexts);
     }
@@ -30,18 +29,18 @@ describe('the database API', function () {
       const deleteUsers = this.db.getById('users', this.users.map(user => user.id))
       .then(users => users.map(user => user._rid))
       .then(rids => this.db.delete('users', rids).then(res => {
-        if (res.every(response => response.status === 204)) { console.log('\nUsers deleted.'); }
-        else { console.error('\nProblem deleting users.'); }
+        if (res.every(response => response.status === 204)) { console.log('Users deleted.'); }
+        else { console.error('Problem deleting users.'); }
       }));
       tasks.push(deleteUsers);
     }
 
     Promise.all(tasks).then(() => {
-      console.log('Database spec finished.');
+      console.log('Database: finished');
       done();
     }).catch(err => {
       console.error(err);
-      console.log('Database spec finished.');
+      console.log('Database: finished');
       done();
     });
 
@@ -256,7 +255,7 @@ describe('the database API', function () {
       this.users.push(...res);
       done();
     }).catch(err => {
-      if (err.status == 409) { fail('\nTest user already exists.'); }
+      if (err.status == 409) { fail('Test user already exists.'); }
       else { fail(err); }
     });
   });

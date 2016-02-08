@@ -4,11 +4,10 @@ const http = require('http');
 
 describe('/apps', function () {
 
-  console.log('Starting apps spec.');
-
   const options = props => {
     props = props || {};
     const defaults = {
+      // TODO: replace this auth header with a JWT Bearer token
       auth: `${credentials.user}:${credentials.secret}`,
       hostname: 'localhost',
       path: '/v1/apps',
@@ -30,11 +29,13 @@ describe('/apps', function () {
   };
 
   beforeAll(function (done) {
+    console.log('Apps: starting');
 
     this.app = { id: 'dlx', description: 'DLx test app.', permissions: { owner: [], contributor: [], viewer: [], public: false } };
 
     db.create('apps', this.app)
     .then(app => {
+      console.log('Apps: test app created');
       this.app = app;
       done();
     }).catch(err => fail(err));
@@ -44,11 +45,11 @@ describe('/apps', function () {
 
     db.delete('apps', this.app._rid)
     .then(res => {
-      if (res.status == 204) { console.log('\nTest app deleted.'); }
-      else { console.error('\nProblem deleting test app.'); }
-      console.log('Apps spec finished.');
+      if (res.status == 204) { console.log('\nApps: test app deleted'); }
+      else { console.error('\nApps: problem deleting test app'); }
+      console.log('Apps: finished');
       done();
-    }).catch(err => console.error('\n Problem deleting test app:', err));
+    }).catch(err => console.error('\nApps: problem deleting test app:', err));
 
   });
 

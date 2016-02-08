@@ -40,8 +40,7 @@ const startServer = () => {
   // listen on port
   /* jshint -W058 */
   server.listen(app.get('port'), () => {
-    console.log(`
-      Server started. Press Ctrl+C to terminate.
+    console.log(`Server started. Press Ctrl+C to terminate.
       Project:  dlx-api
       Port:     ${app.get('port')}
       Time:     ${new Date}

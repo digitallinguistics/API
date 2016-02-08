@@ -1,6 +1,8 @@
 describe('/users', function () {
 
-  console.log('Starting users spec.');
+  beforeAll(function () {
+    console.log('Starting users spec.');
+  });
 
   afterAll(function () {
     console.log('Users spec finished.');

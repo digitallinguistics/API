@@ -1,9 +1,11 @@
 describe('/{collection}', function () {
 
-  console.log('Starting collection spec.');
+  beforeAll(function () {
+    console.log('Collection: starting');
+  });
 
   afterAll(function () {
-    console.log('Collection spec finished.');
+    console.log('Collection: finished');
   });
 
   it('returns a 404 response if the collection does not exist'); // use next() inside the handler for this
