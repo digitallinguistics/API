@@ -4,8 +4,8 @@
   - admin tokens: https://digitallinguistics.org OR https://api.digitallinguistics.org
 * cid: The `client_id` of the application using the token.
 * exp: The expiration time after which the JWT must not be accepted for processing.
-  - user tokens: 3600s
-  - admin tokens: N/A
+  - user tokens: 3600s (1 hr)
+  - admin tokens: 300s (5 min)
 * iat: Time the JWT was issued. (Used for determining age.)
 * sub: Information about the subject/user
   - user tokens: The user RID.

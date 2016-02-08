@@ -273,6 +273,4 @@ describe('/auth', function () {
     }).catch(err => fail(err));
   });
 
-  it('handles OAuth responses'); // mock the sending of an OAuth response
-
 });

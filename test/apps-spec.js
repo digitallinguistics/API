@@ -1,25 +1,39 @@
-const ClientApp = require('../lib/models/client-app');
 const credentials = require('../lib/credentials');
+const ClientApp = require('../lib/models/client-app');
 const db = require('../lib/db');
 const http = require('http');
+const jwt = require('jsonwebtoken');
 const uuid = require('uuid');
 
 describe('/apps', function () {
 
+  const payload = { scope: 'db' };
+
+  const tokenOpts = {
+    algorithm: 'RS256',
+    audience: 'https://api.digitallinguistics.org',
+    expiresIn: 300,
+    subject: 'dlx-org'
+  };
+
+  const token = jwt.sign(payload, credentials.key, tokenOpts);
+
   const options = props => {
     props = props || {};
     const defaults = {
-      // TODO: replace this auth header with a JWT Bearer token
-      auth: `${credentials.user}:${credentials.secret}`,
       hostname: 'localhost',
       path: '/v1/apps',
-      port: 3000
+      port: 3000,
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     };
     Object.assign(defaults, props);
     return defaults;
   };
 
   const makeRequest = (opts, handler) => {
+    opts = opts || options();
     http.request(opts, res => {
       var data = '';
       res.on('data', chunk => data += chunk);
@@ -33,7 +47,11 @@ describe('/apps', function () {
   beforeAll(function (done) {
     console.log('Apps: starting');
 
-    this.app = new ClientApp({ id: uuid.v4(), description: 'DLx test app.', permissions: { owner: [], contributor: [], viewer: [], public: false } });
+    this.app = new ClientApp({
+      id: uuid.v4(),
+      description: 'DLx test app.',
+      permissions: { owner: [], contributor: [], viewer: [], public: false }
+    });
 
     db.create('apps', this.app)
     .then(app => {
@@ -51,20 +69,21 @@ describe('/apps', function () {
       else { console.error('\nApps: problem deleting test app'); }
       console.log('Apps: finished');
       done();
-    }).catch(err => console.error('\nApps: problem deleting test app:', err));
+    }).catch(err => console.error('Apps: problem deleting test app:', err));
 
   });
 
-  it('returns a 405 response if DLx token is absent', function (done) {
+  it('returns a 401 response if DLx token is absent', function (done) {
     const opts = options({ auth: undefined });
     const handler = data => {
-      expect(data.status).toEqual(405);
+      expect(data.status).toEqual(401);
       done();
     };
     makeRequest(opts, handler);
   });
 
-  it('returns a 401 response if Basic auth is present but invalid');
+  it('returns a 401 response if token is present but invalid');
+  it('returns a 403 response if the JWT scope is not `db`');
   it('returns a 404 response if the app is not found');
   it('can upsert apps');
   it('returns an error if the app to be upserted does not validate');
