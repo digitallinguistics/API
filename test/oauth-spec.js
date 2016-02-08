@@ -98,7 +98,25 @@ describe('/oauth', function () {
     makeRequest(opts, handler);
   });
 
-  it('returns a 403 response if the scope is not `db`');
+  it('returns a 401 response if the scope is `user` but not `cid` claim is present', function (done) {
+    const handler = result => {
+      expect(result.status).toEqual(401);
+      done();
+    };
+    const t = token({ scope: 'user' });
+    const opts = options({ headers: { Authorization: `Bearer ${t}` } });
+    makeRequest(opts, handler);
+  });
+
+  it('returns a 401 response if the scope is not `user` or `db`', function (done) {
+    const handler = result => {
+      expect(result.status).toEqual(401);
+      done();
+    };
+    const t = token({ scope: 'all the things' });
+    const opts = options({ headers: { Authorization: `Bearer ${t}` } });
+    makeRequest(opts, handler);
+  });
 
   it('returns a 405 response for non-POST requests');
 
