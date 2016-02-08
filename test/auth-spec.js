@@ -1,22 +1,19 @@
 'use strict';
 
-const credentials = require('../lib/credentials');
+const ClientApp = require('../lib/models/client-app');
 const db = require('../lib/db');
 const http = require('http');
 const jwt = require('jsonwebtoken');
 const qs = require('querystring');
 const URL = require('url');
-const User = require('../lib/models/user');
+const User = require('../lib/models/User');
 
 const makeRequest = (opts, handler) => {
-  const req = http.request(opts, res => {
+  http.request(opts, res => {
     var data = '';
     res.on('data', chunk => data += chunk);
     res.on('end', () => handler(JSON.parse(data)));
-    res.on('error', err => {
-      if (err.status == 429) { setTimeout(req, (+res.headers['x-ms-retry-after-ms']) + 1); }
-      else { fail(err); }
-    });
+    res.on('error', err => fail(err));
   }).end();
 };
 
@@ -24,40 +21,42 @@ describe('/auth', function () {
 
   beforeAll(function (done) {
 
+    console.log('Auth: starting');
+
     this.checkLoginPage = opts => new Promise((resolve, reject) => {
-      const task = () => {
-        http.request(opts, res => {
-          var data = '';
-          res.on('data', chunk => data += chunk);
-          res.on('error', err => {
-            err = JSON.parse(err);
-            if (err.status == 429) { setTimeout(task, 500); }
-            else { fail(err); reject(err); }
-          });
-          res.on('end', () => {
-            if (!res.headers.location) {
-              const err = JSON.parse(data);
-              if (err.status == 429) { setTimeout(task, 500); }
-              else { fail(err); reject(err); }
-            } else {
-              const url = URL.parse(res.headers.location);
-              expect(url.pathname).toBe('/login');
-              const q = qs.parse(url.query);
-              expect(q.redirect).toBe('https://api.digitallinguistics.org/oauth');
-              expect(+q.state).toEqual(this.query.raw.state);
-              resolve();
-            }
-          });
-        }).end();
-      };
-      task();
+      http.request(opts, res => {
+        var data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('error', err => {
+          fail(err);
+          err = JSON.parse(err);
+          reject(err);
+        });
+        res.on('end', () => {
+          if (!res.headers.location) {
+            fail(data);
+            const err = JSON.parse(data);
+            reject(err);
+          } else {
+            const url = URL.parse(res.headers.location);
+            expect(url.pathname).toBe('/login');
+            const q = qs.parse(url.query);
+            expect(q.redirect).toBe('https://api.digitallinguistics.org/oauth');
+            expect(+q.state).toEqual(this.query.raw.state);
+            resolve();
+          }
+        });
+      }).end();
     });
 
-    this.app = { id: '12345', description: 'Test app.' };
-    this.user = { id: 'danny@danielhieber.com', firstName: 'Danny', lastName: 'Hieber' };
+    this.app = new ClientApp({ name: 'TestApp' });
+    this.user = new User({ id: 'danny@danielhieber.com', firstName: 'Danny', lastName: 'Hieber' });
 
     const task = () => db.create('apps', this.app).then(app => {
-      this.app = app;
+
+      console.log('Auth: test app created');
+
+      this.app = new ClientApp(app);
 
       this.query = (() => {
 
@@ -90,8 +89,24 @@ describe('/auth', function () {
 
     }).then(() => db.upsert('users', this.user))
     .then(user => {
+
+      console.log('Auth: test user created.');
+
       this.user = new User(user);
-      this.user.updateToken();
+
+      this.tokenPayload = {
+        cid: this.app.rid,
+        scope: 'user'
+      };
+
+      this.tokenOpts = {
+        algorithm: 'HS256',
+        audience: 'https://api.digitallinguistics.org',
+        expiresIn: 3600,
+        subject: this.user.rid
+      };
+
+      const token = jwt.sign(this.tokenPayload, this.app.secret, this.tokenOpts);
 
       this.options = props => {
         props = props || {};
@@ -99,35 +114,28 @@ describe('/auth', function () {
           hostname: 'localhost',
           path: `/auth?${this.query()}`,
           port: 3000,
-          headers: {
-            'Authorization': `Bearer ${this.user.dlxToken}`
-          }
+          headers: { 'Authorization': `Bearer ${token}` }
         };
         Object.assign(defaults, props);
         return defaults;
       };
 
-    }).then(done)
-    .catch(err => {
-      if (err.status == 409) { this.app.id = ((+this.app.id) + 1) + ''; task(); }
-      else if (err.status == 429) { setTimeout(task, 500); }
-      else { console.error(err); }
-    });
+    }).then(done).catch(err => console.error(err));
 
     task();
 
   }, 10000);
 
   afterAll(function (done) {
-    const task = () => db.delete('apps', this.app._rid).then(res => {
+    db.delete('apps', this.app.rid).then(res => {
       if (res.status !== 204) { console.error(res); }
+      console.log('Auth: finished');
       done();
     }).catch(err => {
-      if (err.status == 429) { setTimeout(task, 500); }
-      else { fail(err); }
+      fail(err);
+      console.log('Auth: finished');
       done();
     });
-    task();
   });
 
   it('returns a 404 response if the method is not GET', function (done) {
@@ -204,15 +212,17 @@ describe('/auth', function () {
       expect(data.status).toEqual(401);
       done();
     };
-    const token = this.user.dlxToken + 'hello';
+    const token = 'hello';
     const opts = this.options({ headers: { Authorization: `Bearer ${token}` } });
     makeRequest(opts, handler);
   });
 
   // this test uses the DLx token in the authorization header as a proxy for the dlx cookie
   it('renders the login page if the DLx cookie is expired', function (done) {
-    const payload = { rid: this.user.rid };
-    const token = jwt.sign(payload, credentials.secret, { expiresIn: 0 });
+    const tokenOpts = {};
+    Object.assign(tokenOpts, this.tokenOpts);
+    tokenOpts.expiresIn = 0;
+    const token = jwt.sign(this.tokenPayload, this.app.secret, tokenOpts);
     const opts = this.options({ headers: { Authorization: `Bearer ${token}` } });
     this.checkLoginPage(opts).then(done).catch(err => fail(err));
   });
@@ -245,9 +255,16 @@ describe('/auth', function () {
             const query = qs.parse(url.query);
             expect(+query.state).toEqual(this.query.raw.state);
             expect(typeof query.access_token).toBe('string');
-            jwt.verify(query.access_token, credentials.secret, (err, payload) => {
+            const opts = {
+              algorithms: ['HS256'],
+              audience: 'https://api.digitallinguistics.org',
+              subject: this.user.rid
+            };
+            jwt.verify(query.access_token, this.app.secret, opts, (err, payload) => {
               expect(err).toBeNull();
-              expect(payload.rid).toEqual(this.user.rid);
+              if (payload) {
+                expect(payload.cid).toEqual(this.app.rid);
+              }
               done();
             });
           }
@@ -255,5 +272,7 @@ describe('/auth', function () {
       }).end();
     }).catch(err => fail(err));
   });
+
+  it('handles OAuth responses'); // mock the sending of an OAuth response
 
 });

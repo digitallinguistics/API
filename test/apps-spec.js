@@ -1,12 +1,15 @@
+const ClientApp = require('../lib/models/client-app');
 const credentials = require('../lib/credentials');
 const db = require('../lib/db');
 const http = require('http');
+const uuid = require('uuid');
 
 describe('/apps', function () {
 
   const options = props => {
     props = props || {};
     const defaults = {
+      // TODO: replace this auth header with a JWT Bearer token
       auth: `${credentials.user}:${credentials.secret}`,
       hostname: 'localhost',
       path: '/v1/apps',
@@ -28,28 +31,31 @@ describe('/apps', function () {
   };
 
   beforeAll(function (done) {
+    console.log('Apps: starting');
 
-    this.app = { id: 'dlx', description: 'DLx test app.', permissions: { owner: [], contributor: [], viewer: [], public: false } };
+    this.app = new ClientApp({ id: uuid.v4(), description: 'DLx test app.', permissions: { owner: [], contributor: [], viewer: [], public: false } });
 
     db.create('apps', this.app)
     .then(app => {
-      this.app = app;
+      console.log('Apps: test app created');
+      this.app = new ClientApp(app);
       done();
     }).catch(err => fail(err));
   });
 
   afterAll(function (done) {
 
-    db.delete('apps', this.app._rid)
+    db.delete('apps', this.app.rid)
     .then(res => {
-      if (res.status == 204) { console.log('\nTest app deleted.'); }
-      else { console.error('\nProblem deleting test app.'); }
+      if (res.status == 204) { console.log('\nApps: test app deleted'); }
+      else { console.error('\nApps: problem deleting test app'); }
+      console.log('Apps: finished');
       done();
-    }).catch(err => console.error('\n Problem deleting test app:', err));
+    }).catch(err => console.error('\nApps: problem deleting test app:', err));
 
   });
 
-  it('returns a 405 response if Basic auth is absent', function (done) {
+  it('returns a 405 response if DLx token is absent', function (done) {
     const opts = options({ auth: undefined });
     const handler = data => {
       expect(data.status).toEqual(405);
@@ -61,9 +67,11 @@ describe('/apps', function () {
   it('returns a 401 response if Basic auth is present but invalid');
   it('returns a 404 response if the app is not found');
   it('can upsert apps');
+  it('returns an error if the app to be upserted does not validate');
   it('can delete apps');
   it('can get apps');
   it('can register a new app');
+  it('returns an error if the new app information does not validate');
   it('can add permissions to an app');
   it('can remove permissions from an app');
 
