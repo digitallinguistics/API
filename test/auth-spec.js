@@ -9,18 +9,17 @@ const URL = require('url');
 const User = require('../lib/models/user');
 
 const makeRequest = (opts, handler) => {
-  const req = http.request(opts, res => {
+  http.request(opts, res => {
     var data = '';
     res.on('data', chunk => data += chunk);
     res.on('end', () => handler(JSON.parse(data)));
-    res.on('error', err => {
-      if (err.status == 429) { setTimeout(req, (+res.headers['x-ms-retry-after-ms']) + 1); }
-      else { fail(err); }
-    });
+    res.on('error', err => fail(err));
   }).end();
 };
 
 describe('/auth', function () {
+
+  console.log('Starting auth spec.');
 
   beforeAll(function (done) {
 
@@ -31,14 +30,12 @@ describe('/auth', function () {
           res.on('data', chunk => data += chunk);
           res.on('error', err => {
             err = JSON.parse(err);
-            if (err.status == 429) { setTimeout(task, 500); }
-            else { fail(err); reject(err); }
+            fail(err); reject(err);
           });
           res.on('end', () => {
             if (!res.headers.location) {
               const err = JSON.parse(data);
-              if (err.status == 429) { setTimeout(task, 500); }
-              else { fail(err); reject(err); }
+              fail(err); reject(err);
             } else {
               const url = URL.parse(res.headers.location);
               expect(url.pathname).toBe('/login');
@@ -53,7 +50,7 @@ describe('/auth', function () {
       task();
     });
 
-    this.app = { id: '12345', description: 'Test app.' };
+    this.app = { id: '12345', name: 'Test app.' };
     this.user = { id: 'danny@danielhieber.com', firstName: 'Danny', lastName: 'Hieber' };
 
     const task = () => db.create('apps', this.app).then(app => {
@@ -121,10 +118,12 @@ describe('/auth', function () {
   afterAll(function (done) {
     const task = () => db.delete('apps', this.app._rid).then(res => {
       if (res.status !== 204) { console.error(res); }
+      console.log('Auth spec finished.');
       done();
     }).catch(err => {
       if (err.status == 429) { setTimeout(task, 500); }
       else { fail(err); }
+      console.log('Auth spec finished.');
       done();
     });
     task();

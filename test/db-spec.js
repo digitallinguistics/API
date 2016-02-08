@@ -1,5 +1,7 @@
 describe('the database API', function () {
 
+  console.log('Starting database spec.');
+
   beforeAll(function (done) {
     this.db = require('../lib/db');
     this.collection = 'texts';
@@ -34,7 +36,14 @@ describe('the database API', function () {
       tasks.push(deleteUsers);
     }
 
-    Promise.all(tasks).then(done).catch(err => console.error(err));
+    Promise.all(tasks).then(() => {
+      console.log('Database spec finished.');
+      done();
+    }).catch(err => {
+      console.error(err);
+      console.log('Database spec finished.');
+      done();
+    });
 
   });
 

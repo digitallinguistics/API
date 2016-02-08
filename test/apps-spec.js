@@ -4,6 +4,8 @@ const http = require('http');
 
 describe('/apps', function () {
 
+  console.log('Starting apps spec.');
+
   const options = props => {
     props = props || {};
     const defaults = {
@@ -44,6 +46,7 @@ describe('/apps', function () {
     .then(res => {
       if (res.status == 204) { console.log('\nTest app deleted.'); }
       else { console.error('\nProblem deleting test app.'); }
+      console.log('Apps spec finished.');
       done();
     }).catch(err => console.error('\n Problem deleting test app:', err));
 
@@ -61,9 +64,11 @@ describe('/apps', function () {
   it('returns a 401 response if Basic auth is present but invalid');
   it('returns a 404 response if the app is not found');
   it('can upsert apps');
+  it('returns an error if the app to be upserted does not validate');
   it('can delete apps');
   it('can get apps');
   it('can register a new app');
+  it('returns an error if the new app information does not validate');
   it('can add permissions to an app');
   it('can remove permissions from an app');
 

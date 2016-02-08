@@ -12,9 +12,15 @@ const handle = handler => {
 
 describe('middleware', function () {
 
+  console.log('Starting middleware spec.');
+
   beforeAll(function (done) {
     this.apiUrl = `${config.url}/v1`;
     done();
+  });
+
+  afterAll(function () {
+    console.log('Middleware spec finished.');
   });
 
   it('returns a 404 response when the route cannot be found', function (done) {
