@@ -12,8 +12,8 @@ describe('/oauth', function () {
       algorithm: 'RS256',
       audience: 'https://api.digitallinguistics.org',
       expiresIn: 300,
-      jwtid: '1234567890',
-      subject: 'testy@testing.test'
+      jwtid: '12345',
+      subject: '1234567890'
     };
     payload = payload || {};
     opts = opts || {};
@@ -131,10 +131,9 @@ describe('/oauth', function () {
     makeRequest(opts, handler);
   });
 
-  it('returns a 405 response for non-POST requests', function (done) {
+  it('returns a 404 response for non-POST requests', function (done) {
     const handler = result => {
-      console.log(result);
-      expect(result.status).toEqual(405);
+      expect(result.status).toEqual(404);
       done();
     };
     const opts = options({ method: 'GET' });
@@ -142,6 +141,12 @@ describe('/oauth', function () {
   });
 
   // should include the original state as well as a DLx token in the querystring
-  it('redirects to the original redirect URI if the token is valid');
+  it('redirects to the original redirect URI if the token is valid', function (done) {
+    const handler = result => {
+      console.log(result);
+      done();
+    };
+    makeRequest(null, handler);
+  });
 
 });
