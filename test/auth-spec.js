@@ -1,12 +1,12 @@
 'use strict';
 
 const ClientApp = require('../lib/models/client-app');
-const credentials = require('../lib/credentials');
 const db = require('../lib/db');
 const http = require('http');
 const jwt = require('jsonwebtoken');
 const qs = require('querystring');
 const URL = require('url');
+const User = require('../lib/models/User');
 
 const makeRequest = (opts, handler) => {
   http.request(opts, res => {
@@ -50,13 +50,13 @@ describe('/auth', function () {
     });
 
     this.app = new ClientApp({ name: 'TestApp' });
-    this.user = { id: 'danny@danielhieber.com', firstName: 'Danny', lastName: 'Hieber' };
+    this.user = new User({ id: 'danny@danielhieber.com', firstName: 'Danny', lastName: 'Hieber' });
 
     const task = () => db.create('apps', this.app).then(app => {
 
       console.log('Auth: test app created');
 
-      this.app = app;
+      this.app = new ClientApp(app);
 
       this.query = (() => {
 
@@ -92,10 +92,10 @@ describe('/auth', function () {
 
       console.log('Auth: test user created.');
 
-      this.user = user;
+      this.user = new User(user);
 
       this.tokenPayload = {
-        cid: this.app._rid,
+        cid: this.app.rid,
         scope: 'user'
       };
 
@@ -103,7 +103,7 @@ describe('/auth', function () {
         algorithm: 'HS256',
         audience: 'https://api.digitallinguistics.org',
         expiresIn: 3600,
-        subject: this.user._rid
+        subject: this.user.rid
       };
 
       const token = jwt.sign(this.tokenPayload, this.app.secret, this.tokenOpts);
@@ -127,7 +127,7 @@ describe('/auth', function () {
   }, 10000);
 
   afterAll(function (done) {
-    db.delete('apps', this.app._rid).then(res => {
+    db.delete('apps', this.app.rid).then(res => {
       if (res.status !== 204) { console.error(res); }
       console.log('Auth: finished');
       done();
@@ -258,12 +258,12 @@ describe('/auth', function () {
             const opts = {
               algorithms: ['HS256'],
               audience: 'https://api.digitallinguistics.org',
-              subject: this.user._rid
+              subject: this.user.rid
             };
             jwt.verify(query.access_token, this.app.secret, opts, (err, payload) => {
               expect(err).toBeNull();
               if (payload) {
-                expect(payload.cid).toEqual(this.app._rid);
+                expect(payload.cid).toEqual(this.app.rid);
               }
               done();
             });

@@ -1,3 +1,5 @@
+const User = require('../lib/models/user');
+
 describe('the database API', function () {
 
   beforeAll(function (done) {
@@ -5,8 +7,8 @@ describe('the database API', function () {
     this.db = require('../lib/db');
     this.collection = 'texts';
     this.users = [
-      { id: 'me@example.com', firstName: 'John', lastName: 'Doe', services: { onedrive: '12345' } },
-      { id: 'me@test.com', firstName: 'Jane', lastName: 'Doe', services: { onedrive: '67890' } }
+      new User({ id: 'me@example.com', firstName: 'John', lastName: 'Doe', services: { onedrive: '12345' } }),
+      new User({ id: 'me@test.com', firstName: 'Jane', lastName: 'Doe', services: { onedrive: '67890' } })
     ];
     this.results = [];
     done();
@@ -17,6 +19,7 @@ describe('the database API', function () {
     const tasks = [];
 
     if (this.results && this.results.length > 0) {
+      console.log('texts deleting');
       const deleteTexts = this.db.delete('texts', this.results.map(text => text._rid))
       .then(res => {
         if (res.every(response => response.status === 204)) { console.log('Texts deleted.'); }
@@ -25,7 +28,8 @@ describe('the database API', function () {
       tasks.push(deleteTexts);
     }
 
-    if (this.users && this.users.length > 0 && this.users[0]._rid) {
+    if (this.users && this.users.length > 0 && this.users[0].rid) {
+      console.log('users deleting');
       const deleteUsers = this.db.getById('users', this.users.map(user => user.id))
       .then(users => users.map(user => user._rid))
       .then(rids => this.db.delete('users', rids).then(res => {
@@ -245,19 +249,27 @@ describe('the database API', function () {
   });
 
   it('can create users with email IDs', function (done) {
-    this.db.create('users', this.users)
+    var counter = 0;
+    const task = () => this.db.create('users', this.users)
     .then(res => {
       expect(res instanceof Array).toBe(true);
       expect(res.length).toEqual(2);
       expect(res.map(user => user.id).includes(this.users[0].id)).toBe(true);
       expect(res.map(user => user.id).includes(this.users[1].id)).toBe(true);
       this.users.splice(0);
-      this.users.push(...res);
+      this.users.push(...res.map(user => new User(user)));
       done();
     }).catch(err => {
-      if (err.status == 409) { fail('Test user already exists.'); }
-      else { fail(err); }
+      if (err.status == 409) {
+        this.users.forEach(user => {
+          counter++;
+          user.id = `email${counter}@test.org`;
+          user.services.onedrive = user.services.onedrive + counter;
+        });
+        task();
+      } else { fail(err); }
     });
+    task();
   });
 
   it('returns a 409 error when creating a user whose email already exists', function (done) {
@@ -274,8 +286,9 @@ describe('the database API', function () {
     this.db.getById('users', serviceId, { id_type: 'service_id', service: 'onedrive' })
     .then(res => {
       expect(res instanceof Array).toBe(false);
-      expect(res._rid).toEqual(this.users[0]._rid);
-      expect(res.id).toEqual(this.users[0].id);
+      const user = new User(res);
+      expect(user.rid).toEqual(this.users[0].rid);
+      expect(user.id).toEqual(this.users[0].id);
       done();
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
@@ -285,17 +298,19 @@ describe('the database API', function () {
     this.db.getById('users', serviceIds, { idType: 'serviceId', service: 'onedrive' })
     .then(res => {
       expect(res instanceof Array).toBe(true);
-      expect(this.users).toContain(res[0]);
-      expect(this.users).toContain(res[1]);
+      const users = res.map(user => new User(user));
+      expect(this.users).toContain(users[0]);
+      expect(this.users).toContain(users[1]);
       done();
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can get multiple users by email ID', function (done) {
+  it('can get user by email ID', function (done) {
     const email = this.users[0].id;
     this.db.getById('users', email)
     .then(res => {
-      expect(this.users).toContain(res);
+      const user = new User(res);
+      expect(this.users).toContain(user);
       done();
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
@@ -305,17 +320,18 @@ describe('the database API', function () {
     this.db.getById('users', emails)
     .then(res => {
       expect(res instanceof Array).toBe(true);
-      expect(this.users).toContain(res[0]);
-      expect(this.users).toContain(res[1]);
+      const users = res.map(user => new User(user));
+      expect(this.users).toContain(users[0]);
+      expect(this.users).toContain(users[1]);
       done();
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
   it('can log in a user', function (done) {
-    this.db.login(this.users[0]._rid)
+    this.db.login(this.users[0].rid)
     .then(res => {
       expect(res.status).toEqual(200);
-      this.db.get('users', this.users[0]._rid)
+      this.db.get('users', this.users[0].rid)
       .then(user => {
         expect(user.lastActive).toBeGreaterThan(Date.now() - 10000);
         done();
@@ -324,10 +340,10 @@ describe('the database API', function () {
   });
 
   it('can log out a user', function (done) {
-    this.db.logout(this.users[0]._rid)
+    this.db.logout(this.users[0].rid)
     .then(res => {
       expect(res.status).toEqual(200);
-      this.db.get('users', this.users[0]._rid)
+      this.db.get('users', this.users[0].rid)
       .then(user => {
         expect(user.lastActive).toBeLessThan(Date.now() - 10000);
         done();

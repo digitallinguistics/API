@@ -10,7 +10,6 @@ const http = require('http');
 const middleware = require('./lib/middleware');
 if (global.env === 'local') { require('./lib/dev'); }
 
-
 const app = express(); // initialize Express app
 
 app.disable('x-powered-by'); // hide server information in the response

@@ -1,6 +1,8 @@
+const ClientApp = require('../lib/models/client-app');
 const credentials = require('../lib/credentials');
 const db = require('../lib/db');
 const http = require('http');
+const uuid = require('uuid');
 
 describe('/apps', function () {
 
@@ -31,19 +33,19 @@ describe('/apps', function () {
   beforeAll(function (done) {
     console.log('Apps: starting');
 
-    this.app = { id: 'dlx', description: 'DLx test app.', permissions: { owner: [], contributor: [], viewer: [], public: false } };
+    this.app = new ClientApp({ id: uuid.v4(), description: 'DLx test app.', permissions: { owner: [], contributor: [], viewer: [], public: false } });
 
     db.create('apps', this.app)
     .then(app => {
       console.log('Apps: test app created');
-      this.app = app;
+      this.app = new ClientApp(app);
       done();
     }).catch(err => fail(err));
   });
 
   afterAll(function (done) {
 
-    db.delete('apps', this.app._rid)
+    db.delete('apps', this.app.rid)
     .then(res => {
       if (res.status == 204) { console.log('\nApps: test app deleted'); }
       else { console.error('\nApps: problem deleting test app'); }
@@ -53,7 +55,7 @@ describe('/apps', function () {
 
   });
 
-  it('returns a 405 response if Basic auth is absent', function (done) {
+  it('returns a 405 response if DLx token is absent', function (done) {
     const opts = options({ auth: undefined });
     const handler = data => {
       expect(data.status).toEqual(405);
