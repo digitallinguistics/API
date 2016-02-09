@@ -10,7 +10,7 @@ describe('the database API', function () {
     console.log('\nDatabase: finished');
   });
 
-  it('can create a document', function (done) {
+  xit('can create a document', function (done) {
     db.create('texts', { hello: 'world' })
     .then(text => {
       expect(text instanceof Array).toBe(false);
@@ -19,7 +19,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can create multiple documents', function (done) {
+  xit('can create multiple documents', function (done) {
     const texts = [
       { title: 'jambo dunia' },
       { title: 'hola mundo' },
@@ -36,7 +36,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can get a document', function (done) {
+  xit('can get a document', function (done) {
     db.create('texts', { title: 'How the world began' })
     .then(text => db.get('texts', text._rid))
     .then(res => {
@@ -46,7 +46,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can get a document by ID', function (done) {
+  xit('can get a document by ID', function (done) {
     db.upsert('texts', { id: '999', title: 'A girl who got married to dogs' })
     .then(text => db.getById('texts', text.id))
     .then(res => {
@@ -57,7 +57,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can get multiple documents by ID', function (done) {
+  xit('can get multiple documents by ID', function (done) {
     const texts = [
       { id: '1000', title: 'First title' },
       { id: '1001', title: 'Second title' }
@@ -74,7 +74,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can upsert an existing document', function (done) {
+  xit('can upsert an existing document', function (done) {
     const text = { id: '1002', title: 'Deja Vu' };
     db.upsert('texts', text)
     .then(() => db.upsert('texts', text))
@@ -84,7 +84,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can upsert multiple existing documents', function (done) {
+  xit('can upsert multiple existing documents', function (done) {
     const texts = [
       { id: '1000', title: 'New title 1' },
       { id: '1001', title: 'New title 2' },
@@ -102,7 +102,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can upsert an existing document as a new document', function (done) {
+  xit('can upsert an existing document as a new document', function (done) {
     db.upsert('texts', { id: '1003', title: 'Original title' })
     .then(text => db.upsert('texts', text, { createId: true }))
     .then(res => {
@@ -113,7 +113,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can create a user with an email ID', function (done) {
+  xit('can create a user with an email ID', function (done) {
     const user = { id: `user${Date.now()}@test.com`, firstName: 'Testy', lastName: 'McTester' };
     db.create('users', user).then(res => {
       expect(res instanceof Array).toBe(false);
@@ -122,7 +122,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('returns a 409 response if the email of a new user already exists', function (done) {
+  xit('returns a 409 response if the email of a new user already exists', function (done) {
     const user = { id: 'test@example.com', firstName: 'John', lastName: 'Doe' };
     db.upsert('users', user).then(() => db.create('users', user))
     .then(() => fail('No error thrown.'))
@@ -132,7 +132,7 @@ describe('the database API', function () {
     });
   });
 
-  it('can get a user by service ID', function (done) {
+  xit('can get a user by service ID', function (done) {
     const user = { firstName: 'Bill', lastName: 'Gates', services: { onedrive: '1004' } };
     db.upsert('users', user)
     .then(() => db.getById('users', '1004', { idType: 'serviceId', service: 'onedrive' }))
@@ -143,7 +143,7 @@ describe('the database API', function () {
     }).catch(err => fail(JSON.stringify(err, null, 2)));
   });
 
-  it('can get a user by email ID', function (done) {
+  xit('can get a user by email ID', function (done) {
     db.upsert('users', { id: 'testing@test.com' })
     .then(() => db.getById('users', 'testing@test.com', { idType: 'email' }))
     .then(res => {
@@ -152,7 +152,7 @@ describe('the database API', function () {
     }).catch(err => fail(err));
   });
 
-  it('can get multiple users by email ID', function (done) {
+  xit('can get multiple users by email ID', function (done) {
     const users = [
       { id: 'test1@test.com', name: 'test 1' },
       { id: 'test2@test.com', name: 'test 2' }
@@ -167,7 +167,7 @@ describe('the database API', function () {
     }).catch(err => fail(err));
   });
 
-  it('can log in a user', function (done) {
+  xit('can log in a user', function (done) {
     db.upsert('users', { id: 'me@example.com', firstName: 'Me', lastActive: 0 })
     .then(user => db.login(user._rid))
     .then(res => {
@@ -179,7 +179,7 @@ describe('the database API', function () {
     }).catch(err => fail(err));
   });
 
-  it('can log out a user', function (done) {
+  xit('can log out a user', function (done) {
     db.upsert('users', { id: 'lastmelon@test.com', lastActive: Date.now() })
     .then(user => db.logout(user._rid))
     .then(res => {
@@ -191,7 +191,7 @@ describe('the database API', function () {
     }).catch(err => fail(err));
   });
 
-  it('can handled throttled requests (many requests in sequence)', function (done) {
+  xit('can handled throttled requests (many requests in sequence)', function (done) {
     pending('This is a stress test. It should only be run occasionally.');
     const lexEntries = Array(250).fill({ token: 'jambo', gloss: 'hello' });
     db.upsert('lexEntries', lexEntries)
