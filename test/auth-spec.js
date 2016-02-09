@@ -71,7 +71,7 @@ describe('/auth', function () {
     console.log('\nAuth: finished');
   });
 
-  it('returns a 400 response if the `client_id` parameter is missing', function (done) {
+  xit('returns a 400 response if the `client_id` parameter is missing', function (done) {
     const qstring = qs.stringify(this.query({ client_id: undefined }));
     const opts = this.options({ path: `/auth?${qstring}` });
     const handler = result => {
@@ -82,7 +82,7 @@ describe('/auth', function () {
     makeRequest(opts, handler);
   });
 
-  it('returns a 400 response if the `redirect_uri` parameter is missing', function (done) {
+  xit('returns a 400 response if the `redirect_uri` parameter is missing', function (done) {
     const qstring = qs.stringify(this.query({ redirect_uri: undefined }));
     const opts = this.options({ path: `/auth?${qstring}` });
     const handler = result => {
@@ -93,7 +93,7 @@ describe('/auth', function () {
     makeRequest(opts, handler);
   });
 
-  it('returns a 400 response if the `response_type` parameter is not `token`', function (done) {
+  xit('returns a 400 response if the `response_type` parameter is not `token`', function (done) {
     const qstring = qs.stringify(this.query({ response_type: 'code' }));
     const opts = this.options({ path: `/auth?${qstring}` });
     const handler = result => {
@@ -104,7 +104,7 @@ describe('/auth', function () {
     makeRequest(opts, handler);
   });
 
-  it('returns a 404 response if the application ID is invalid', function (done) {
+  xit('returns a 404 response if the application ID is invalid', function (done) {
     const qstring = qs.stringify(this.query({ client_id: 'badId' }));
     const opts = this.options({ path: `/auth?${qstring}` });
     const handler = result => {
@@ -115,7 +115,7 @@ describe('/auth', function () {
   });
 
   // if no token is provided in the Auth or Cookie headers, user is assumed to not be logged in
-  it('redirects to the login page if the user is not logged in', function (done) {
+  xit('redirects to the login page if the user is not logged in', function (done) {
     const q = this.query();
     const state = q.state;
     const opts = this.options({ path: `/auth?${qs.stringify(q)}`, headers: {} });
@@ -133,7 +133,7 @@ describe('/auth', function () {
     makeRequest(opts, handler);
   });
 
-  it('redirects to the login page if the User ID in the token is invalid', function (done) {
+  xit('redirects to the login page if the User ID in the token is invalid', function (done) {
     const token = this.token({}, { subject: 'badId' });
     const opts = this.options({ headers: { Authorization: `Bearer ${token}` }});
     const handler = (result, res) => {
@@ -145,7 +145,7 @@ describe('/auth', function () {
     makeRequest(opts, handler);
   });
 
-  it('redirects to the redirect URI if the token is valid', function (done) {
+  xit('redirects to the redirect URI if the token is valid', function (done) {
     const q = this.query();
     const state = q.state;
     const opts = this.options({ path: `/auth?${qs.stringify(q)}` });
