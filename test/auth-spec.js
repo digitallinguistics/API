@@ -2,6 +2,8 @@ const ClientApp = require('../lib/models/client-app');
 const db = require('../lib/db');
 const http = require('http');
 const qs = require('querystring');
+const URL = require('url');
+const User = require('../lib/models/user');
 const uuid = require('uuid');
 
 describe('/auth', function () {
@@ -11,7 +13,10 @@ describe('/auth', function () {
       var data = '';
       res.on('data', chunk => data += chunk);
       res.on('error', err => fail(err));
-      res.on('end', () => handler(JSON.parse(data), res));
+      res.on('end', () => {
+        const result = data.startsWith('{') ? JSON.parse(data) : data;
+        handler(result, res);
+      });
     }).end();
   };
 
@@ -39,12 +44,15 @@ describe('/auth', function () {
         Object.assign(defaults, props);
         return defaults;
       };
-      done();
-    }).catch(err => console.error(err));
+      return;
+    }).then(() => db.upsert('users', new User({ firstName: 'Auth', lastName: 'Test User' })))
+    .then(user => this.user = user)
+    .then(done)
+    .catch(err => console.error(err));
   });
 
   afterAll(function () {
-    console.log('Auth: finished');
+    console.log('\nAuth: finished');
   });
 
   it('returns a 400 response if the `client_id` parameter is missing', function (done) {
@@ -85,6 +93,24 @@ describe('/auth', function () {
     const opts = this.options({ path: `/auth?${qstring}` });
     const handler = result => {
       expect(result.status).toBe(404);
+      done();
+    };
+    makeRequest(opts, handler);
+  });
+
+  // if no token is provided in the Auth or Cookie headers, user is assumed
+  it('redirects to the login page if the user is not logged in', function (done) {
+    const q = this.query();
+    const state = q.state;
+    const opts = this.options({ path: `/auth?${qs.stringify(q)}` });
+    const handler = (result, res) => {
+      expect(res.headers.location).toBeDefined();
+      const url = URL.parse(res.headers.location);
+      expect(url.pathname).toEqual('/login');
+      expect(url.hostname).toEqual('digitallinguistics.org');
+      const query = qs.parse(url.query);
+      expect(query.redirect).toBe('https://api.digitallinguistics.org/oauth');
+      expect(query.state).toEqual(state);
       done();
     };
     makeRequest(opts, handler);

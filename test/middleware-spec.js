@@ -27,7 +27,7 @@ describe('middleware', function () {
   });
 
   afterAll(function () {
-    console.log('Middleware: finished');
+    console.log('\nMiddleware: finished');
   });
 
   xit('returns a 404 error when the collection does not exist', function (done) {
