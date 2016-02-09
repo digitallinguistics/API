@@ -1,378 +1,139 @@
-const User = require('../lib/models/user');
+const db = require('../lib/db');
 
 describe('the database API', function () {
 
-  beforeAll(function (done) {
+  beforeAll(function () {
     console.log('Database: starting');
-    this.db = require('../lib/db');
-    this.collection = 'texts';
-    this.users = [
-      new User({ id: 'me@example.com', firstName: 'John', lastName: 'Doe', services: { onedrive: '12345' } }),
-      new User({ id: 'me@test.com', firstName: 'Jane', lastName: 'Doe', services: { onedrive: '67890' } })
-    ];
-    this.results = [];
-    done();
   });
 
-  afterAll(function (done) {
-
-    const tasks = [];
-
-    if (this.results && this.results.length > 0) {
-      console.log('texts deleting');
-      const deleteTexts = this.db.delete('texts', this.results.map(text => text._rid))
-      .then(res => {
-        if (res.every(response => response.status === 204)) { console.log('Texts deleted.'); }
-        else { console.error('Problem deleting texts.'); }
-      }).catch(err => console.error(err));
-      tasks.push(deleteTexts);
-    }
-
-    if (this.users && this.users.length > 0 && this.users[0].rid) {
-      console.log('users deleting');
-      const deleteUsers = this.db.getById('users', this.users.map(user => user.id))
-      .then(users => users.map(user => user._rid))
-      .then(rids => this.db.delete('users', rids).then(res => {
-        if (res.every(response => response.status === 204)) { console.log('Users deleted.'); }
-        else { console.error('Problem deleting users.'); }
-      }));
-      tasks.push(deleteUsers);
-    }
-
-    Promise.all(tasks).then(() => {
-      console.log('Database: finished');
-      done();
-    }).catch(err => {
-      console.error(err);
-      console.log('Database: finished');
-      done();
-    });
-
+  afterAll(function () {
+    console.log('\nDatabase: finished');
   });
 
   it('can create a document', function (done) {
-
-    const text = {
-      title: 'How the world began',
-      phrases: [
-        {
-          transcription: 'waštʼunkʼu ʔasi',
-          translation: 'one day a man'
-        }
-      ]
-    };
-
-    this.db.create(this.collection, text, { createId: true })
-    .then(res => {
-      expect(res instanceof Array).toBe(false);
-      expect(Number.isInteger(+res.id)).toBe(true);
-      this.results.push(res);
+    db.create('texts', { hello: 'world' })
+    .then(text => {
+      expect(text instanceof Array).toBe(false);
+      expect(text.hello).toBe('world');
       done();
-    }).catch(err => fail(JSON.stringify(err, null, 2)));
-
+    }).catch(err => fail(err));
   });
 
   it('can create multiple documents', function (done) {
-
     const texts = [
-      {
-        title: 'How the Indian came',
-        phrases: [
-          {
-            transcription: 'Wetkš hus naːnčaːkamankš weyt hi hokmiʔi.',
-            translation: 'Then he left his brothers.'
-          }
-        ]
-      },
-      {
-        title: 'ɔ́moísɛ́kɛ́ ɔ́sɔːkɛ́rɛ́tɛ́ chísɛ́ɛsɛ́',
-        phrases: [
-          {
-            transcription: 'ɔ́moísɛ́kɛ́ ɔ́sɔːkɛ́rɛ́tɛ́ chísɛ́ɛsɛ́',
-            translation: 'A girl who got married to dogs'
-          }
-        ]
-      }
+      { title: 'jambo dunia' },
+      { title: 'hola mundo' },
+      { title: 'hello world' }
     ];
-
-    this.db.create(this.collection, texts)
-    .then(res => {
+    db.create('texts', texts).then(res => {
       expect(res instanceof Array).toBe(true);
-      expect(res.length).toEqual(2);
-      expect(res[0].id).toMatch(/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i);
-      this.results.push(...res);
+      expect(res.length).toEqual(texts.length);
+      const titles = texts.map(text => text.title);
+      res.forEach(text => {
+        expect(titles.includes(text.title)).toBe(true);
+      });
       done();
-    }).catch(err => fail(JSON.stringify(err, null, 2)));
-
+    }).catch(err => fail(err));
   });
 
   it('can get a document', function (done) {
-    this.db.get(this.collection, this.results[1]._rid)
-    .then(text => {
-      expect(text).toEqual(this.results[1]);
-      done();
-    }).catch(err => fail(JSON.stringify(err, null, 2)));
-  });
-
-  it('can get multiple documents', function (done) {
-    const rids = this.results.slice(1).map(text => text._rid);
-    this.db.get(this.collection, rids)
+    db.create('texts', { title: 'How the world began' })
+    .then(text => db.get('texts', text._rid))
     .then(res => {
-      expect(res instanceof Array).toBe(true);
-      expect(res.length).toEqual(rids.length);
-      expect(rids.includes(res[0]._rid)).toBe(true);
-      expect(rids.includes(res[1]._rid)).toBe(true);
+      expect(res instanceof Array).toBe(false);
+      expect(res.title).toBe('How the world began');
       done();
-    }).catch(err => fail(JSON.stringify(err, null, 2)));
+    }).catch(err => fail(err));
   });
 
   it('can get a document by ID', function (done) {
-    this.db.getById(this.collection, this.results[0].id, { idType: 'id' })
-    .then(text => {
-      expect(text).toEqual(this.results[0]);
+    db.upsert('texts', { id: '999', title: 'A girl who got married to dogs' })
+    .then(text => db.getById('texts', text.id))
+    .then(res => {
+      expect(res instanceof Array).toBe(false);
+      expect(res.id).toBe('999');
+      expect(res.title).toBe('A girl who got married to dogs');
       done();
-    }).catch(err => fail(JSON.stringify(err, null, 2)));
+    }).catch(err => fail(err));
   });
 
   it('can get multiple documents by ID', function (done) {
-    const ids = this.results.map(text => text.id);
-    this.db.getById(this.collection, ids)
+    const texts = [
+      { id: '1000', title: 'First title' },
+      { id: '1001', title: 'Second title' }
+    ];
+    const ids = ['1000', '1001'];
+    db.upsert('texts', texts)
+    .then(() => db.getById('texts', ids))
     .then(res => {
       expect(res instanceof Array).toBe(true);
-      expect(res.length).toEqual(this.results.length);
-      expect(this.results).toContain(res[0]);
+      expect(res.length).toBe(2);
+      expect(ids).toContain(res[0].id);
+      expect(ids).toContain(res[1].id);
       done();
-    }).catch(err => fail(JSON.stringify(err, null, 2)));
+    }).catch(err => fail(err));
+  });
+
+  it('can upsert an existing document', function (done) {
+    const text = { id: '1002', title: 'Deja Vu' };
+    db.upsert('texts', text)
+    .then(() => db.upsert('texts', text))
+    .then(res => {
+      expect(res.id).toEqual(text.id);
+      done();
+    }).catch(err => fail(err));
   });
 
   it('can upsert multiple existing documents', function (done) {
-    this.results.forEach(text => text.speaker = 'John Smith');
-    this.db.upsert(this.collection, this.results)
-    .then(res => {
-      expect(res instanceof Array).toBe(true);
-      res.forEach((text, i, arr) => {
-        const orig = this.results.filter(item => item.id === text.id)[0];
-        expect(orig).toBeDefined();
-        expect(orig._rid).toEqual(text._rid);
-        expect(text.speaker).toBe('John Smith');
-        if (i === arr.length-1) { done(); }
-      });
-    }).catch(err => fail(JSON.stringify(err, null, 2)));
-  });
-
-  it('can upsert a new document', function (done) {
-
-    const text = {
-      title: 'Jambo means hello',
-      phrases: [
-        { token: 'jambo', gloss: 'hello' },
-        { token: 'kwa heri', gloss: 'goodbye' }
-      ]
-    };
-
-    this.db.upsert(this.collection, text)
-    .then(res => {
-      expect(res).toBeDefined();
-      expect(res instanceof Array).toBe(false);
-      expect(res._rid).toBeDefined();
-      done();
-    }).catch(err => fail(JSON.stringify(err, null, 2)));
-
-  });
-
-  it('can upsert multiple new documents', function (done) {
-
     const texts = [
-      {
-        title: 'How the Indian came',
-        phrases: [
-          {
-            transcription: 'Wetkš hus naːnčaːkamankš weyt hi hokmiʔi.',
-            translation: 'Then he left his brothers.'
-          }
-        ]
-      },
-      {
-        title: 'ɔ́moísɛ́kɛ́ ɔ́sɔːkɛ́rɛ́tɛ́ chísɛ́ɛsɛ́',
-        phrases: [
-          {
-            transcription: 'ɔ́moísɛ́kɛ́ ɔ́sɔːkɛ́rɛ́tɛ́ chísɛ́ɛsɛ́',
-            translation: 'A girl who got married to dogs'
-          }
-        ]
-      }
+      { id: '1000', title: 'New title 1' },
+      { id: '1001', title: 'New title 2' },
+      { id: '1002', title: 'New title 3' }
     ];
-
-    this.db.upsert(this.collection, texts)
+    const ids = texts.map(text => text.id);
+    const titles = texts.map(text => text.title);
+    db.upsert('texts', texts)
+    .then(texts => db.upsert('texts', texts))
     .then(res => {
-      expect(res).toBeDefined();
       expect(res instanceof Array).toBe(true);
-      expect(res[1]._rid).toBeDefined();
-      const titles = texts.map(text => text.title);
+      expect(ids).toContain(res[0].id);
       expect(titles).toContain(res[0].title);
       done();
-    }).catch(err => fail(JSON.stringify(err, null, 2)));
-
+    }).catch(err => fail(err));
   });
 
   it('can upsert an existing document as a new document', function (done) {
-    this.db.upsert(this.collection, this.results[0], { createId: true })
+    db.upsert('texts', { id: '1003', title: 'Original title' })
+    .then(text => db.upsert('texts', text, { createId: true }))
     .then(res => {
       expect(res instanceof Array).toBe(false);
-      expect(res.speaker).toBe('John Smith');
-      expect(res.title).toEqual(this.results[0].title);
-      expect(res.id).not.toEqual(this.results[0].id);
-      expect(res._rid).not.toEqual(this.results[0]._rid);
-      this.results.push(res);
+      expect(res.id).not.toEqual('1003');
+      expect(res.title).toBe('Original title');
       done();
-    }).catch(err => fail(JSON.stringify(err, null, 2)));
-  });
-
-  it('can delete a document', function (done) {
-    this.db.delete(this.collection, this.results[2]._rid)
-    .then(res => {
-      expect(res.status).toBe(204);
-      this.results.splice(2, 1);
-      done(0);
-    }).catch(err => fail(JSON.stringify(err, null, 2)));
-  });
-
-  it('can delete multiple documents', function (done) {
-    const ids = this.results.map(text => text._rid);
-    this.db.delete(this.collection, ids)
-    .then(res => {
-      expect(res instanceof Array).toBe(true);
-      expect(res.every(response => response.status === 204)).toBe(true);
-      this.results.splice(0);
-      done();
-    }).catch(err => fail(JSON.stringify(err, null, 2)));
-  });
-
-  it('can create users with email IDs', function (done) {
-    var counter = 0;
-    const task = () => this.db.create('users', this.users)
-    .then(res => {
-      expect(res instanceof Array).toBe(true);
-      expect(res.length).toEqual(2);
-      expect(res.map(user => user.id).includes(this.users[0].id)).toBe(true);
-      expect(res.map(user => user.id).includes(this.users[1].id)).toBe(true);
-      this.users.splice(0);
-      this.users.push(...res.map(user => new User(user)));
-      done();
-    }).catch(err => {
-      if (err.status == 409) {
-        this.users.forEach(user => {
-          counter++;
-          user.id = `email${counter}@test.org`;
-          user.services.onedrive = user.services.onedrive + counter;
-        });
-        task();
-      } else { fail(err); }
-    });
-    task();
-  });
-
-  it('returns a 409 error when creating a user whose email already exists', function (done) {
-    this.db.create('users', this.users)
-    .then(res => fail('Error not thrown. Received response:', res))
-    .catch(err => {
-      expect(err.status).toBe(409);
-      done();
-    });
-  });
-
-  it('can get a user by service ID', function (done) {
-    const serviceId = this.users[0].services.onedrive;
-    this.db.getById('users', serviceId, { id_type: 'service_id', service: 'onedrive' })
-    .then(res => {
-      expect(res instanceof Array).toBe(false);
-      const user = new User(res);
-      expect(user.rid).toEqual(this.users[0].rid);
-      expect(user.id).toEqual(this.users[0].id);
-      done();
-    }).catch(err => fail(JSON.stringify(err, null, 2)));
-  });
-
-  it('can get multiple users by service ID', function (done) {
-    const serviceIds = this.users.map(user => user.services.onedrive);
-    this.db.getById('users', serviceIds, { idType: 'serviceId', service: 'onedrive' })
-    .then(res => {
-      expect(res instanceof Array).toBe(true);
-      const users = res.map(user => new User(user));
-      expect(this.users).toContain(users[0]);
-      expect(this.users).toContain(users[1]);
-      done();
-    }).catch(err => fail(JSON.stringify(err, null, 2)));
-  });
-
-  it('can get user by email ID', function (done) {
-    const email = this.users[0].id;
-    this.db.getById('users', email)
-    .then(res => {
-      const user = new User(res);
-      expect(this.users).toContain(user);
-      done();
-    }).catch(err => fail(JSON.stringify(err, null, 2)));
-  });
-
-  it('can get multiple users by email ID', function (done) {
-    const emails = this.users.map(user => user.id);
-    this.db.getById('users', emails)
-    .then(res => {
-      expect(res instanceof Array).toBe(true);
-      const users = res.map(user => new User(user));
-      expect(this.users).toContain(users[0]);
-      expect(this.users).toContain(users[1]);
-      done();
-    }).catch(err => fail(JSON.stringify(err, null, 2)));
-  });
-
-  it('can log in a user', function (done) {
-    this.db.login(this.users[0].rid)
-    .then(res => {
-      expect(res.status).toEqual(200);
-      this.db.get('users', this.users[0].rid)
-      .then(user => {
-        expect(user.lastActive).toBeGreaterThan(Date.now() - 10000);
-        done();
-      }).catch(err => fail(err));
     }).catch(err => fail(err));
   });
 
-  it('can log out a user', function (done) {
-    this.db.logout(this.users[0].rid)
-    .then(res => {
-      expect(res.status).toEqual(200);
-      this.db.get('users', this.users[0].rid)
-      .then(user => {
-        expect(user.lastActive).toBeLessThan(Date.now() - 10000);
-        done();
-      }).catch(err => fail(err));
+  it('can create a user with an email ID', function (done) {
+    const user = { id: `user${Date.now()}@test.com`, firstName: 'Testy', lastName: 'McTester' };
+    db.create('users', user).then(res => {
+      expect(res instanceof Array).toBe(false);
+      expect(res.id).toEqual(user.id);
+      done();
     }).catch(err => fail(err));
   });
 
-  it('can handle throttled requests (many requests in sequence)', function (done) {
+  it('returns a 409 response if the email of a new user already exists');
 
-    pending('This is a stress test that should only be run occasionally.');
+  it('can get a user by service ID');
 
-    const lexEntries = Array(500).fill(null).map((item, i) => {
-      return { id: i + '', token: 'jambo', gloss: 'hello' };
-    });
+  it('can get a user by email ID');
 
-    this.db.upsert('lexEntries', lexEntries)
-    .then(res => {
+  it('can get multiple users by email ID');
 
-      expect(res instanceof Array).toBe(true);
-      expect(res.length).toEqual(lexEntries.length);
+  it('can log in a user');
 
-      this.db.delete('lexEntries', res.map(lexEntry => lexEntry._rid))
-      .then(res => {
-        expect(res.every(response => response.status === 204)).toBe(true);
-        done();
-      }).catch(err => fail(JSON.stringify(err, null, 2)));
+  it('can log out a user');
 
-    }).catch(err => fail(JSON.stringify(err, null, 2)));
-
-  }, 180000);
+  it('can handled throttled requests (many requests in sequence)');
 
 });
