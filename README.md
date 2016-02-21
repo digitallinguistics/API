@@ -55,60 +55,7 @@ Public resources can sometimes become Community resources. This happens when the
 
 ## II. How to Use the API Service
 
-### A. Registering Your App with the API
-Before your app can interact with the DLx API, you'll need to register your app with the service. Do this by going to https://developer.digitallinguistics.org/myapps and clicking `Register New Application`. Once your app is registered, you'll be provided with a client ID (the unique ID for your application). Save this ID - you'll need it to authenticate users later. You can also view your app's client ID at any time by returning to your [developer applications page])(https://developer.digitallinguistics.org/myapps).
-
-### B. Authenticating Users
-Some of the resources in the DLx database are publicly available, and require no special permission to access. Other resources are private, and require the user to be logged into the DLx database to access them. Any requests to create, edit, or delete resources also requires the user to be logged in. So before making these kinds of requests, you will need to authenticate the user with the API service following the steps below.
-
-*Technical Note:* The DLx API server implements the [Implicit grant type](http://tools.ietf.org/html/rfc6749#section-4.2) of the [OAuth 2.0 specification](http://tools.ietf.org/html/rfc6749) for authentication. (In the future the [Authorization Code grant type](http://tools.ietf.org/html/rfc6749#section-4.1) may be implemented as well.) Note that a `scope` parameter is *not* required during the authorization process (all access tokens have the same default scope). For a simple overview of the OAuth 2.0 authentication process, see [this post](http://aaronparecki.com/articles/2012/07/29/1/oauth2-simplified) by Aaron Parecki.
-
-#### Authentication Process
-(Adapted from *[Getting started with OAuth 2.0: Programming clients for secure web API authorization and authentication](http://shop.oreilly.com/product/0636920021810.do)* by Ryan Boyd)
-
-##### 1. Let the user know what you're doing and request authorization from the API
-Let the user know that you are redirecting them to the DLx website, where they will login and be asked to grant your application permission to access the database on their behalf. Then create a GET request in the following format (parameters are enclosed in curly brackets `{ }` and optional parameters are enclosed in square brackets `[ ]`):
-
-    GET https://dlx.azurewebsites.net/auth?client_id={client_id}&redirect_uri={redirect_uri}&response_type=token[&state={state}]
-
-| Parameter       | Description |
-| --------------- | ----------- |
-| `client_id`     | (*required*) The unique client ID you received when registering your application. |
-| `redirect_uri`  | (*required*) The location the user should be returned to after they finish granting permission to your application. |
-| `response_type` | (*required*) Indicates that an access token is being requested. This should always have the value `token`. |
-| `state`         | (*recommended*) A unique random string for this particular request, unguessable and kept secret in the client. Used to prevent CSRF attacks. |
-
-If your request is correctly formatted and successful, the user is directed to the DLx login page. If this is the first time they have accessed the DLx API with your app, they are asked whether they wish to allow your app to make requests to the database on their behalf.
-
-##### 2. Get the access token from the redirect URL
-If the user has granted your app permission, they will be redirected back to the URL you specified in the `redirect_uri` parameter. In addition, the URL will contain an added hash fragment (everything after the `#` in the URL) with the following properties:
-
-| Property       | Description |
-| -------------- | ----------- |
-| `access_token` | The requested access token. Include this with any future requests to the API. |
-| `expires_in`   | The lifetime of the access token (in seconds). Once the token expires, the user will have to reauthenticate. |
-| `state`        | If the `state` parameter was included in the request in Step 1, this will contain the value you provided. You should programmatically check that the value of `state` matches the value you provided in Step 1 to prevent CSRF attacks. |
-
-Here is an example redirect URL with the added hash fragment:
-
-    http://myapplication.com/oauth.html#access_token=a1b2c3d4e5&expires_in=3600&state=1234567890
-
-Your redirect page should include script that examines the URL, parses the hash, checks the state (if provided), and stores the access token for make future requests.
-
-##### 3. Include the access token in requests to the API
-For any requests that require the user to be logged in, you should now include the access token you received in Step 2 as part of the request. (You may include the access token in other requests as well; if the token is not required for a request, it is simply ignored.) To include the token with the request, simply add an `Authorization` header to the request, whose value is `bearer {access_token}`.
-
-##### 4. Request a new token when the old one expires (or before)
-The lifetime of an API access token is 1 hour (3600 seconds). After the token expires, attempts to access the API using the same token will return an error. When this happens, simply request a new token following Step 1 above.
-
-If you request a new token before the old one expires, and the user is still logged in, you will be sent a new token automatically, without the user having to login again. Therefore you can keep the user logged in by simply requesting a new token every hour (or 59 minutes). Users are automatically logged out of DLx if they have not been active in four hours.
-
-When you make an authorization request, the DLx server attempts to identify the user by one of two means: a `dlx` cookie, and the authentication header. If neither of these is present in the authentication request, the DLx server will be unable to identify the user, and so the user will be asked to log in regardless of whether the DLx token is expired or the user is already logged in.
-
-##### Handling Errors During Authentication
-Sometimes the request you made in Step 1 will return an error. This can happen for a variety of reasons - incorrectly formatted URLs, bad request parameters, etc. If this happens, the user will be returned to the redirect URL, along with two querystring parameters: an `error` parameter indicating the type of error, and an `error_description` parameter with a more detailed description of the problem. A `state` parameter is also included if a `state` was provided in Step 1. A list of possible values for the `error` parameter can be viewed [here](http://tools.ietf.org/html/rfc6749#section-4.2.2.1).
-
-### C. Making Requests to the API
+### A. Making Requests to the API
 
 #### URL Syntax
 Each resource and collection in the database corresponds to a different URL. Requests made to that URL can be used to perform various operations on that resource or collection. For example, the text with an ID of `17` can be retrieved by sending a GET request to https://dlx.azurewebsites.net/v1/texts/17, and a lexicon can be added to the database by sending a PUT request to https://dlx.azurewebsites.net/v1/lexicons. Below is a set of schemas showing how to format URLS for different types of operations:
@@ -153,7 +100,7 @@ Many requests to the API take optional or required querstring parameters. These 
 * ##### Body
 The body of the request should contain any resources to be uploaded to the database, in the [DLx JSON data format](https://github.com/digitallinguistics/digitallinguistics.github.io).
 
-### D. Handling Responses from the API
+### B. Handling Responses from the API
 If the request is successful, the API will return a response with a `2xx` status and a JSON object in the response body. A `WWW-Authenticate` header may also be included for invalid authorization requests.
 
 Unsuccessful requests will return a response with a `4xx` or `5xx` status, as well as a JSON object in the response body containing additional details about the error.
@@ -203,7 +150,3 @@ The following status codes are used in responses from the API. Your application 
 
 * In database calls: (coll, ids/items, opts)
 * In passing response parameters: (err, status, responseObject)
-
-### Cheat Sheet
-* Token lifespan: 1 hour
-* Login lifespan: 4 hours

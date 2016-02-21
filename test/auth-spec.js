@@ -16,6 +16,20 @@ describe('/auth', function () {
       res.on('error', err => fail(err));
       res.on('end', () => {
         const result = data.startsWith('{') ? JSON.parse(data) : data;
+        if (res.statusCode == 302) {
+          const hash = qs.parse(URL.parse(res.headers.location).hash.replace('#', ''));
+          expect(hash.state).toBeDefined();
+          const errors = [
+            'invalid_request',
+            'unauthorized_client',
+            'access_denied',
+            'unsupported_response_type',
+            'invalid_scope',
+            'server_error',
+            'temporarily_unavailable'
+          ];
+          if (hash.error) { expect(errors).toContain(hash.error); }
+        }
         handler(result, res);
       });
     }).end();
@@ -76,6 +90,7 @@ describe('/auth', function () {
     const opts = this.options({ path: `/auth?${qstring}` });
     const handler = result => {
       expect(result.status).toBe(400);
+      expect(result.error).toBe('invalid_request');
       expect(result.error_description.includes('client_id')).toBe(true);
       done();
     };
@@ -93,22 +108,29 @@ describe('/auth', function () {
     makeRequest(opts, handler);
   });
 
+  it('returns a 400 response if the `redirect_uri` parameter does not match the registered one');
+
+  it('returns a 400 response if the `response_type` parameter is missing.');
+
   xit('returns a 400 response if the `response_type` parameter is not `token`', function (done) {
     const qstring = qs.stringify(this.query({ response_type: 'code' }));
     const opts = this.options({ path: `/auth?${qstring}` });
     const handler = result => {
       expect(result.status).toBe(400);
+      expect(result.error).toBe('unsupported_response_type');
       expect(result.error_description.includes('response_type')).toBe(true);
       done();
     };
     makeRequest(opts, handler);
   });
 
-  xit('returns a 404 response if the application ID is invalid', function (done) {
+  xit('returns a 401 response if the `client_id` is invalid', function (done) {
     const qstring = qs.stringify(this.query({ client_id: 'badId' }));
     const opts = this.options({ path: `/auth?${qstring}` });
     const handler = result => {
-      expect(result.status).toBe(404);
+      expect(result.status).toBe(401);
+      expect(result.error).toBe('unauthorized_client');
+      expect(result.error_description.includes('client')).toBe(true);
       done();
     };
     makeRequest(opts, handler);
@@ -145,7 +167,7 @@ describe('/auth', function () {
     makeRequest(opts, handler);
   });
 
-  xit('redirects to the redirect URI if the token is valid', function (done) {
+  it('redirects to the redirect URI with a valid OAuth response if the token is valid', function (done) {
     const q = this.query();
     const state = q.state;
     const opts = this.options({ path: `/auth?${qs.stringify(q)}` });
@@ -154,15 +176,16 @@ describe('/auth', function () {
       expect(res.headers.location).toBeDefined();
       const url = URL.parse(res.headers.location);
       expect(url.hostname).toBe('danielhieber.com');
-      const query = qs.parse(url.query);
-      expect(query.state).toEqual(state);
-      expect(query.access_token).toBeDefined();
+      const hash = qs.parse(url.hash.replace('#', ''));
+      expect(hash.state).toEqual(state);
+      expect(hash.access_token).toBeDefined();
+      expect(hash.expires_in).toBe(3600);
       const opts = {
         algorithms: ['HS256'],
         audience: 'https://api.digitallinguistics.org',
         subject: this.user._rid
       };
-      const payload = jwt.verify(query.access_token, this.app.secret, opts);
+      const payload = jwt.verify(hash.access_token, this.app.secret, opts);
       expect(payload.cid).toEqual(this.app._rid);
       done();
     };
