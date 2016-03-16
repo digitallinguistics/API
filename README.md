@@ -18,6 +18,7 @@ Each item in a collection must be formatted according to the Digital Linguistics
 Some types of resources contain subitems that may also be accessed with the API. For example, texts contain phrases, and so a user may request one or more phrases from a text, rather than having to request the entire text at once. Subitems in a collection are shown following a `>`.
 
 * [bundles](http://spec.digitallinguistics.org/bundle) > [items](http://spec.digitallinguistics.org/bundle#items)
+* [dictionaries] (http://spec.digitallinguistics.org/dictionary)
 * [languages](http://spec.digitallinguistics.org/language)
 * [lexicons](http://spec.digitallinguistics.org/lexicon) > [lexicon entries](http://spec.digitallinguistics.org/lexicon#lexEntries)
 * [locations](http://spec.digitallinguistics.org/location)
