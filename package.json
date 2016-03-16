@@ -1,7 +1,7 @@
 {
   "name": "dlx-api",
-  "version": "0.4.5-beta",
-  "description": "Source code for the DLX database API",
+  "version": "0.5.0",
+  "description": "Source code for the DLx database API and Web Socket.",
   "contributors": [
     {
       "name": "Daniel W. Hieber",
@@ -36,18 +36,11 @@
   "engines": {
     "node": "5.x"
   },
-  "scripts": {
-    "test": "node lib/jasmine.js"
-  },
   "dependencies": {
-    "body-parser": "^1.14.2",
-    "cookie-parser": "^1.4.1",
-    "documentdb": "^1.5.1",
-    "express": "^4.13.3",
-    "jsonwebtoken": "^5.5.4",
-    "uuid": "^2.0.1"
+    "body-parser": "^1.15.0",
+    "express": "^4.13.4",
+    "jsonwebtoken": "^5.7.0",
+    "socket.io": "^1.4.5"
   },
-  "devDependencies": {
-    "jasmine": "^2.4.1"
-  }
+  "devDependencies": {}
 }
