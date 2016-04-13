@@ -35,9 +35,8 @@ router(app);
 app.use((req, res, next) => res.error(404)); // eslint-disable-line
 app.use((err, req, res, next) => res.error(JSON.stringify(err, null, 2))); // eslint-disable-line
 
-// create a server and Socket.IO server
+// create a server
 const server = http.createServer(app);
-const io = require('socket.io')(server);
 
 // listen on port
 server.listen(app.get('port'), () => console.log(`Server started. Press Ctrl+C to terminate.
@@ -47,6 +46,8 @@ server.listen(app.get('port'), () => console.log(`Server started. Press Ctrl+C t
   Node:     ${process.version}
   Env:      ${process.env.NODE_ENV}`));
 
-// Socket routing
-io.origins('danielhieber.com');
+// create a socket
+const io = require('socket.io')(server);
+
+// socket routing
 io.on('connection', socket => Socket(io, socket));
