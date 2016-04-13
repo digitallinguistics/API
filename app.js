@@ -24,11 +24,6 @@ app.use(express.static(path.join(__dirname, '/public'))); // routing for static 
 app.use(bodyParser.json()); // parse JSON data
 app.use(middleware); // various middleware functions
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Credentials', false);
-  next();
-});
-
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, './public/index.html'));
 });
@@ -53,4 +48,5 @@ server.listen(app.get('port'), () => console.log(`Server started. Press Ctrl+C t
   Env:      ${process.env.NODE_ENV}`));
 
 // Socket routing
+io.origins('danielhieber.com');
 io.on('connection', socket => Socket(io, socket));
