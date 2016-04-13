@@ -12,7 +12,9 @@
 
   <script type=text/javascript>
 
-    const socket = io();
+    const socket = io({
+      transports: ['websocket', 'xhr-polling']
+    });
     socket.on('message', data => console.log(data));
 
   </script>

@@ -47,7 +47,9 @@ server.listen(app.get('port'), () => console.log(`Server started. Press Ctrl+C t
   Env:      ${process.env.NODE_ENV}`));
 
 // create a socket
-const io = require('socket.io')(server);
+const io = require('socket.io')(server, {
+  transports: ['websocket', 'xhr-polling']
+});
 
 // socket routing
 io.on('connection', socket => Socket(io, socket));
