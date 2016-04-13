@@ -47,8 +47,6 @@ server.listen(app.get('port'), () => console.log(`Server started. Press Ctrl+C t
   Node:     ${process.version}
   Env:      ${process.env.NODE_ENV}`));
 
-// configure Socket.IO
-io.set('origins', 'digitallinguistics.org:*');
-
 // Socket routing
+io.origins();
 io.on('connection', socket => Socket(io, socket));
