@@ -2,7 +2,7 @@
 This package is still under development. The version number will be incremented to v1.0.0 when this package is production-ready.
 
 # The Digital Linguistics (DLx) API
-This repository contains the source code and documentation for the DLx API, a service that allows software developers to programmatically access the DLx database. By sending requests to the API, developers can add, update, delete, or retrieve resources in the database using code. This page describes the structure of the DLx database and the resources in it, how to register your app with the API service, how to authenticate users so that they may access resources, how to properly format requests to the database, and how to handle responses from the database.
+This repository contains the source code and documentation for the DLx API, a service that allows software developers to programmatically access the DLx database. By sending requests to the API, developers can add, update, delete, or retrieve resources in the database using code. This page describes the structure of the DLx database and the resources in it, how to register your app with the API service, how to authenticate users so that they may access resources, how to properly format requests to the database, and how to handle responses from the database. To send requests to the API, you will need to programmatically construct an HTTP request and send it to the appropriate URL. Below is information explaining how to format each part of your requests to the API.
 
 **[View the API reference documentation here.](https://api.digitallinguistics.org/doc)**
 
@@ -67,9 +67,7 @@ Some examples:
 
 A complete list of the operations that can be performed on each type of resource and collection is available [here](https://api.digitallinguistics.org/doc).
 
-Because the API uses regular URLs, GET requests (but not other operations) can be made simply by typing the URL into the browser. Since GET requests return an HTML representation of the resource by default, the user will see an HTML page with the requested resources. If the resource has its permissions set to `public`, the text/html response allows users to share a visual representation of a resource using the static link for that resource. If its permissions are set to `private`, only authorized users will be able to view the HTML page. Unauthorized users will simply see an error message if they try to open the link. For requests to a collection, a summary of the DLx resources in that collection will be returned. For requests for multiple resources, a list of links to the individual resources will be returned.
-
-The other way to send requests to the API is to programmatically construct an HTTP request and send it to the appropriate URL. Below is information explaining how to format each part of your requests to the API.
+**NB:** The API always returns JSON data in the response. If you would like to see HTML representations of the data instead, use the [Data Explorer API](http://developer.digitallinguistics.org/data).
 
 #### Parts of the Request
 
@@ -84,7 +82,6 @@ Certain requests to the API take optional or required headers. The following hea
 
 Header        | Description
 ------------- | -----------
-Accept        | Indicates whether the response should be an HTML (`text/html`) or JSON `application/json` representation of the resource(s). Defaults to `text/html`.
 Authorization | Required for most operations, and for accessing private resources. Should contain the access token you received from the API during authentication, in the format `bearer {access_token}`.
 
 * ##### Path
@@ -103,13 +100,13 @@ Unsuccessful requests will return a response with a `4xx` or `5xx` status, as we
 
 The response body may contain the following attributes:
 
-| Attribute  | Description |
-| ---------- | ----------- |
-| `data`     | (2xx responses only) an array containing the requested data for successful requests |
-| `error_description`  | (4xx or 5xx responses only) a more specific error message for help in debugging unsuccessful requests |
-| `error`  | (4xx or 5xx responses only) a generic error message for unsuccessful requests   |
-| `included` | (2xx responses only) in the future, this attribute may be used to include related resources with the response |
-| `status`   | (all responses) contains the HTTP status code (as numeric) |
+Attribute           | Description
+------------------- | -----------
+`data`              | (2xx responses only) an array containing the requested data for successful requests
+`error_description` | (4xx or 5xx responses only) a more specific error message for help in debugging unsuccessful requests
+`error`             | (4xx or 5xx responses only) a generic error message for unsuccessful requests
+`included`          | (2xx responses only) in the future, this attribute may be used to include related resources with the response
+`status`            | (all responses) contains the HTTP status code (as numeric)
 
 #### Response Headers &amp; Status Codes
 The following status codes are used in responses from the API. Your application should be prepared to handle any of these response types.

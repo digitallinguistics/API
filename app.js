@@ -3,10 +3,13 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const http = require('http');
 const middleware = require('./lib/middleware');
+const path = require('path');
+const router = require('./lib/router');
+const Socket = require('./lib/socket');
 
 // set environment variables
 process.env.NODE_ENV = process.env.NODE_ENV || 'localhost';
-process.env.PORT = process.env.PORT || 3000;
+process.env.PORT = process.env.PORT || 3000; // eslint-disable-line
 
 // initialize Express app
 const app = express();
@@ -17,27 +20,32 @@ app.enable('trust proxy'); // trust the Azure proxy server
 app.set('port', process.env.PORT); // set local port to 3000
 
 // middleware
-app.use(middleware.log); // url logging for debugging
-app.use(express.static(__dirname + '/public')); // routing for static files
+app.use(express.static(path.join(__dirname, '/public'))); // routing for static files
 app.use(bodyParser.json()); // parse JSON data
+app.use(middleware); // various middleware functions
 
-// routing
-require('./lib/router')(app);
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/index.html'));
+});
+
+// API routing
+router(app);
 
 // catch-all error handlers
-app.use(middleware.error404);
-app.use(middleware.error500);
+app.use((req, res, next) => res.error(404)); // eslint-disable-line
+app.use((err, req, res, next) => res.error(JSON.stringify(err, null, 2))); // eslint-disable-line
 
-// create a server
+// create a server and Socket.IO server
 const server = http.createServer(app);
+const io = require('socket.io')(server);
 
 // listen on port
-/* jshint -W058 */
-server.listen(app.get('port'), () => {
-console.log(`Server started. Press Ctrl+C to terminate.
+server.listen(app.get('port'), () => console.log(`Server started. Press Ctrl+C to terminate.
   Project:  dlx-api
   Port:     ${app.get('port')}
   Time:     ${new Date}
   Node:     ${process.version}
-  Env:      ${process.env.NODE_ENV}`);
-});
+  Env:      ${process.env.NODE_ENV}`));
+
+// Socket routing
+io.on('connection', socket => Socket(io, socket));
