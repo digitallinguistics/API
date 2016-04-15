@@ -75,6 +75,11 @@
                     "type": "string"
                 }
             }
+        },
+        "default": {
+            "status": 500,
+            "error": "Server error.",
+            "error_description": "An unknown server error occurred."
         }
     },
     "responses": {
