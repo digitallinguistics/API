@@ -53,6 +53,10 @@
     {
       "name": "app",
       "description": "Operations on apps."
+    },
+    {
+      "name": "permission",
+      "description": "Operations on permissions."
     }
   ],
   "definitions": {
