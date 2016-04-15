@@ -66,19 +66,17 @@
       ],
       "properties": {
         "status": {
-          "type": "integer"
+          "type": "integer",
+          "default": 500
         },
         "error": {
-          "type": "string"
+          "type": "string",
+          "default": "Server error"
         },
         "error_description": {
-          "type": "string"
+          "type": "string",
+          "default": "An unknown server error occurred."
         }
-      },
-      "default": {
-        "status": 500,
-        "error": "Server error.",
-        "error_description": "An unknown server error occurred."
       }
     }
   },
