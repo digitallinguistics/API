@@ -78,7 +78,7 @@ Request Format                                              | Operation
 ----------------------------------------------------------- | ---------
 `DELETE https://api.digitallinguistics.org/v1/{collection}` | Delete items from the collection (an `ids` parameter in the querystring is required).
 `GET    https://api.digitallinguistics.org/v1/{collection}` | Retrieve items from the collection (an `ids` parameter in the querystring is required).
-`PUT    https://api.digitallinguistics.org/v1/{collection}` | Upsert (add/update) resources to the collection.
+`PUT    https://api.digitallinguistics.org/v1/{collection}` | Upsert (add/update) a resource to the collection.
 
 ###### Operations on Permissions
 To add or delete permissions for an object, simply make a POST or DELETE request to the resource URL with `/permissions` appended to the end. For example, to add a new permission for a text with the ID `17`, you would make a PUT request to `https://api.digitallinguistics.org/v1/texts/17/permissions`.
