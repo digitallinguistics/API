@@ -176,7 +176,17 @@
         "tags" : [ "Lexeme" ],
         "summary" : "Retrieve multiple lexemes by IDs",
         "operationId" : "getLexemes",
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "ids",
+          "in" : "query",
+          "description" : "A comma-separated list of lexeme IDs",
+          "required" : false,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "csv"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
