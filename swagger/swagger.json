@@ -18,7 +18,21 @@
   "schemes" : [ "https" ],
   "consumes" : [ "application/json" ],
   "produces" : [ "application/json" ],
-  "paths" : { },
+  "paths" : {
+    "/apps" : { },
+    "/bundles" : { },
+    "/corpora" : { },
+    "/languages" : { },
+    "/lexemes" : { },
+    "/lexicons" : { },
+    "/locations" : { },
+    "/media" : { },
+    "/orthographies" : { },
+    "/people" : { },
+    "/projects" : { },
+    "/texts" : { },
+    "/users" : { }
+  },
   "definitions" : { },
   "externalDocs" : {
     "description" : "How to use the API",
