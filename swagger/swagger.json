@@ -1,0 +1,27 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "The Digital Linguistics (DLx) database API",
+    "version" : "0.1.0",
+    "title" : "DLx",
+    "contact" : {
+      "name" : "Daniel W. Hieber",
+      "url" : "http://danielhieber.com",
+      "email" : "dhieber@umail.ucsb.edu"
+    },
+    "license" : {
+      "name" : "MIT"
+    }
+  },
+  "host" : "virtserver.swaggerhub.com",
+  "basePath" : "/dwhieb/dlx/0.1.0",
+  "schemes" : [ "https" ],
+  "consumes" : [ "application/json" ],
+  "produces" : [ "application/json" ],
+  "paths" : { },
+  "definitions" : { },
+  "externalDocs" : {
+    "description" : "How to use the API",
+    "url" : "http://digitallinguistics.github.io/dlx-api/"
+  }
+}
