@@ -29,9 +29,15 @@
         }
       }
     },
-    "/apps/{app}" : {
+    "/apps/{appId}" : {
       "get" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "appId",
+          "in" : "path",
+          "description" : "The ID of the app to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
@@ -39,7 +45,13 @@
         }
       },
       "put" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "appId",
+          "in" : "path",
+          "description" : "The ID of the app to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "201" : {
             "description" : "Upsert successful."
@@ -47,7 +59,13 @@
         }
       },
       "delete" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "appId",
+          "in" : "path",
+          "description" : "The ID of the app to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "204" : {
             "description" : "Delete operation successful."
@@ -73,9 +91,15 @@
         }
       }
     },
-    "/languages/{language}" : {
+    "/languages/{languageId}" : {
       "get" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "languageId",
+          "in" : "path",
+          "description" : "The ID of the language to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
@@ -83,7 +107,13 @@
         }
       },
       "put" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "languageId",
+          "in" : "path",
+          "description" : "The ID of the language to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "201" : {
             "description" : "Upsert successful."
@@ -91,7 +121,13 @@
         }
       },
       "delete" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "languageId",
+          "in" : "path",
+          "description" : "The ID of the language to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "204" : {
             "description" : "Delete operation successful."
@@ -117,9 +153,15 @@
         }
       }
     },
-    "/lexemes/{lexeme}" : {
+    "/lexemes/{lexemeId}" : {
       "get" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "lexemeId",
+          "in" : "path",
+          "description" : "The ID of the lexeme to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
@@ -127,7 +169,13 @@
         }
       },
       "put" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "lexemeId",
+          "in" : "path",
+          "description" : "The ID of the lexeme to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "201" : {
             "description" : "Upsert successful."
@@ -135,7 +183,13 @@
         }
       },
       "delete" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "lexemeId",
+          "in" : "path",
+          "description" : "The ID of the lexeme to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "204" : {
             "description" : "Delete operation successful."
@@ -161,9 +215,15 @@
         }
       }
     },
-    "/lexicons/{lexicon}" : {
+    "/lexicons/{lexiconId}" : {
       "get" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "lexiconId",
+          "in" : "path",
+          "description" : "The ID of the lexicon to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
@@ -171,7 +231,13 @@
         }
       },
       "put" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "lexiconId",
+          "in" : "path",
+          "description" : "The ID of the lexicon to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "201" : {
             "description" : "Upsert successful."
@@ -179,7 +245,13 @@
         }
       },
       "delete" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "lexiconId",
+          "in" : "path",
+          "description" : "The ID of the lexicon to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "204" : {
             "description" : "Delete operation successful."
@@ -205,9 +277,15 @@
         }
       }
     },
-    "/locations/{location}" : {
+    "/locations/{locationId}" : {
       "get" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "locationId",
+          "in" : "path",
+          "description" : "The ID of the location to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
@@ -215,7 +293,13 @@
         }
       },
       "put" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "locationId",
+          "in" : "path",
+          "description" : "The ID of the location to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "201" : {
             "description" : "Upsert successful."
@@ -223,7 +307,13 @@
         }
       },
       "delete" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "locationId",
+          "in" : "path",
+          "description" : "The ID of the location to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "204" : {
             "description" : "Delete operation successful."
@@ -249,9 +339,15 @@
         }
       }
     },
-    "/media/{file}" : {
+    "/media/{mediaId}" : {
       "get" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "mediaId",
+          "in" : "path",
+          "description" : "The ID of the media file to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
@@ -259,7 +355,13 @@
         }
       },
       "put" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "mediaId",
+          "in" : "path",
+          "description" : "The ID of the media file to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "201" : {
             "description" : "Upsert successful."
@@ -267,7 +369,13 @@
         }
       },
       "delete" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "mediaId",
+          "in" : "path",
+          "description" : "The ID of the media file to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "204" : {
             "description" : "Delete operation successful."
@@ -293,9 +401,15 @@
         }
       }
     },
-    "/orthographies/{orthography}" : {
+    "/orthographies/{orthographyId}" : {
       "get" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "orthographyId",
+          "in" : "path",
+          "description" : "The ID of the orthography to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
@@ -303,7 +417,13 @@
         }
       },
       "put" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "orthographyId",
+          "in" : "path",
+          "description" : "The ID of the orthography to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "201" : {
             "description" : "Upsert successful."
@@ -311,7 +431,13 @@
         }
       },
       "delete" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "orthographyId",
+          "in" : "path",
+          "description" : "The ID of the orthography to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "204" : {
             "description" : "Delete operation successful."
@@ -337,9 +463,15 @@
         }
       }
     },
-    "/people/{person}" : {
+    "/people/{personId}" : {
       "get" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "personId",
+          "in" : "path",
+          "description" : "The ID of the person to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
@@ -347,7 +479,13 @@
         }
       },
       "put" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "personId",
+          "in" : "path",
+          "description" : "The ID of the person to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "201" : {
             "description" : "Upsert successful."
@@ -355,7 +493,13 @@
         }
       },
       "delete" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "personId",
+          "in" : "path",
+          "description" : "The ID of the person to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "204" : {
             "description" : "Delete operation successful."
@@ -381,9 +525,15 @@
         }
       }
     },
-    "/texts/{text}" : {
+    "/texts/{textId}" : {
       "get" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "textId",
+          "in" : "path",
+          "description" : "The ID of the text to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
@@ -391,7 +541,13 @@
         }
       },
       "put" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "textId",
+          "in" : "path",
+          "description" : "The ID of the text to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "201" : {
             "description" : "Upsert successful."
@@ -399,7 +555,13 @@
         }
       },
       "delete" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "textId",
+          "in" : "path",
+          "description" : "The ID of the text to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "204" : {
             "description" : "Delete operation successful."
@@ -425,9 +587,15 @@
         }
       }
     },
-    "/users/{user}" : {
+    "/users/{userId}" : {
       "get" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "userId",
+          "in" : "path",
+          "description" : "The ID of the user to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
@@ -435,7 +603,13 @@
         }
       },
       "put" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "userId",
+          "in" : "path",
+          "description" : "The ID of the user to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "201" : {
             "description" : "Upsert successful."
@@ -443,7 +617,13 @@
         }
       },
       "delete" : {
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "userId",
+          "in" : "path",
+          "description" : "The ID of the user to perform the operation on.",
+          "required" : true,
+          "type" : "string"
+        } ],
         "responses" : {
           "204" : {
             "description" : "Delete operation successful."
