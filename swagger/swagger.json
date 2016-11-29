@@ -50,67 +50,16 @@
   "consumes" : [ "application/json" ],
   "produces" : [ "application/json" ],
   "paths" : {
-    "/apps" : {
-      "put" : {
-        "tags" : [ "App" ],
-        "summary" : "Upsert a client app",
-        "description" : "Only one client app may be upserted a time.",
-        "operationId" : "upsertApp",
-        "parameters" : [ ],
-        "responses" : {
-          "201" : {
-            "description" : "Upsert successful."
-          }
-        }
-      }
-    },
-    "/apps/{appId}" : {
-      "get" : {
-        "tags" : [ "App" ],
-        "summary" : "Retrieve a client app by ID",
-        "operationId" : "getApp",
-        "parameters" : [ {
-          "name" : "appId",
-          "in" : "path",
-          "description" : "The ID of the app to perform the operation on",
-          "required" : true,
-          "type" : "string"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Operation successful."
-          }
-        }
-      },
-      "delete" : {
-        "tags" : [ "App" ],
-        "summary" : "Delete a client app.",
-        "operationId" : "deleteApp",
-        "parameters" : [ {
-          "name" : "appId",
-          "in" : "path",
-          "description" : "The ID of the app to perform the operation on",
-          "required" : true,
-          "type" : "string"
-        } ],
-        "responses" : {
-          "204" : {
-            "description" : "Delete operation successful."
-          }
-        }
-      }
-    },
     "/languages" : {
       "get" : {
         "tags" : [ "Language" ],
         "summary" : "Retrieve multiple languages by ID",
-        "description" : "If the \"ids\" parameter is omitted, returns all languages for which the user has permission.",
         "operationId" : "getLanguages",
         "parameters" : [ {
           "name" : "ids",
           "in" : "query",
           "description" : "A comma-separated list of IDs",
-          "required" : false,
+          "required" : true,
           "type" : "array",
           "items" : {
             "type" : "string"
@@ -176,17 +125,7 @@
         "tags" : [ "Lexeme" ],
         "summary" : "Retrieve multiple lexemes by IDs",
         "operationId" : "getLexemes",
-        "parameters" : [ {
-          "name" : "ids",
-          "in" : "query",
-          "description" : "A comma-separated list of IDs",
-          "required" : false,
-          "type" : "array",
-          "items" : {
-            "type" : "string"
-          },
-          "collectionFormat" : "csv"
-        } ],
+        "parameters" : [ ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
@@ -250,7 +189,7 @@
           "name" : "ids",
           "in" : "query",
           "description" : "A comma-separated list of IDs",
-          "required" : false,
+          "required" : true,
           "type" : "array",
           "items" : {
             "type" : "string"
@@ -320,7 +259,7 @@
           "name" : "ids",
           "in" : "query",
           "description" : "A comma-separated list of IDs",
-          "required" : false,
+          "required" : true,
           "type" : "array",
           "items" : {
             "type" : "string"
@@ -390,7 +329,7 @@
           "name" : "ids",
           "in" : "query",
           "description" : "A comma-separated list of IDs",
-          "required" : false,
+          "required" : true,
           "type" : "array",
           "items" : {
             "type" : "string"
@@ -460,7 +399,7 @@
           "name" : "ids",
           "in" : "query",
           "description" : "A comma-separated list of IDs",
-          "required" : false,
+          "required" : true,
           "type" : "array",
           "items" : {
             "type" : "string"
@@ -530,7 +469,7 @@
           "name" : "ids",
           "in" : "query",
           "description" : "A comma-separated list of IDs",
-          "required" : false,
+          "required" : true,
           "type" : "array",
           "items" : {
             "type" : "string"
@@ -600,7 +539,7 @@
           "name" : "ids",
           "in" : "query",
           "description" : "A comma-separated list of IDs",
-          "required" : false,
+          "required" : true,
           "type" : "array",
           "items" : {
             "type" : "string"
@@ -670,7 +609,7 @@
           "name" : "ids",
           "in" : "query",
           "description" : "A comma-separated list of IDs",
-          "required" : false,
+          "required" : true,
           "type" : "array",
           "items" : {
             "type" : "string"
@@ -738,7 +677,7 @@
       "name" : "ids",
       "in" : "query",
       "description" : "A comma-separated list of IDs",
-      "required" : false,
+      "required" : true,
       "type" : "array",
       "items" : {
         "type" : "string"
