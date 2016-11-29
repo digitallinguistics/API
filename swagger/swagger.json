@@ -50,17 +50,6 @@
   "consumes" : [ "application/json" ],
   "produces" : [ "application/json" ],
   "paths" : {
-    "/apps" : {
-      "put" : {
-        "tags" : [ "App" ],
-        "parameters" : [ ],
-        "responses" : {
-          "201" : {
-            "description" : "Upsert successful."
-          }
-        }
-      }
-    },
     "/apps/{appId}" : {
       "get" : {
         "tags" : [ "App" ],
@@ -94,6 +83,7 @@
       },
       "delete" : {
         "tags" : [ "App" ],
+        "summary" : "Delete a client app.",
         "parameters" : [ {
           "name" : "appId",
           "in" : "path",
