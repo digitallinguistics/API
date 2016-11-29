@@ -15,12 +15,44 @@
   },
   "host" : "virtserver.swaggerhub.com",
   "basePath" : "/dwhieb/dlx/0.1.0",
+  "tags" : [ {
+    "name" : "App",
+    "description" : "Operations on client apps"
+  }, {
+    "name" : "Language",
+    "description" : "Operations on languages"
+  }, {
+    "name" : "Lexeme",
+    "description" : "Operations on lexemes"
+  }, {
+    "name" : "Lexicon",
+    "description" : "Operations on lexicons"
+  }, {
+    "name" : "Location",
+    "description" : "Operations on locations"
+  }, {
+    "name" : "Media",
+    "description" : "Operations on media items"
+  }, {
+    "name" : "Orthography",
+    "description" : "Operations on orthographies"
+  }, {
+    "name" : "Person",
+    "description" : "Operations on people"
+  }, {
+    "name" : "Text",
+    "description" : "Operations on texts"
+  }, {
+    "name" : "User",
+    "description" : "Operations on DLx users"
+  } ],
   "schemes" : [ "https" ],
   "consumes" : [ "application/json" ],
   "produces" : [ "application/json" ],
   "paths" : {
     "/apps" : {
       "put" : {
+        "tags" : [ "App" ],
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -31,6 +63,7 @@
     },
     "/apps/{appId}" : {
       "get" : {
+        "tags" : [ "App" ],
         "parameters" : [ {
           "name" : "appId",
           "in" : "path",
@@ -45,6 +78,7 @@
         }
       },
       "put" : {
+        "tags" : [ "App" ],
         "parameters" : [ {
           "name" : "appId",
           "in" : "path",
@@ -59,6 +93,7 @@
         }
       },
       "delete" : {
+        "tags" : [ "App" ],
         "parameters" : [ {
           "name" : "appId",
           "in" : "path",
