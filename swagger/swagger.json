@@ -19,21 +19,329 @@
   "consumes" : [ "application/json" ],
   "produces" : [ "application/json" ],
   "paths" : {
-    "/apps" : { },
-    "/bundles" : { },
-    "/corpora" : { },
-    "/languages" : { },
-    "/lexemes" : { },
-    "/lexicons" : { },
-    "/locations" : { },
-    "/media" : { },
-    "/orthographies" : { },
-    "/people" : { },
-    "/projects" : { },
-    "/texts" : { },
-    "/users" : { }
+    "/apps" : {
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      }
+    },
+    "/apps/{app}" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : { }
+      },
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      },
+      "delete" : {
+        "parameters" : [ ],
+        "responses" : { }
+      }
+    },
+    "/languages" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : { }
+      },
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      }
+    },
+    "/languages/{language}" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : { }
+      },
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      },
+      "delete" : {
+        "parameters" : [ ],
+        "responses" : { }
+      }
+    },
+    "/lexemes" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : { }
+      },
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      }
+    },
+    "/lexemes/{lexeme}" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : { }
+      },
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      },
+      "delete" : {
+        "parameters" : [ ],
+        "responses" : { }
+      }
+    },
+    "/lexicons" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : { }
+      },
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      }
+    },
+    "/lexicons/{lexicon}" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : { }
+      },
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      },
+      "delete" : {
+        "parameters" : [ ],
+        "responses" : { }
+      }
+    },
+    "/locations" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : { }
+      },
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      }
+    },
+    "/locations/{location}" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : { }
+      },
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      },
+      "delete" : {
+        "parameters" : [ ],
+        "responses" : { }
+      }
+    },
+    "/media" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : { }
+      },
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      }
+    },
+    "/media/{file}" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : { }
+      },
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      },
+      "delete" : {
+        "parameters" : [ ],
+        "responses" : { }
+      }
+    },
+    "/orthographies" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : { }
+      },
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      }
+    },
+    "/orthographies/{orthography}" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : { }
+      },
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      },
+      "delete" : {
+        "parameters" : [ ],
+        "responses" : { }
+      }
+    },
+    "/people" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : { }
+      },
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      }
+    },
+    "/people/{person}" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : { }
+      },
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      },
+      "delete" : {
+        "parameters" : [ ],
+        "responses" : { }
+      }
+    },
+    "/texts" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : { }
+      },
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      }
+    },
+    "/texts/{text}" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : { }
+      },
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      },
+      "delete" : {
+        "parameters" : [ ],
+        "responses" : { }
+      }
+    },
+    "/users" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : { }
+      },
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      }
+    },
+    "/users/{user}" : {
+      "get" : {
+        "parameters" : [ ],
+        "responses" : { }
+      },
+      "put" : {
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "Upsert successful."
+          }
+        }
+      },
+      "delete" : {
+        "parameters" : [ ],
+        "responses" : { }
+      }
+    }
   },
   "definitions" : { },
+  "responses" : {
+    "UpsertSuccessful" : {
+      "description" : "Upsert successful."
+    }
+  },
   "externalDocs" : {
     "description" : "How to use the API",
     "url" : "http://digitallinguistics.github.io/dlx-api/"
