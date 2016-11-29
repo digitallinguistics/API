@@ -104,8 +104,19 @@
       "get" : {
         "tags" : [ "Language" ],
         "summary" : "Retrieve multiple languages by ID",
+        "description" : "If the \"ids\" parameter is omitted, returns all languages for which the user has permission.",
         "operationId" : "getLanguages",
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "ids",
+          "in" : "query",
+          "description" : "A comma-separated list of language IDs",
+          "required" : false,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "csv"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
