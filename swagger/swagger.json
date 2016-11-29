@@ -110,6 +110,7 @@
     },
     "/languages" : {
       "get" : {
+        "tags" : [ "Language" ],
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -118,6 +119,7 @@
         }
       },
       "put" : {
+        "tags" : [ "Language" ],
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -128,6 +130,7 @@
     },
     "/languages/{languageId}" : {
       "get" : {
+        "tags" : [ "Language" ],
         "parameters" : [ {
           "name" : "languageId",
           "in" : "path",
@@ -142,6 +145,7 @@
         }
       },
       "put" : {
+        "tags" : [ "Language" ],
         "parameters" : [ {
           "name" : "languageId",
           "in" : "path",
@@ -156,6 +160,7 @@
         }
       },
       "delete" : {
+        "tags" : [ "Language" ],
         "parameters" : [ {
           "name" : "languageId",
           "in" : "path",
@@ -172,6 +177,7 @@
     },
     "/lexemes" : {
       "get" : {
+        "tags" : [ "Lexeme" ],
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -180,6 +186,7 @@
         }
       },
       "put" : {
+        "tags" : [ "Lexeme" ],
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -190,6 +197,7 @@
     },
     "/lexemes/{lexemeId}" : {
       "get" : {
+        "tags" : [ "Lexeme" ],
         "parameters" : [ {
           "name" : "lexemeId",
           "in" : "path",
@@ -204,6 +212,7 @@
         }
       },
       "put" : {
+        "tags" : [ "Lexeme" ],
         "parameters" : [ {
           "name" : "lexemeId",
           "in" : "path",
@@ -218,6 +227,7 @@
         }
       },
       "delete" : {
+        "tags" : [ "Lexeme" ],
         "parameters" : [ {
           "name" : "lexemeId",
           "in" : "path",
@@ -234,6 +244,7 @@
     },
     "/lexicons" : {
       "get" : {
+        "tags" : [ "Lexicon" ],
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -242,6 +253,7 @@
         }
       },
       "put" : {
+        "tags" : [ "Lexicon" ],
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -252,6 +264,7 @@
     },
     "/lexicons/{lexiconId}" : {
       "get" : {
+        "tags" : [ "Lexicon" ],
         "parameters" : [ {
           "name" : "lexiconId",
           "in" : "path",
@@ -266,6 +279,7 @@
         }
       },
       "put" : {
+        "tags" : [ "Lexicon" ],
         "parameters" : [ {
           "name" : "lexiconId",
           "in" : "path",
@@ -280,6 +294,7 @@
         }
       },
       "delete" : {
+        "tags" : [ "Lexicon" ],
         "parameters" : [ {
           "name" : "lexiconId",
           "in" : "path",
@@ -296,6 +311,7 @@
     },
     "/locations" : {
       "get" : {
+        "tags" : [ "Location" ],
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -304,6 +320,7 @@
         }
       },
       "put" : {
+        "tags" : [ "Location" ],
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -314,6 +331,7 @@
     },
     "/locations/{locationId}" : {
       "get" : {
+        "tags" : [ "Location" ],
         "parameters" : [ {
           "name" : "locationId",
           "in" : "path",
@@ -328,6 +346,7 @@
         }
       },
       "put" : {
+        "tags" : [ "Location" ],
         "parameters" : [ {
           "name" : "locationId",
           "in" : "path",
@@ -342,6 +361,7 @@
         }
       },
       "delete" : {
+        "tags" : [ "Location" ],
         "parameters" : [ {
           "name" : "locationId",
           "in" : "path",
@@ -358,6 +378,7 @@
     },
     "/media" : {
       "get" : {
+        "tags" : [ "Media" ],
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -366,6 +387,7 @@
         }
       },
       "put" : {
+        "tags" : [ "Media" ],
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -376,6 +398,7 @@
     },
     "/media/{mediaId}" : {
       "get" : {
+        "tags" : [ "Media" ],
         "parameters" : [ {
           "name" : "mediaId",
           "in" : "path",
@@ -390,6 +413,7 @@
         }
       },
       "put" : {
+        "tags" : [ "Media" ],
         "parameters" : [ {
           "name" : "mediaId",
           "in" : "path",
@@ -404,6 +428,7 @@
         }
       },
       "delete" : {
+        "tags" : [ "Media" ],
         "parameters" : [ {
           "name" : "mediaId",
           "in" : "path",
@@ -420,6 +445,7 @@
     },
     "/orthographies" : {
       "get" : {
+        "tags" : [ "Orthography" ],
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -428,6 +454,7 @@
         }
       },
       "put" : {
+        "tags" : [ "Orthography" ],
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -438,6 +465,7 @@
     },
     "/orthographies/{orthographyId}" : {
       "get" : {
+        "tags" : [ "Orthography" ],
         "parameters" : [ {
           "name" : "orthographyId",
           "in" : "path",
@@ -452,6 +480,7 @@
         }
       },
       "put" : {
+        "tags" : [ "Orthography" ],
         "parameters" : [ {
           "name" : "orthographyId",
           "in" : "path",
@@ -466,6 +495,7 @@
         }
       },
       "delete" : {
+        "tags" : [ "Orthography" ],
         "parameters" : [ {
           "name" : "orthographyId",
           "in" : "path",
@@ -482,6 +512,7 @@
     },
     "/people" : {
       "get" : {
+        "tags" : [ "Person" ],
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -490,6 +521,7 @@
         }
       },
       "put" : {
+        "tags" : [ "Person" ],
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -500,6 +532,7 @@
     },
     "/people/{personId}" : {
       "get" : {
+        "tags" : [ "Person" ],
         "parameters" : [ {
           "name" : "personId",
           "in" : "path",
@@ -514,6 +547,7 @@
         }
       },
       "put" : {
+        "tags" : [ "Person" ],
         "parameters" : [ {
           "name" : "personId",
           "in" : "path",
@@ -528,6 +562,7 @@
         }
       },
       "delete" : {
+        "tags" : [ "Person" ],
         "parameters" : [ {
           "name" : "personId",
           "in" : "path",
@@ -544,6 +579,7 @@
     },
     "/texts" : {
       "get" : {
+        "tags" : [ "Text" ],
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -552,6 +588,7 @@
         }
       },
       "put" : {
+        "tags" : [ "Text" ],
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -562,6 +599,7 @@
     },
     "/texts/{textId}" : {
       "get" : {
+        "tags" : [ "Text" ],
         "parameters" : [ {
           "name" : "textId",
           "in" : "path",
@@ -576,6 +614,7 @@
         }
       },
       "put" : {
+        "tags" : [ "Text" ],
         "parameters" : [ {
           "name" : "textId",
           "in" : "path",
@@ -590,6 +629,7 @@
         }
       },
       "delete" : {
+        "tags" : [ "Text" ],
         "parameters" : [ {
           "name" : "textId",
           "in" : "path",
@@ -606,6 +646,7 @@
     },
     "/users" : {
       "get" : {
+        "tags" : [ "User" ],
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -614,6 +655,7 @@
         }
       },
       "put" : {
+        "tags" : [ "User" ],
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -624,6 +666,7 @@
     },
     "/users/{userId}" : {
       "get" : {
+        "tags" : [ "User" ],
         "parameters" : [ {
           "name" : "userId",
           "in" : "path",
@@ -638,6 +681,7 @@
         }
       },
       "put" : {
+        "tags" : [ "User" ],
         "parameters" : [ {
           "name" : "userId",
           "in" : "path",
@@ -652,6 +696,7 @@
         }
       },
       "delete" : {
+        "tags" : [ "User" ],
         "parameters" : [ {
           "name" : "userId",
           "in" : "path",
