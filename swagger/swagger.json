@@ -128,6 +128,7 @@
       "get" : {
         "tags" : [ "Language" ],
         "summary" : "Retrieve a language by ID",
+        "operationId" : "getLanguage",
         "parameters" : [ {
           "name" : "languageId",
           "in" : "path",
@@ -163,6 +164,7 @@
       "get" : {
         "tags" : [ "Lexeme" ],
         "summary" : "Retrieve multiple lexemes by IDs",
+        "operationId" : "getLexemes",
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -173,6 +175,7 @@
       "put" : {
         "tags" : [ "Lexeme" ],
         "summary" : "Upsert one or more lexemes",
+        "operationId" : "upsertLexemes",
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -185,6 +188,7 @@
       "get" : {
         "tags" : [ "Lexeme" ],
         "summary" : "Retrieve a lexeme by ID",
+        "operationId" : "getLexeme",
         "parameters" : [ {
           "name" : "lexemeId",
           "in" : "path",
@@ -201,6 +205,7 @@
       "delete" : {
         "tags" : [ "Lexeme" ],
         "summary" : "Delete a lexeme by ID",
+        "operationId" : "deleteLexeme",
         "parameters" : [ {
           "name" : "lexemeId",
           "in" : "path",
@@ -219,6 +224,7 @@
       "get" : {
         "tags" : [ "Lexicon" ],
         "summary" : "Retrieve multiple lexicons by ID",
+        "operationId" : "getLexicons",
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -229,6 +235,7 @@
       "put" : {
         "tags" : [ "Lexicon" ],
         "summary" : "Upsert one or more lexicons",
+        "operationId" : "upsertLexicons",
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -241,6 +248,7 @@
       "get" : {
         "tags" : [ "Lexicon" ],
         "summary" : "Retrieve a lexicon by ID",
+        "operationId" : "getLexicon",
         "parameters" : [ {
           "name" : "lexiconId",
           "in" : "path",
@@ -257,6 +265,7 @@
       "delete" : {
         "tags" : [ "Lexicon" ],
         "summary" : "Delete a lexicon by ID",
+        "operationId" : "deleteLexicon",
         "parameters" : [ {
           "name" : "lexiconId",
           "in" : "path",
@@ -275,6 +284,7 @@
       "get" : {
         "tags" : [ "Location" ],
         "summary" : "Retrieve multiple locations by ID",
+        "operationId" : "getLocations",
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -285,6 +295,7 @@
       "put" : {
         "tags" : [ "Location" ],
         "summary" : "Upsert one or more locations",
+        "operationId" : "upsertLocations",
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -297,6 +308,7 @@
       "get" : {
         "tags" : [ "Location" ],
         "summary" : "Retrieve a location by ID",
+        "operationId" : "getLocation",
         "parameters" : [ {
           "name" : "locationId",
           "in" : "path",
@@ -313,6 +325,7 @@
       "delete" : {
         "tags" : [ "Location" ],
         "summary" : "Delete a location by ID",
+        "operationId" : "deleteLocation",
         "parameters" : [ {
           "name" : "locationId",
           "in" : "path",
@@ -331,6 +344,7 @@
       "get" : {
         "tags" : [ "Media" ],
         "summary" : "Retrieve multiple media items by ID",
+        "operationId" : "getMediaItems",
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -341,6 +355,7 @@
       "put" : {
         "tags" : [ "Media" ],
         "summary" : "Upsert one or more media items",
+        "operationId" : "upsertMediaItems",
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -353,6 +368,7 @@
       "get" : {
         "tags" : [ "Media" ],
         "summary" : "Retrieve a media item by ID",
+        "operationId" : "getMediaItem",
         "parameters" : [ {
           "name" : "mediaId",
           "in" : "path",
@@ -369,6 +385,7 @@
       "delete" : {
         "tags" : [ "Media" ],
         "summary" : "Delete a media item by ID",
+        "operationId" : "deleteMediaItem",
         "parameters" : [ {
           "name" : "mediaId",
           "in" : "path",
@@ -387,6 +404,7 @@
       "get" : {
         "tags" : [ "Orthography" ],
         "summary" : "Retrieve multiple orthographies by ID",
+        "operationId" : "getOrthographies",
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -397,6 +415,7 @@
       "put" : {
         "tags" : [ "Orthography" ],
         "summary" : "Upsert one or more orthographies",
+        "operationId" : "upsertOrthographies",
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -409,6 +428,7 @@
       "get" : {
         "tags" : [ "Orthography" ],
         "summary" : "Retrieve an orthography by ID",
+        "operationId" : "getOrthography",
         "parameters" : [ {
           "name" : "orthographyId",
           "in" : "path",
@@ -425,6 +445,7 @@
       "delete" : {
         "tags" : [ "Orthography" ],
         "summary" : "Delete an orthography by ID",
+        "operationId" : "deleteOrthography",
         "parameters" : [ {
           "name" : "orthographyId",
           "in" : "path",
@@ -443,6 +464,7 @@
       "get" : {
         "tags" : [ "Person" ],
         "summary" : "Retrieve multiple people by ID",
+        "operationId" : "getPeople",
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -453,6 +475,7 @@
       "put" : {
         "tags" : [ "Person" ],
         "summary" : "Upsert one or more people",
+        "operationId" : "upsertPeople",
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -465,6 +488,7 @@
       "get" : {
         "tags" : [ "Person" ],
         "summary" : "Retrieve a person by ID",
+        "operationId" : "getPerson",
         "parameters" : [ {
           "name" : "personId",
           "in" : "path",
@@ -481,6 +505,7 @@
       "delete" : {
         "tags" : [ "Person" ],
         "summary" : "Delete a person by ID",
+        "operationId" : "deletePerson",
         "parameters" : [ {
           "name" : "personId",
           "in" : "path",
@@ -499,6 +524,7 @@
       "get" : {
         "tags" : [ "Text" ],
         "summary" : "Retrieve multiple texts by ID",
+        "operationId" : "getTexts",
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -509,6 +535,7 @@
       "put" : {
         "tags" : [ "Text" ],
         "summary" : "Upsert one or more texts",
+        "operationId" : "upsertTexts",
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -521,6 +548,7 @@
       "get" : {
         "tags" : [ "Text" ],
         "summary" : "Retrieve a text by ID",
+        "operationId" : "getText",
         "parameters" : [ {
           "name" : "textId",
           "in" : "path",
@@ -537,6 +565,7 @@
       "delete" : {
         "tags" : [ "Text" ],
         "summary" : "Delete a text by ID",
+        "operationId" : "deleteText",
         "parameters" : [ {
           "name" : "textId",
           "in" : "path",
@@ -555,6 +584,7 @@
       "get" : {
         "tags" : [ "User" ],
         "summary" : "Retrieve multiple users by ID",
+        "operationId" : "getUsers",
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -565,6 +595,7 @@
       "put" : {
         "tags" : [ "User" ],
         "summary" : "Upsert one or more users",
+        "operationId" : "upsertUsers",
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -577,6 +608,7 @@
       "get" : {
         "tags" : [ "User" ],
         "summary" : "Retrieve a user by ID",
+        "operationId" : "getUser",
         "parameters" : [ {
           "name" : "userId",
           "in" : "path",
@@ -593,6 +625,7 @@
       "delete" : {
         "tags" : [ "User" ],
         "summary" : "Delete a user by ID",
+        "operationId" : "deleteUser",
         "parameters" : [ {
           "name" : "userId",
           "in" : "path",
