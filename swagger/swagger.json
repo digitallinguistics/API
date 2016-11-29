@@ -54,6 +54,8 @@
       "put" : {
         "tags" : [ "App" ],
         "summary" : "Upsert a client app",
+        "description" : "Only one client app may be upserted a time.",
+        "operationId" : "upsertApp",
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -65,7 +67,8 @@
     "/apps/{appId}" : {
       "get" : {
         "tags" : [ "App" ],
-        "summary" : "Retrieve multiple client apps by ID",
+        "summary" : "Retrieve a client app by ID",
+        "operationId" : "getApp",
         "parameters" : [ {
           "name" : "appId",
           "in" : "path",
@@ -82,6 +85,7 @@
       "delete" : {
         "tags" : [ "App" ],
         "summary" : "Delete a client app.",
+        "operationId" : "deleteApp",
         "parameters" : [ {
           "name" : "appId",
           "in" : "path",
@@ -100,6 +104,7 @@
       "get" : {
         "tags" : [ "Language" ],
         "summary" : "Retrieve multiple languages by ID",
+        "operationId" : "getLanguages",
         "parameters" : [ ],
         "responses" : {
           "200" : {
@@ -110,6 +115,7 @@
       "put" : {
         "tags" : [ "Language" ],
         "summary" : "Upsert one or more languages",
+        "operationId" : "upsertLanguages",
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -138,6 +144,7 @@
       "delete" : {
         "tags" : [ "Language" ],
         "summary" : "Delete a language by ID",
+        "operationId" : "deleteLanguage",
         "parameters" : [ {
           "name" : "languageId",
           "in" : "path",
