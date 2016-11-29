@@ -109,7 +109,7 @@
         "parameters" : [ {
           "name" : "ids",
           "in" : "query",
-          "description" : "A comma-separated list of language IDs",
+          "description" : "A comma-separated list of IDs",
           "required" : false,
           "type" : "array",
           "items" : {
@@ -179,7 +179,7 @@
         "parameters" : [ {
           "name" : "ids",
           "in" : "query",
-          "description" : "A comma-separated list of lexeme IDs",
+          "description" : "A comma-separated list of IDs",
           "required" : false,
           "type" : "array",
           "items" : {
@@ -246,7 +246,17 @@
         "tags" : [ "Lexicon" ],
         "summary" : "Retrieve multiple lexicons by ID",
         "operationId" : "getLexicons",
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "ids",
+          "in" : "query",
+          "description" : "A comma-separated list of IDs",
+          "required" : false,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "csv"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
@@ -306,7 +316,17 @@
         "tags" : [ "Location" ],
         "summary" : "Retrieve multiple locations by ID",
         "operationId" : "getLocations",
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "ids",
+          "in" : "query",
+          "description" : "A comma-separated list of IDs",
+          "required" : false,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "csv"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
@@ -366,7 +386,17 @@
         "tags" : [ "Media" ],
         "summary" : "Retrieve multiple media items by ID",
         "operationId" : "getMediaItems",
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "ids",
+          "in" : "query",
+          "description" : "A comma-separated list of IDs",
+          "required" : false,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "csv"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
@@ -426,7 +456,17 @@
         "tags" : [ "Orthography" ],
         "summary" : "Retrieve multiple orthographies by ID",
         "operationId" : "getOrthographies",
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "ids",
+          "in" : "query",
+          "description" : "A comma-separated list of IDs",
+          "required" : false,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "csv"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
@@ -486,7 +526,17 @@
         "tags" : [ "Person" ],
         "summary" : "Retrieve multiple people by ID",
         "operationId" : "getPeople",
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "ids",
+          "in" : "query",
+          "description" : "A comma-separated list of IDs",
+          "required" : false,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "csv"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
@@ -546,7 +596,17 @@
         "tags" : [ "Text" ],
         "summary" : "Retrieve multiple texts by ID",
         "operationId" : "getTexts",
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "ids",
+          "in" : "query",
+          "description" : "A comma-separated list of IDs",
+          "required" : false,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "csv"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
@@ -606,7 +666,17 @@
         "tags" : [ "User" ],
         "summary" : "Retrieve multiple users by ID",
         "operationId" : "getUsers",
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "ids",
+          "in" : "query",
+          "description" : "A comma-separated list of IDs",
+          "required" : false,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "csv"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
@@ -663,6 +733,19 @@
     }
   },
   "definitions" : { },
+  "parameters" : {
+    "ids" : {
+      "name" : "ids",
+      "in" : "query",
+      "description" : "A comma-separated list of IDs",
+      "required" : false,
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      },
+      "collectionFormat" : "csv"
+    }
+  },
   "responses" : {
     "DeleteSuccessful" : {
       "description" : "Delete operation successful."
