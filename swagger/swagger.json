@@ -16,35 +16,29 @@
   "host" : "virtserver.swaggerhub.com",
   "basePath" : "/dwhieb/dlx/0.1.0",
   "tags" : [ {
-    "name" : "App",
-    "description" : "Operations on client apps"
-  }, {
     "name" : "Language",
-    "description" : "Operations on languages"
+    "description" : "Operations on Languages"
   }, {
     "name" : "Lexeme",
-    "description" : "Operations on lexemes"
+    "description" : "Operations on Lexemes"
   }, {
     "name" : "Lexicon",
-    "description" : "Operations on lexicons"
+    "description" : "Operations on Lexicons"
   }, {
     "name" : "Location",
-    "description" : "Operations on locations"
+    "description" : "Operations on Locations"
   }, {
     "name" : "Media",
-    "description" : "Operations on media items"
+    "description" : "Operations on Media Items"
   }, {
     "name" : "Orthography",
-    "description" : "Operations on orthographies"
+    "description" : "Operations on Orthographies"
   }, {
     "name" : "Person",
-    "description" : "Operations on people"
+    "description" : "Operations on Persons"
   }, {
     "name" : "Text",
-    "description" : "Operations on texts"
-  }, {
-    "name" : "User",
-    "description" : "Operations on DLx users"
+    "description" : "Operations on Texts"
   } ],
   "schemes" : [ "https" ],
   "consumes" : [ "application/json" ],
@@ -53,7 +47,7 @@
     "/languages" : {
       "get" : {
         "tags" : [ "Language" ],
-        "summary" : "Retrieve multiple languages by ID",
+        "summary" : "Retrieve multiple Languages by ID",
         "operationId" : "getLanguages",
         "parameters" : [ {
           "name" : "ids",
@@ -74,7 +68,7 @@
       },
       "put" : {
         "tags" : [ "Language" ],
-        "summary" : "Upsert a language",
+        "summary" : "Upsert a Language",
         "operationId" : "upsertLanguage",
         "parameters" : [ ],
         "responses" : {
@@ -87,12 +81,12 @@
     "/languages/{languageId}" : {
       "get" : {
         "tags" : [ "Language" ],
-        "summary" : "Retrieve a language by ID",
+        "summary" : "Retrieve a Language by ID",
         "operationId" : "getLanguage",
         "parameters" : [ {
           "name" : "languageId",
           "in" : "path",
-          "description" : "The ID of the language to perform the operation on.",
+          "description" : "The ID of the Language to perform the operation on",
           "required" : true,
           "type" : "string"
         } ],
@@ -104,12 +98,12 @@
       },
       "delete" : {
         "tags" : [ "Language" ],
-        "summary" : "Delete a language by ID",
+        "summary" : "Delete a Language by ID",
         "operationId" : "deleteLanguage",
         "parameters" : [ {
           "name" : "languageId",
           "in" : "path",
-          "description" : "The ID of the language to perform the operation on.",
+          "description" : "The ID of the Language to perform the operation on",
           "required" : true,
           "type" : "string"
         } ],
@@ -123,7 +117,7 @@
     "/lexemes" : {
       "get" : {
         "tags" : [ "Lexeme" ],
-        "summary" : "Retrieve multiple lexemes by IDs",
+        "summary" : "Retrieve multiple Lexemes by IDs",
         "operationId" : "getLexemes",
         "parameters" : [ {
           "name" : "ids",
@@ -144,7 +138,7 @@
       },
       "put" : {
         "tags" : [ "Lexeme" ],
-        "summary" : "Upsert a lexeme",
+        "summary" : "Upsert a Lexeme",
         "operationId" : "upsertLexeme",
         "parameters" : [ ],
         "responses" : {
@@ -157,12 +151,12 @@
     "/lexemes/{lexemeId}" : {
       "get" : {
         "tags" : [ "Lexeme" ],
-        "summary" : "Retrieve a lexeme by ID",
+        "summary" : "Retrieve a Lexeme by ID",
         "operationId" : "getLexeme",
         "parameters" : [ {
           "name" : "lexemeId",
           "in" : "path",
-          "description" : "The ID of the lexeme to perform the operation on.",
+          "description" : "The ID of the Lexeme to perform the operation on",
           "required" : true,
           "type" : "string"
         } ],
@@ -174,12 +168,12 @@
       },
       "delete" : {
         "tags" : [ "Lexeme" ],
-        "summary" : "Delete a lexeme by ID",
+        "summary" : "Delete a Lexeme by ID",
         "operationId" : "deleteLexeme",
         "parameters" : [ {
           "name" : "lexemeId",
           "in" : "path",
-          "description" : "The ID of the lexeme to perform the operation on.",
+          "description" : "The ID of the Lexeme to perform the operation on",
           "required" : true,
           "type" : "string"
         } ],
@@ -193,7 +187,7 @@
     "/lexicons" : {
       "get" : {
         "tags" : [ "Lexicon" ],
-        "summary" : "Retrieve multiple lexicons by ID",
+        "summary" : "Retrieve multiple Lexicons by ID",
         "operationId" : "getLexicons",
         "parameters" : [ {
           "name" : "ids",
@@ -214,7 +208,7 @@
       },
       "put" : {
         "tags" : [ "Lexicon" ],
-        "summary" : "Upsert a lexicon",
+        "summary" : "Upsert a Lexicon",
         "operationId" : "upsertLexicon",
         "parameters" : [ ],
         "responses" : {
@@ -227,12 +221,12 @@
     "/lexicons/{lexiconId}" : {
       "get" : {
         "tags" : [ "Lexicon" ],
-        "summary" : "Retrieve a lexicon by ID",
+        "summary" : "Retrieve a Lexicon by ID",
         "operationId" : "getLexicon",
         "parameters" : [ {
           "name" : "lexiconId",
           "in" : "path",
-          "description" : "The ID of the lexicon to perform the operation on.",
+          "description" : "The ID of the Lexicon to perform the operation on",
           "required" : true,
           "type" : "string"
         } ],
@@ -244,12 +238,12 @@
       },
       "delete" : {
         "tags" : [ "Lexicon" ],
-        "summary" : "Delete a lexicon by ID",
+        "summary" : "Delete a Lexicon by ID",
         "operationId" : "deleteLexicon",
         "parameters" : [ {
           "name" : "lexiconId",
           "in" : "path",
-          "description" : "The ID of the lexicon to perform the operation on.",
+          "description" : "The ID of the Lexicon to perform the operation on",
           "required" : true,
           "type" : "string"
         } ],
@@ -263,7 +257,7 @@
     "/locations" : {
       "get" : {
         "tags" : [ "Location" ],
-        "summary" : "Retrieve multiple locations by ID",
+        "summary" : "Retrieve multiple Locations by ID",
         "operationId" : "getLocations",
         "parameters" : [ {
           "name" : "ids",
@@ -284,7 +278,7 @@
       },
       "put" : {
         "tags" : [ "Location" ],
-        "summary" : "Upsert a location",
+        "summary" : "Upsert a Location",
         "operationId" : "upsertLocation",
         "parameters" : [ ],
         "responses" : {
@@ -297,12 +291,12 @@
     "/locations/{locationId}" : {
       "get" : {
         "tags" : [ "Location" ],
-        "summary" : "Retrieve a location by ID",
+        "summary" : "Retrieve a Location by ID",
         "operationId" : "getLocation",
         "parameters" : [ {
           "name" : "locationId",
           "in" : "path",
-          "description" : "The ID of the location to perform the operation on.",
+          "description" : "The ID of the Location to perform the operation on",
           "required" : true,
           "type" : "string"
         } ],
@@ -314,12 +308,12 @@
       },
       "delete" : {
         "tags" : [ "Location" ],
-        "summary" : "Delete a location by ID",
+        "summary" : "Delete a Location by ID",
         "operationId" : "deleteLocation",
         "parameters" : [ {
           "name" : "locationId",
           "in" : "path",
-          "description" : "The ID of the location to perform the operation on.",
+          "description" : "The ID of the Location to perform the operation on",
           "required" : true,
           "type" : "string"
         } ],
@@ -333,7 +327,7 @@
     "/media" : {
       "get" : {
         "tags" : [ "Media" ],
-        "summary" : "Retrieve multiple media items by ID",
+        "summary" : "Retrieve multiple Media Items by ID",
         "operationId" : "getMediaItems",
         "parameters" : [ {
           "name" : "ids",
@@ -354,7 +348,7 @@
       },
       "put" : {
         "tags" : [ "Media" ],
-        "summary" : "Upsert a media item",
+        "summary" : "Upsert a Media Item",
         "operationId" : "upsertMediaItem",
         "parameters" : [ ],
         "responses" : {
@@ -367,12 +361,12 @@
     "/media/{mediaId}" : {
       "get" : {
         "tags" : [ "Media" ],
-        "summary" : "Retrieve a media item by ID",
+        "summary" : "Retrieve a Media Item by ID",
         "operationId" : "getMediaItem",
         "parameters" : [ {
           "name" : "mediaId",
           "in" : "path",
-          "description" : "The ID of the media file to perform the operation on.",
+          "description" : "The ID of the Media Item to perform the operation on",
           "required" : true,
           "type" : "string"
         } ],
@@ -384,12 +378,12 @@
       },
       "delete" : {
         "tags" : [ "Media" ],
-        "summary" : "Delete a media item by ID",
+        "summary" : "Delete a Media Item by ID",
         "operationId" : "deleteMediaItem",
         "parameters" : [ {
           "name" : "mediaId",
           "in" : "path",
-          "description" : "The ID of the media file to perform the operation on.",
+          "description" : "The ID of the Media Item to perform the operation on",
           "required" : true,
           "type" : "string"
         } ],
@@ -403,7 +397,7 @@
     "/orthographies" : {
       "get" : {
         "tags" : [ "Orthography" ],
-        "summary" : "Retrieve multiple orthographies by ID",
+        "summary" : "Retrieve multiple Orthographies by ID",
         "operationId" : "getOrthographies",
         "parameters" : [ {
           "name" : "ids",
@@ -424,7 +418,7 @@
       },
       "put" : {
         "tags" : [ "Orthography" ],
-        "summary" : "Upsert an orthography",
+        "summary" : "Upsert an Orthography",
         "operationId" : "upsertOrthography",
         "parameters" : [ ],
         "responses" : {
@@ -437,12 +431,12 @@
     "/orthographies/{orthographyId}" : {
       "get" : {
         "tags" : [ "Orthography" ],
-        "summary" : "Retrieve an orthography by ID",
+        "summary" : "Retrieve an Orthography by ID",
         "operationId" : "getOrthography",
         "parameters" : [ {
           "name" : "orthographyId",
           "in" : "path",
-          "description" : "The ID of the orthography to perform the operation on.",
+          "description" : "The ID of the Orthography to perform the operation on",
           "required" : true,
           "type" : "string"
         } ],
@@ -454,12 +448,12 @@
       },
       "delete" : {
         "tags" : [ "Orthography" ],
-        "summary" : "Delete an orthography by ID",
+        "summary" : "Delete an Orthography by ID",
         "operationId" : "deleteOrthography",
         "parameters" : [ {
           "name" : "orthographyId",
           "in" : "path",
-          "description" : "The ID of the orthography to perform the operation on.",
+          "description" : "The ID of the Orthography to perform the operation on",
           "required" : true,
           "type" : "string"
         } ],
@@ -470,11 +464,11 @@
         }
       }
     },
-    "/people" : {
+    "/persons" : {
       "get" : {
         "tags" : [ "Person" ],
-        "summary" : "Retrieve multiple people by ID",
-        "operationId" : "getPeople",
+        "summary" : "Retrieve multiple Persons by ID",
+        "operationId" : "getPersons",
         "parameters" : [ {
           "name" : "ids",
           "in" : "query",
@@ -494,7 +488,7 @@
       },
       "put" : {
         "tags" : [ "Person" ],
-        "summary" : "Upsert a person",
+        "summary" : "Upsert a Person",
         "operationId" : "upsertPerson",
         "parameters" : [ ],
         "responses" : {
@@ -504,15 +498,15 @@
         }
       }
     },
-    "/people/{personId}" : {
+    "/persons/{personId}" : {
       "get" : {
         "tags" : [ "Person" ],
-        "summary" : "Retrieve a person by ID",
+        "summary" : "Retrieve a Person by ID",
         "operationId" : "getPerson",
         "parameters" : [ {
           "name" : "personId",
           "in" : "path",
-          "description" : "The ID of the person to perform the operation on.",
+          "description" : "The ID of the Person to perform the operation on",
           "required" : true,
           "type" : "string"
         } ],
@@ -524,12 +518,12 @@
       },
       "delete" : {
         "tags" : [ "Person" ],
-        "summary" : "Delete a person by ID",
+        "summary" : "Delete a Person by ID",
         "operationId" : "deletePerson",
         "parameters" : [ {
           "name" : "personId",
           "in" : "path",
-          "description" : "The ID of the person to perform the operation on.",
+          "description" : "The ID of the Person to perform the operation on",
           "required" : true,
           "type" : "string"
         } ],
@@ -543,7 +537,7 @@
     "/texts" : {
       "get" : {
         "tags" : [ "Text" ],
-        "summary" : "Retrieve multiple texts by ID",
+        "summary" : "Retrieve multiple Texts by ID",
         "operationId" : "getTexts",
         "parameters" : [ {
           "name" : "ids",
@@ -564,7 +558,7 @@
       },
       "put" : {
         "tags" : [ "Text" ],
-        "summary" : "Upsert a text",
+        "summary" : "Upsert a Text",
         "operationId" : "upsertText",
         "parameters" : [ ],
         "responses" : {
@@ -577,12 +571,12 @@
     "/texts/{textId}" : {
       "get" : {
         "tags" : [ "Text" ],
-        "summary" : "Retrieve a text by ID",
+        "summary" : "Retrieve a Text by ID",
         "operationId" : "getText",
         "parameters" : [ {
           "name" : "textId",
           "in" : "path",
-          "description" : "The ID of the text to perform the operation on.",
+          "description" : "The ID of the Text to perform the operation on",
           "required" : true,
           "type" : "string"
         } ],
@@ -594,82 +588,12 @@
       },
       "delete" : {
         "tags" : [ "Text" ],
-        "summary" : "Delete a text by ID",
+        "summary" : "Delete a Text by ID",
         "operationId" : "deleteText",
         "parameters" : [ {
           "name" : "textId",
           "in" : "path",
-          "description" : "The ID of the text to perform the operation on.",
-          "required" : true,
-          "type" : "string"
-        } ],
-        "responses" : {
-          "204" : {
-            "description" : "Delete operation successful."
-          }
-        }
-      }
-    },
-    "/users" : {
-      "get" : {
-        "tags" : [ "User" ],
-        "summary" : "Retrieve multiple users by ID",
-        "operationId" : "getUsers",
-        "parameters" : [ {
-          "name" : "ids",
-          "in" : "query",
-          "description" : "A comma-separated list of IDs",
-          "required" : true,
-          "type" : "array",
-          "items" : {
-            "type" : "string"
-          },
-          "collectionFormat" : "csv"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Operation successful."
-          }
-        }
-      },
-      "put" : {
-        "tags" : [ "User" ],
-        "summary" : "Upsert a user",
-        "operationId" : "upsertUser",
-        "parameters" : [ ],
-        "responses" : {
-          "201" : {
-            "description" : "Upsert successful."
-          }
-        }
-      }
-    },
-    "/users/{userId}" : {
-      "get" : {
-        "tags" : [ "User" ],
-        "summary" : "Retrieve a user by ID",
-        "operationId" : "getUser",
-        "parameters" : [ {
-          "name" : "userId",
-          "in" : "path",
-          "description" : "The ID of the user to perform the operation on.",
-          "required" : true,
-          "type" : "string"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Operation successful."
-          }
-        }
-      },
-      "delete" : {
-        "tags" : [ "User" ],
-        "summary" : "Delete a user by ID",
-        "operationId" : "deleteUser",
-        "parameters" : [ {
-          "name" : "userId",
-          "in" : "path",
-          "description" : "The ID of the user to perform the operation on.",
+          "description" : "The ID of the Text to perform the operation on",
           "required" : true,
           "type" : "string"
         } ],
