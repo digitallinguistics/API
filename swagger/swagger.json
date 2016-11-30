@@ -48,12 +48,13 @@
       "get" : {
         "tags" : [ "Language" ],
         "summary" : "Retrieve multiple Languages by ID",
+        "description" : "If the \"ids\" parameter is omitted, returns all items that the user has permission to access.",
         "operationId" : "getLanguages",
         "parameters" : [ {
           "name" : "ids",
           "in" : "query",
           "description" : "A comma-separated list of IDs",
-          "required" : true,
+          "required" : false,
           "type" : "array",
           "items" : {
             "type" : "string"
@@ -126,12 +127,13 @@
       "get" : {
         "tags" : [ "Lexeme" ],
         "summary" : "Retrieve multiple Lexemes by IDs",
+        "description" : "If the \"ids\" parameter is omitted, returns all items that the user has permission to access.",
         "operationId" : "getLexemes",
         "parameters" : [ {
           "name" : "ids",
           "in" : "query",
           "description" : "A comma-separated list of IDs",
-          "required" : true,
+          "required" : false,
           "type" : "array",
           "items" : {
             "type" : "string"
@@ -204,12 +206,13 @@
       "get" : {
         "tags" : [ "Lexicon" ],
         "summary" : "Retrieve multiple Lexicons by ID",
+        "description" : "If the \"ids\" parameter is omitted, returns all items that the user has permission to access.",
         "operationId" : "getLexicons",
         "parameters" : [ {
           "name" : "ids",
           "in" : "query",
           "description" : "A comma-separated list of IDs",
-          "required" : true,
+          "required" : false,
           "type" : "array",
           "items" : {
             "type" : "string"
@@ -282,12 +285,13 @@
       "get" : {
         "tags" : [ "Location" ],
         "summary" : "Retrieve multiple Locations by ID",
+        "description" : "If the \"ids\" parameter is omitted, returns all items that the user has permission to access.",
         "operationId" : "getLocations",
         "parameters" : [ {
           "name" : "ids",
           "in" : "query",
           "description" : "A comma-separated list of IDs",
-          "required" : true,
+          "required" : false,
           "type" : "array",
           "items" : {
             "type" : "string"
@@ -360,12 +364,13 @@
       "get" : {
         "tags" : [ "Media" ],
         "summary" : "Retrieve multiple Media Items by ID",
+        "description" : "If the \"ids\" parameter is omitted, returns all items that the user has permission to access.",
         "operationId" : "getMediaItems",
         "parameters" : [ {
           "name" : "ids",
           "in" : "query",
           "description" : "A comma-separated list of IDs",
-          "required" : true,
+          "required" : false,
           "type" : "array",
           "items" : {
             "type" : "string"
@@ -438,12 +443,13 @@
       "get" : {
         "tags" : [ "Orthography" ],
         "summary" : "Retrieve multiple Orthographies by ID",
+        "description" : "If the \"ids\" parameter is omitted, returns all items that the user has permission to access.",
         "operationId" : "getOrthographies",
         "parameters" : [ {
           "name" : "ids",
           "in" : "query",
           "description" : "A comma-separated list of IDs",
-          "required" : true,
+          "required" : false,
           "type" : "array",
           "items" : {
             "type" : "string"
@@ -516,12 +522,13 @@
       "get" : {
         "tags" : [ "Person" ],
         "summary" : "Retrieve multiple Persons by ID",
+        "description" : "If the \"ids\" parameter is omitted, returns all items that the user has permission to access.",
         "operationId" : "getPersons",
         "parameters" : [ {
           "name" : "ids",
           "in" : "query",
           "description" : "A comma-separated list of IDs",
-          "required" : true,
+          "required" : false,
           "type" : "array",
           "items" : {
             "type" : "string"
@@ -594,12 +601,13 @@
       "get" : {
         "tags" : [ "Text" ],
         "summary" : "Retrieve multiple Texts by ID",
+        "description" : "If the \"ids\" parameter is omitted, returns all items that the user has permission to access.",
         "operationId" : "getTexts",
         "parameters" : [ {
           "name" : "ids",
           "in" : "query",
           "description" : "A comma-separated list of IDs",
-          "required" : true,
+          "required" : false,
           "type" : "array",
           "items" : {
             "type" : "string"
@@ -707,7 +715,7 @@
       "name" : "ids",
       "in" : "query",
       "description" : "A comma-separated list of IDs",
-      "required" : true,
+      "required" : false,
       "type" : "array",
       "items" : {
         "type" : "string"
