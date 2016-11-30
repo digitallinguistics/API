@@ -669,6 +669,14 @@
       }
     }
   },
+  "securityDefinitions" : {
+    "token" : {
+      "description" : "An access token (JSON Web Token) included in the Authorization header. Tokens may be retrieved programmatically from https://login.digitallinguistics.io. See the documentation at http://digitallinguistics.github.io/dlx-login/.",
+      "type" : "apiKey",
+      "name" : "token",
+      "in" : "header"
+    }
+  },
   "definitions" : {
     "Document" : {
       "type" : "object",
