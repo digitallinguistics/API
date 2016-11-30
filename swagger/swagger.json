@@ -13,8 +13,8 @@
       "name" : "MIT"
     }
   },
-  "host" : "virtserver.swaggerhub.com",
-  "basePath" : "/dwhieb/dlx/0.1.0",
+  "host" : "api.digitallinguistics.io",
+  "basePath" : "/v0",
   "tags" : [ {
     "name" : "Language",
     "description" : "Operations on Languages"
