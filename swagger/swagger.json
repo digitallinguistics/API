@@ -625,9 +625,11 @@
     "body" : {
       "in" : "body",
       "name" : "body",
-      "description" : "An object or array of objects to upsert",
+      "description" : "An database object to upsert",
       "required" : true,
-      "schema" : { }
+      "schema" : {
+        "$ref" : "#/definitions/Document"
+      }
     },
     "ids" : {
       "name" : "ids",
