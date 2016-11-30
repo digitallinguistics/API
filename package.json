@@ -1,6 +1,6 @@
 {
   "name": "dlx-api",
-  "version": "0.5.0",
+  "version": "0.5.0-alpha",
   "description": "Source code for the DLx database API and Web Socket.",
   "contributors": [
     {
