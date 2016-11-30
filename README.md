@@ -88,7 +88,7 @@ Certain resources contain subitems or references to other resources. These can o
 
 A complete list of the operations that can be performed on each type of resource and collection is available [here](https://api.digitallinguistics.io/docs).
 
-**NB:** The API always returns JSON data in the response. If you would like to see HTML representations of the data instead, use the [Data Explorer API](http://developer.digitallinguistics.io/data).
+**NB:** The API always returns JSON data in the response. If you would like to see HTML representations of the data instead, use the [Data Explorer](http://developer.digitallinguistics.io/data).
 
 #### Parts of the Request
 
@@ -96,7 +96,7 @@ A complete list of the operations that can be performed on each type of resource
 All requests to the DLx API should use HTTPS protocol rather than HTTP.
 
 * ##### Host
-The hostname for requests to the DLx API should always be `api.digitallinguistics.org`.
+The hostname for requests to the DLx API should always be `api.digitallinguistics.io`.
 
 * ##### Headers
 Every request to the API requires an Authorization header, which should contain the access token you received from `login.digitallinguistics.io` during authentication, in the format `Bearer {access_token}`.
