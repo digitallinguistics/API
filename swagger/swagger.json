@@ -74,8 +74,8 @@
       },
       "put" : {
         "tags" : [ "Language" ],
-        "summary" : "Upsert one or more languages",
-        "operationId" : "upsertLanguages",
+        "summary" : "Upsert a language",
+        "operationId" : "upsertLanguage",
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -125,7 +125,17 @@
         "tags" : [ "Lexeme" ],
         "summary" : "Retrieve multiple lexemes by IDs",
         "operationId" : "getLexemes",
-        "parameters" : [ ],
+        "parameters" : [ {
+          "name" : "ids",
+          "in" : "query",
+          "description" : "A comma-separated list of IDs",
+          "required" : true,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "csv"
+        } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
@@ -134,8 +144,8 @@
       },
       "put" : {
         "tags" : [ "Lexeme" ],
-        "summary" : "Upsert one or more lexemes",
-        "operationId" : "upsertLexemes",
+        "summary" : "Upsert a lexeme",
+        "operationId" : "upsertLexeme",
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -204,8 +214,8 @@
       },
       "put" : {
         "tags" : [ "Lexicon" ],
-        "summary" : "Upsert one or more lexicons",
-        "operationId" : "upsertLexicons",
+        "summary" : "Upsert a lexicon",
+        "operationId" : "upsertLexicon",
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -274,8 +284,8 @@
       },
       "put" : {
         "tags" : [ "Location" ],
-        "summary" : "Upsert one or more locations",
-        "operationId" : "upsertLocations",
+        "summary" : "Upsert a location",
+        "operationId" : "upsertLocation",
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -344,8 +354,8 @@
       },
       "put" : {
         "tags" : [ "Media" ],
-        "summary" : "Upsert one or more media items",
-        "operationId" : "upsertMediaItems",
+        "summary" : "Upsert a media item",
+        "operationId" : "upsertMediaItem",
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -414,8 +424,8 @@
       },
       "put" : {
         "tags" : [ "Orthography" ],
-        "summary" : "Upsert one or more orthographies",
-        "operationId" : "upsertOrthographies",
+        "summary" : "Upsert an orthography",
+        "operationId" : "upsertOrthography",
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -484,8 +494,8 @@
       },
       "put" : {
         "tags" : [ "Person" ],
-        "summary" : "Upsert one or more people",
-        "operationId" : "upsertPeople",
+        "summary" : "Upsert a person",
+        "operationId" : "upsertPerson",
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -554,8 +564,8 @@
       },
       "put" : {
         "tags" : [ "Text" ],
-        "summary" : "Upsert one or more texts",
-        "operationId" : "upsertTexts",
+        "summary" : "Upsert a text",
+        "operationId" : "upsertText",
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -624,8 +634,8 @@
       },
       "put" : {
         "tags" : [ "User" ],
-        "summary" : "Upsert one or more users",
-        "operationId" : "upsertUsers",
+        "summary" : "Upsert a user",
+        "operationId" : "upsertUser",
         "parameters" : [ ],
         "responses" : {
           "201" : {
@@ -671,8 +681,30 @@
       }
     }
   },
-  "definitions" : { },
+  "definitions" : {
+    "Document" : {
+      "type" : "object",
+      "required" : [ "type" ],
+      "properties" : {
+        "id" : {
+          "type" : "string"
+        },
+        "type" : {
+          "type" : "string"
+        }
+      },
+      "title" : "Document",
+      "description" : "A document in the DLx database"
+    }
+  },
   "parameters" : {
+    "body" : {
+      "in" : "body",
+      "name" : "body",
+      "description" : "An object or array of objects to upsert",
+      "required" : true,
+      "schema" : { }
+    },
     "ids" : {
       "name" : "ids",
       "in" : "query",
