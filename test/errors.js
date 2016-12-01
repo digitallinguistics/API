@@ -43,7 +43,13 @@ const options = (attrs = {}) => {
     subject:    config.subject,
   };
 
-  return Object.assign({}, defaults, attrs);
+  const opts = Object.assign({}, defaults, attrs);
+
+  Object.keys(opts).forEach(key => {
+    if (!opts[key]) delete opts[key];
+  });
+
+  return opts;
 
 };
 
@@ -76,7 +82,7 @@ describe('API Errors', function() {
     });
   });
 
-  it('404: No Route', function(done) {
+  xit('404: No Route', function(done) {
     return req.get('/test')
     .set('Authorization', `Bearer ${token}`)
     .expect(404)
@@ -92,7 +98,7 @@ describe('API Errors', function() {
 
   });
 
-  it('credentials_required', function(done) {
+  xit('credentials_required', function(done) {
     return req.get('/texts')
     .expect(401)
     .then(res => {
@@ -104,13 +110,36 @@ describe('API Errors', function() {
 
   xit('invalid_token: aud missing', function(done) {
 
+    const p = payload({ aud: '' });
+    const opts = options({ audience: '' });
+    const token = jwt.sign(p, secret, opts);
+
+    return req.get('/texts')
+    .set('Authorization', `Bearer ${token}`)
+    .expect(401)
+    .then(res => {
+      expect(res.headers['www-authenticate']).toBeDefined();
+      done();
+    }).catch(handleError(done));
+
   });
 
   xit('invalid_token: aud invalid', function(done) {
 
+    const opts = options({ audience: 'https://api.wrongdomain.io' });
+    const token = jwt.sign(payload(), secret, opts);
+
+    return req.get('/texts')
+    .set('Authorization', `Bearer ${token}`)
+    .expect(401)
+    .then(res => {
+      expect(res.headers['www-authenticate']).toBeDefined();
+      done();
+    }).catch(handleError(done));
+
   });
 
-  it('invalid_token: cid missing', function(done) {
+  xit('invalid_token: cid missing', function(done) {
 
     const p = payload({ cid: '' });
     const token = jwt.sign(p, secret, options());
@@ -125,7 +154,7 @@ describe('API Errors', function() {
 
   });
 
-  it('invalid_token: cid invalid', function(done) {
+  xit('invalid_token: cid invalid', function(done) {
 
     const p = payload({ cid: 'a1b2c3d4e5' });
     const token = jwt.sign(p, secret, options());
