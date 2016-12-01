@@ -76,7 +76,7 @@ describe('API Errors', function() {
   });
 
   it('404: No Route', function(done) {
-    return req.get('/texts')
+    return req.get('/test')
     .set('Authorization', `Bearer ${token}`)
     .expect(404)
     .then(done)
@@ -133,26 +133,6 @@ describe('API Errors', function() {
   });
 
   xit('invalid_token: iss invalid', function(done) {
-
-  });
-
-  xit('invalid_token: jti missing', function(done) {
-
-  });
-
-  xit('invalid_token: jti invalid', function(done) {
-
-  });
-
-  xit('invalid_token: scp missing', function(done) {
-
-  });
-
-  xit('invalid_token: scp invalid', function(done) {
-
-  });
-
-  xit('invalid_token: sub invalid', function(done) {
 
   });
 
