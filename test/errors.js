@@ -175,6 +175,18 @@ describe('API Errors', function() {
 
   xit('invalid_token: iss invalid', function(done) {
 
+    const p = payload({ iss: 'https://login.wrongdomain.io' });
+    const opts = options({ issuer: '' });
+    const token = jwt.sign(p, secret, opts);
+
+    return req.get('/texts')
+    .set('Authorization', `Bearer ${token}`)
+    .expect(401)
+    .then(res => {
+      expect(res.headers['www-authenticate']).toBeDefined();
+      done();
+    }).catch(handleError(done));
+
   });
 
   xit('token_expired', function(done) {
