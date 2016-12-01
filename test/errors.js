@@ -65,12 +65,14 @@ describe('API Errors', function() {
     return req.get('/texts')
     .expect(401)
     .then(res => {
+      expect(res.headers['www-authenticate']).toBeDefined();
       expect(res.body.code).toBe('credentials_required');
       done();
     }).catch(handleError(done));
   });
 
   xit('invalid_token: aud missing', function(done) {
+
   });
 
   xit('invalid_token: aud invalid', function(done) {
@@ -81,8 +83,14 @@ describe('API Errors', function() {
 
   });
 
-  xit('invalid_token: cid invalid', function(done) {
-
+  it('invalid_token: cid invalid', function(done) {
+    return req.get('/texts')
+    .set('Authorization', `Bearer ${token}`)
+    .expect(401)
+    .then(res => {
+      expect(res.headers['www-authenticate']).toBeDefined();
+      done();
+    }).catch(handleError(done));
   });
 
   xit('invalid_token: iss missing', function(done) {
