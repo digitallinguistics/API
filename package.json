@@ -44,6 +44,7 @@
   },
   "devDependencies": {
     "express-routemap": "^1.0.2",
-    "jasmine": "^2.5.2"
+    "jasmine": "^2.5.2",
+    "jsonwebtoken": "^7.1.9"
   }
 }
