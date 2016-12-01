@@ -2,10 +2,14 @@
   func-names,
   max-nested-callbacks,
   max-statements,
+  newline-per-chained-call,
+  no-magic-numbers,
+  no-shadow,
   prefer-arrow-callback
 */
 
 const app    = require('../app');
+const db     = require('../lib/db');
 const jwt    = require('jsonwebtoken');
 const config = require('../../credentials/dlx-api-spec.js');
 const req    = require('supertest-as-promised').agent(app);
@@ -46,11 +50,37 @@ const options = (attrs = {}) => {
 const secret = config.secret;
 const token = jwt.sign(payload(), secret, options());
 
+const clientApp = {
+  id:           config.cid,
+  name:        'API Errors Test App',
+  secret:       config.secret,
+  confidential: true,
+  scope:       'public',
+  redirects: ['http://localhost:3000/oauth'],
+  permissions: {
+    owner:       [],
+    contributor: [],
+    viewer:      [],
+    public:      false,
+  },
+};
+
 // API Errors Spec
 describe('API Errors', function() {
 
-  xit('404: No Route', function(done) {
+  beforeAll(function(done) {
+    db.upsertDocument(db.coll, clientApp, err => {
+      if (err) return fail(err);
+      return done();
+    });
+  });
 
+  it('404: No Route', function(done) {
+    return req.get('/texts')
+    .set('Authorization', `Bearer ${token}`)
+    .expect(404)
+    .then(done)
+    .catch(handleError(done));
   });
 
   xit('405: Method Not Allowed', function(done) {
@@ -84,6 +114,10 @@ describe('API Errors', function() {
   });
 
   it('invalid_token: cid invalid', function(done) {
+
+    const p = payload({ cid: 'a1b2c3d4e5' });
+    const token = jwt.sign(p, secret, options());
+
     return req.get('/texts')
     .set('Authorization', `Bearer ${token}`)
     .expect(401)
@@ -91,6 +125,7 @@ describe('API Errors', function() {
       expect(res.headers['www-authenticate']).toBeDefined();
       done();
     }).catch(handleError(done));
+
   });
 
   xit('invalid_token: iss missing', function(done) {
