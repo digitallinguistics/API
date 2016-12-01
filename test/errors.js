@@ -52,6 +52,7 @@ const token = jwt.sign(payload(), secret, options());
 
 const clientApp = {
   id:           config.cid,
+  type:        'client-app',
   name:        'API Errors Test App',
   secret:       config.secret,
   confidential: true,
@@ -109,7 +110,18 @@ describe('API Errors', function() {
 
   });
 
-  xit('invalid_token: cid missing', function(done) {
+  it('invalid_token: cid missing', function(done) {
+
+    const p = payload({ cid: '' });
+    const token = jwt.sign(p, secret, options());
+
+    return req.get('/texts')
+    .set('Authorization', `Bearer ${token}`)
+    .expect(401)
+    .then(res => {
+      expect(res.headers['www-authenticate']).toBeDefined();
+      done();
+    }).catch(handleError(done));
 
   });
 
