@@ -1,11 +1,21 @@
 /* eslint-disable
   func-names,
+  max-nested-callbacks,
   max-statements,
   prefer-arrow-callback
 */
 
-const jwt = require('jsonwebtoken');
+const app    = require('../app');
+const jwt    = require('jsonwebtoken');
 const config = require('../../credentials/dlx-api-spec.js');
+const req    = require('supertest-as-promised').agent(app);
+
+const handleError = done => {
+  return function(err) {
+    fail(err);
+    done();
+  };
+};
 
 const payload = (attrs = {}) => {
 
@@ -51,12 +61,16 @@ describe('API Errors', function() {
 
   });
 
-  xit('credentials_required', function(done) {
-
+  it('credentials_required', function(done) {
+    return req.get('/texts')
+    .expect(401)
+    .then(res => {
+      expect(res.body.code).toBe('credentials_required');
+      done();
+    }).catch(handleError(done));
   });
 
   xit('invalid_token: aud missing', function(done) {
-
   });
 
   xit('invalid_token: aud invalid', function(done) {
