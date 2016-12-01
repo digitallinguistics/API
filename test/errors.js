@@ -4,6 +4,39 @@
   prefer-arrow-callback
 */
 
+const jwt = require('jsonwebtoken');
+const config = require('../../credentials/dlx-api-spec.js');
+
+const payload = (attrs = {}) => {
+
+  const defaults = {
+    cid: config.cid,
+    scp: 'public',
+  };
+
+  return Object.assign({}, defaults, attrs);
+
+};
+
+const options = (attrs = {}) => {
+
+  const defaults = {
+    algorithm: 'HS256',
+    expiresIn:  3600,
+    audience:  'https://api.digitallinguistics.io',
+    issuer:    'https://login.digitallinguistics.io',
+    jwtid:      config.jwtid,
+    subject:    config.subject,
+  };
+
+  return Object.assign({}, defaults, attrs);
+
+};
+
+const secret = config.secret;
+const token = jwt.sign(payload(), secret, options());
+
+// API Errors Spec
 describe('API Errors', function() {
 
   xit('404: No Route', function(done) {
@@ -43,6 +76,14 @@ describe('API Errors', function() {
   });
 
   xit('invalid_token: iss invalid', function(done) {
+
+  });
+
+  xit('invalid_token: jti missing', function(done) {
+
+  });
+
+  xit('invalid_token: jti invalid', function(done) {
 
   });
 
