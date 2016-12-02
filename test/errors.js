@@ -10,6 +10,7 @@
 
 const app    = require('../app');
 const db     = require('../lib/db');
+const http   = require('http');
 const jwt    = require('jsonwebtoken');
 const config = require('../../credentials/dlx-api-spec.js');
 const req    = require('supertest-as-promised').agent(app);
@@ -84,24 +85,44 @@ describe('API Errors', function() {
     });
   });
 
+  it('HTTP > HTTPS', function(done) {
+
+    // TODO: change this URL once you've enabled the api.digitallinguistics.io domain
+    const req = http.get(`http://dlx-api.azurewebsites.net/test`, res => {
+
+      let data = '';
+
+      res.on('error', fail);
+      res.on('data', chunk => { data += chunk; });
+      res.on('end', () => {
+        expect(res.headers.location.includes('https')).toBe(true);
+        done();
+      });
+
+    });
+
+    req.on('error', fail);
+
+  });
+
   it('404: No Route', function(done) {
-    return req.get('/test')
+    return req.get('/badroute')
     .set('Authorization', `Bearer ${token}`)
     .expect(404)
     .then(done)
     .catch(handleError(done));
   });
 
-  xit('405: Method Not Allowed', function(done) {
-
-  });
-
-  xit('497: Use HTTPS', function(done) {
-
+  it('405: Method Not Allowed', function(done) {
+    return req.post('/test')
+    .set('Authorization', `Bearer ${token}`)
+    .expect(405)
+    .then(done)
+    .catch(handleError(done));
   });
 
   it('credentials_required', function(done) {
-    req.get('/texts')
+    req.get('/test')
     .expect(401)
     .then(res => {
       expect(res.headers['www-authenticate']).toBeDefined();
@@ -116,7 +137,7 @@ describe('API Errors', function() {
     const opts = options({ audience: '' });
     const token = jwt.sign(p, secret, opts);
 
-    req.get('/texts')
+    req.get('/test')
     .set('Authorization', `Bearer ${token}`)
     .expect(401)
     .then(res => {
@@ -131,7 +152,7 @@ describe('API Errors', function() {
     const opts = options({ audience: 'https://api.wrongdomain.io' });
     const token = jwt.sign(p, secret, opts);
 
-    req.get('/texts')
+    req.get('/test')
     .set('Authorization', `Bearer ${token}`)
     .expect(401)
     .then(res => {
@@ -146,7 +167,7 @@ describe('API Errors', function() {
     const p = payload({ cid: '' });
     const token = jwt.sign(p, secret, opts);
 
-    req.get('/texts')
+    req.get('/test')
     .set('Authorization', `Bearer ${token}`)
     .expect(401)
     .then(res => {
@@ -161,7 +182,7 @@ describe('API Errors', function() {
     const p = payload({ cid: 'a1b2c3d4e5' });
     const token = jwt.sign(p, secret, opts);
 
-    req.get('/texts')
+    req.get('/test')
     .set('Authorization', `Bearer ${token}`)
     .expect(401)
     .then(res => {
@@ -176,7 +197,7 @@ describe('API Errors', function() {
     const p = payload({ iss: '' });
     const token = jwt.sign(p, secret, options({ issuer: '' }));
 
-    req.get('/texts')
+    req.get('/test')
     .set('Authorization', `Bearer ${token}`)
     .expect(401)
     .then(res => {
@@ -192,7 +213,7 @@ describe('API Errors', function() {
     const opts = options({ issuer: '' });
     const token = jwt.sign(p, secret, opts);
 
-    req.get('/texts')
+    req.get('/test')
     .set('Authorization', `Bearer ${token}`)
     .expect(401)
     .then(res => {
@@ -216,5 +237,15 @@ describe('API Errors', function() {
     }, 1500);
 
   }, 10000);
+
+  it('GET /test', function(done) {
+    req.get('/test')
+    .set('Authorization', `Bearer ${token}`)
+    .expect(200)
+    .then(res => {
+      expect(res.body.message).toBe('Test successful.');
+      done();
+    }).catch(handleError(done));
+  });
 
 });
