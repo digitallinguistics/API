@@ -5,6 +5,7 @@ const config = require('./lib/config');
 const authenticate = require('./lib/authenticate');
 const bodyParser   = require('body-parser');
 const express      = require('express');
+const handlers     = require('./lib/handlers');
 const helmet       = require('helmet');
 const middleware   = require('./lib/middleware');
 const routers      = require('./lib/routers');
@@ -29,8 +30,12 @@ app.use(authenticate);             // authenticate all requests to the API
 routers.v0(v0);
 
 // mount routers to their respective API version paths
-app.use(v0);                       // Latest
-app.use('/v0', v0);                // v0.x
+app.use(v0);
+app.use('/v0', v0);
+
+// generic error handlers
+app.use(handlers.notFound);        // 404 error
+app.use(handlers.errors);          // 500 error
 
 server(app);                       // create the server
 
