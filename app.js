@@ -7,7 +7,7 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const helmet = require('helmet');
 const middleware = require('./lib/middleware');
-const router = require('./lib/routes');
+const router = require('./lib/router');
 const server = require('./lib/server');
 
 // initialize Express
