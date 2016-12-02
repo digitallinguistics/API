@@ -171,6 +171,17 @@ describe('API Errors', function() {
 
   xit('invalid_token: iss missing', function(done) {
 
+    const p = payload({ iss: '' });
+    const token = jwt.sign(p, secret, options({ issuer: '' }));
+
+    return req.get('/texts')
+    .set('Authorization', `Bearer ${token}`)
+    .expect(401)
+    .then(res => {
+      expect(res.headers['www-authenticate']).toBeDefined();
+      done();
+    }).catch(handleError(done));
+
   });
 
   xit('invalid_token: iss invalid', function(done) {
