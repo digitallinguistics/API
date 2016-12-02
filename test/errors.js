@@ -54,6 +54,8 @@ const options = (attrs = {}) => {
 };
 
 const secret = config.secret;
+const p = payload();
+const opts = options();
 const token = jwt.sign(payload(), secret, options());
 
 const clientApp = {
@@ -82,7 +84,7 @@ describe('API Errors', function() {
     });
   });
 
-  xit('404: No Route', function(done) {
+  it('404: No Route', function(done) {
     return req.get('/test')
     .set('Authorization', `Bearer ${token}`)
     .expect(404)
@@ -98,8 +100,8 @@ describe('API Errors', function() {
 
   });
 
-  xit('credentials_required', function(done) {
-    return req.get('/texts')
+  it('credentials_required', function(done) {
+    req.get('/texts')
     .expect(401)
     .then(res => {
       expect(res.headers['www-authenticate']).toBeDefined();
@@ -108,13 +110,13 @@ describe('API Errors', function() {
     }).catch(handleError(done));
   });
 
-  xit('invalid_token: aud missing', function(done) {
+  it('invalid_token: aud missing', function(done) {
 
     const p = payload({ aud: '' });
     const opts = options({ audience: '' });
     const token = jwt.sign(p, secret, opts);
 
-    return req.get('/texts')
+    req.get('/texts')
     .set('Authorization', `Bearer ${token}`)
     .expect(401)
     .then(res => {
@@ -124,12 +126,12 @@ describe('API Errors', function() {
 
   });
 
-  xit('invalid_token: aud invalid', function(done) {
+  it('invalid_token: aud invalid', function(done) {
 
     const opts = options({ audience: 'https://api.wrongdomain.io' });
-    const token = jwt.sign(payload(), secret, opts);
+    const token = jwt.sign(p, secret, opts);
 
-    return req.get('/texts')
+    req.get('/texts')
     .set('Authorization', `Bearer ${token}`)
     .expect(401)
     .then(res => {
@@ -139,12 +141,12 @@ describe('API Errors', function() {
 
   });
 
-  xit('invalid_token: cid missing', function(done) {
+  it('invalid_token: cid missing', function(done) {
 
     const p = payload({ cid: '' });
-    const token = jwt.sign(p, secret, options());
+    const token = jwt.sign(p, secret, opts);
 
-    return req.get('/texts')
+    req.get('/texts')
     .set('Authorization', `Bearer ${token}`)
     .expect(401)
     .then(res => {
@@ -154,12 +156,12 @@ describe('API Errors', function() {
 
   });
 
-  xit('invalid_token: cid invalid', function(done) {
+  it('invalid_token: cid invalid', function(done) {
 
     const p = payload({ cid: 'a1b2c3d4e5' });
-    const token = jwt.sign(p, secret, options());
+    const token = jwt.sign(p, secret, opts);
 
-    return req.get('/texts')
+    req.get('/texts')
     .set('Authorization', `Bearer ${token}`)
     .expect(401)
     .then(res => {
@@ -169,12 +171,12 @@ describe('API Errors', function() {
 
   });
 
-  xit('invalid_token: iss missing', function(done) {
+  it('invalid_token: iss missing', function(done) {
 
     const p = payload({ iss: '' });
     const token = jwt.sign(p, secret, options({ issuer: '' }));
 
-    return req.get('/texts')
+    req.get('/texts')
     .set('Authorization', `Bearer ${token}`)
     .expect(401)
     .then(res => {
@@ -184,13 +186,13 @@ describe('API Errors', function() {
 
   });
 
-  xit('invalid_token: iss invalid', function(done) {
+  it('invalid_token: iss invalid', function(done) {
 
     const p = payload({ iss: 'https://login.wrongdomain.io' });
     const opts = options({ issuer: '' });
     const token = jwt.sign(p, secret, opts);
 
-    return req.get('/texts')
+    req.get('/texts')
     .set('Authorization', `Bearer ${token}`)
     .expect(401)
     .then(res => {
@@ -200,8 +202,19 @@ describe('API Errors', function() {
 
   });
 
-  xit('token_expired', function(done) {
-    // TODO: rename this test?
-  });
+  it('invalid_token: expired', function(done) {
+
+    const opts = options({ expiresIn: 1 });
+    const token = jwt.sign(p, secret, opts);
+
+    setTimeout(() => {
+      req.get('/test')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(401)
+      .then(done)
+      .catch(handleError(done));
+    }, 1500);
+
+  }, 10000);
 
 });
