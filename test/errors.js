@@ -9,10 +9,10 @@
 */
 
 const app    = require('../app');
+const config = require('../lib/config');
 const db     = require('../lib/db');
 const http   = require('http');
 const jwt    = require('jsonwebtoken');
-const config = require('../../credentials/dlx-api-spec.js');
 const req    = require('supertest-as-promised').agent(app);
 
 const handleError = done => {
