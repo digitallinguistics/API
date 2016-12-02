@@ -75,177 +75,182 @@ const clientApp = {
   },
 };
 
-// API Errors Spec
-describe('API Errors', function() {
+// The "v" parameter is a version path, e.g. "/v0", "/v1", etc.
+module.exports = (v = '') => {
 
-  beforeAll(function(done) {
-    db.upsertDocument(db.coll, clientApp, err => {
-      if (err) return fail(err);
-      return done();
+  // API Errors Spec
+  describe('API Errors', function() {
+
+    beforeAll(function(done) {
+      db.upsertDocument(db.coll, clientApp, err => {
+        if (err) return fail(err);
+        return done();
+      });
     });
-  });
 
-  it('HTTP > HTTPS', function(done) {
+    it('HTTP > HTTPS', function(done) {
 
-    // TODO: change this URL once you've enabled the api.digitallinguistics.io domain
-    const req = http.get(`http://dlx-api.azurewebsites.net/test`, res => {
+      // TODO: change this URL once you've enabled the api.digitallinguistics.io domain
+      const req = http.get(`http://dlx-api.azurewebsites.net/test`, res => {
 
-      let data = '';
+        let data = '';
 
-      res.on('error', fail);
-      res.on('data', chunk => { data += chunk; });
-      res.on('end', () => {
-        expect(res.headers.location.includes('https')).toBe(true);
-        done();
+        res.on('error', fail);
+        res.on('data', chunk => { data += chunk; });
+        res.on('end', () => {
+          expect(res.headers.location.includes('https')).toBe(true);
+          done();
+        });
+
       });
 
+      req.on('error', fail);
+
     });
 
-    req.on('error', fail);
-
-  });
-
-  it('404: No Route', function(done) {
-    return req.get('/badroute')
-    .set('Authorization', `Bearer ${token}`)
-    .expect(404)
-    .then(done)
-    .catch(handleError(done));
-  });
-
-  it('405: Method Not Allowed', function(done) {
-    return req.post('/test')
-    .set('Authorization', `Bearer ${token}`)
-    .expect(405)
-    .then(done)
-    .catch(handleError(done));
-  });
-
-  it('credentials_required', function(done) {
-    req.get('/test')
-    .expect(401)
-    .then(res => {
-      expect(res.headers['www-authenticate']).toBeDefined();
-      expect(res.body.code).toBe('credentials_required');
-      done();
-    }).catch(handleError(done));
-  });
-
-  it('invalid_token: aud missing', function(done) {
-
-    const p = payload({ aud: '' });
-    const opts = options({ audience: '' });
-    const token = jwt.sign(p, secret, opts);
-
-    req.get('/test')
-    .set('Authorization', `Bearer ${token}`)
-    .expect(401)
-    .then(res => {
-      expect(res.headers['www-authenticate']).toBeDefined();
-      done();
-    }).catch(handleError(done));
-
-  });
-
-  it('invalid_token: aud invalid', function(done) {
-
-    const opts = options({ audience: 'https://api.wrongdomain.io' });
-    const token = jwt.sign(p, secret, opts);
-
-    req.get('/test')
-    .set('Authorization', `Bearer ${token}`)
-    .expect(401)
-    .then(res => {
-      expect(res.headers['www-authenticate']).toBeDefined();
-      done();
-    }).catch(handleError(done));
-
-  });
-
-  it('invalid_token: cid missing', function(done) {
-
-    const p = payload({ cid: '' });
-    const token = jwt.sign(p, secret, opts);
-
-    req.get('/test')
-    .set('Authorization', `Bearer ${token}`)
-    .expect(401)
-    .then(res => {
-      expect(res.headers['www-authenticate']).toBeDefined();
-      done();
-    }).catch(handleError(done));
-
-  });
-
-  it('invalid_token: cid invalid', function(done) {
-
-    const p = payload({ cid: 'a1b2c3d4e5' });
-    const token = jwt.sign(p, secret, opts);
-
-    req.get('/test')
-    .set('Authorization', `Bearer ${token}`)
-    .expect(401)
-    .then(res => {
-      expect(res.headers['www-authenticate']).toBeDefined();
-      done();
-    }).catch(handleError(done));
-
-  });
-
-  it('invalid_token: iss missing', function(done) {
-
-    const p = payload({ iss: '' });
-    const token = jwt.sign(p, secret, options({ issuer: '' }));
-
-    req.get('/test')
-    .set('Authorization', `Bearer ${token}`)
-    .expect(401)
-    .then(res => {
-      expect(res.headers['www-authenticate']).toBeDefined();
-      done();
-    }).catch(handleError(done));
-
-  });
-
-  it('invalid_token: iss invalid', function(done) {
-
-    const p = payload({ iss: 'https://login.wrongdomain.io' });
-    const opts = options({ issuer: '' });
-    const token = jwt.sign(p, secret, opts);
-
-    req.get('/test')
-    .set('Authorization', `Bearer ${token}`)
-    .expect(401)
-    .then(res => {
-      expect(res.headers['www-authenticate']).toBeDefined();
-      done();
-    }).catch(handleError(done));
-
-  });
-
-  it('invalid_token: expired', function(done) {
-
-    const opts = options({ expiresIn: 1 });
-    const token = jwt.sign(p, secret, opts);
-
-    setTimeout(() => {
-      req.get('/test')
+    it('404: No Route', function(done) {
+      return req.get(`${v}/badroute`)
       .set('Authorization', `Bearer ${token}`)
-      .expect(401)
+      .expect(404)
       .then(done)
       .catch(handleError(done));
-    }, 1500);
+    });
 
-  }, 10000);
+    it('405: Method Not Allowed', function(done) {
+      return req.post(`${v}/test`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(405)
+      .then(done)
+      .catch(handleError(done));
+    });
 
-  it('GET /test', function(done) {
-    req.get('/test')
-    .set('Authorization', `Bearer ${token}`)
-    .expect(200)
-    .then(res => {
-      expect(res.body.message).toBe('Test successful.');
-      done();
-    }).catch(handleError(done));
+    it('credentials_required', function(done) {
+      req.get(`${v}/test`)
+      .expect(401)
+      .then(res => {
+        expect(res.headers['www-authenticate']).toBeDefined();
+        expect(res.body.code).toBe('credentials_required');
+        done();
+      }).catch(handleError(done));
+    });
+
+    it('invalid_token: aud missing', function(done) {
+
+      const p = payload({ aud: '' });
+      const opts = options({ audience: '' });
+      const token = jwt.sign(p, secret, opts);
+
+      req.get(`${v}/test`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(401)
+      .then(res => {
+        expect(res.headers['www-authenticate']).toBeDefined();
+        done();
+      }).catch(handleError(done));
+
+    });
+
+    it('invalid_token: aud invalid', function(done) {
+
+      const opts = options({ audience: 'https://api.wrongdomain.io' });
+      const token = jwt.sign(p, secret, opts);
+
+      req.get(`${v}/test`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(401)
+      .then(res => {
+        expect(res.headers['www-authenticate']).toBeDefined();
+        done();
+      }).catch(handleError(done));
+
+    });
+
+    it('invalid_token: cid missing', function(done) {
+
+      const p = payload({ cid: '' });
+      const token = jwt.sign(p, secret, opts);
+
+      req.get(`${v}/test`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(401)
+      .then(res => {
+        expect(res.headers['www-authenticate']).toBeDefined();
+        done();
+      }).catch(handleError(done));
+
+    });
+
+    it('invalid_token: cid invalid', function(done) {
+
+      const p = payload({ cid: 'a1b2c3d4e5' });
+      const token = jwt.sign(p, secret, opts);
+
+      req.get(`${v}/test`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(401)
+      .then(res => {
+        expect(res.headers['www-authenticate']).toBeDefined();
+        done();
+      }).catch(handleError(done));
+
+    });
+
+    it('invalid_token: iss missing', function(done) {
+
+      const p = payload({ iss: '' });
+      const token = jwt.sign(p, secret, options({ issuer: '' }));
+
+      req.get(`${v}/test`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(401)
+      .then(res => {
+        expect(res.headers['www-authenticate']).toBeDefined();
+        done();
+      }).catch(handleError(done));
+
+    });
+
+    it('invalid_token: iss invalid', function(done) {
+
+      const p = payload({ iss: 'https://login.wrongdomain.io' });
+      const opts = options({ issuer: '' });
+      const token = jwt.sign(p, secret, opts);
+
+      req.get(`${v}/test`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(401)
+      .then(res => {
+        expect(res.headers['www-authenticate']).toBeDefined();
+        done();
+      }).catch(handleError(done));
+
+    });
+
+    it('invalid_token: expired', function(done) {
+
+      const opts = options({ expiresIn: 1 });
+      const token = jwt.sign(p, secret, opts);
+
+      setTimeout(() => {
+        req.get(`${v}/test`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(401)
+        .then(done)
+        .catch(handleError(done));
+      }, 1500);
+
+    }, 10000);
+
+    it('GET /test', function(done) {
+      req.get(`${v}/test`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200)
+      .then(res => {
+        expect(res.body.message).toBe('Test successful.');
+        done();
+      }).catch(handleError(done));
+    });
+
   });
 
-});
+};
