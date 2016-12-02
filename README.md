@@ -137,3 +137,8 @@ The following status codes are used in responses from the API. Your application 
 - 409: Data conflict.
 - 419: Authorization token expired.
 - 500: Internal server error. [Open an issue.](https://github.com/digitallinguistics/dlx-api/issues)
+
+## GitHub Workflow
+* Feature branches should be branched from the `dev` branch. New features should only be merged into `master` from `dev`, not other branches.
+* Hotfix branches can be branched directly from `master`, and merged directly to `master`.
+* Updates to `swagger.json` are synced to the `dev` branch directly from SwaggerHub. Be sure that `dev` has synced with SwaggerHub before merging into `master`.
