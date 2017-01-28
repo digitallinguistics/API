@@ -13,7 +13,7 @@ const config = require('../lib/config');
 const db     = require('../lib/db');
 const http   = require('http');
 const jwt    = require('jsonwebtoken');
-const req    = require('supertest-as-promised').agent(app);
+const req    = require('supertest').agent(app);
 
 const handleError = done => {
   return function(err) {
