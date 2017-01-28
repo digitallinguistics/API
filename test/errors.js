@@ -13,13 +13,11 @@ const config = require('../lib/config');
 const db     = require('../lib/db');
 const http   = require('http');
 const jwt    = require('jsonwebtoken');
-const req    = require('supertest-as-promised').agent(app);
+const req    = require('supertest').agent(app);
 
-const handleError = done => {
-  return function(err) {
-    fail(err);
-    done();
-  };
+const handleError = done => function(err) {
+  fail(err);
+  done();
 };
 
 const payload = (attrs = {}) => {
@@ -37,8 +35,8 @@ const options = (attrs = {}) => {
 
   const defaults = {
     algorithm: 'HS256',
-    expiresIn:  3600,
     audience:  'https://api.digitallinguistics.io',
+    expiresIn:  3600,
     issuer:    'https://login.digitallinguistics.io',
     jwtid:      config.jwtid,
     subject:    config.subject,
@@ -60,19 +58,19 @@ const opts = options();
 const token = jwt.sign(payload(), secret, options());
 
 const clientApp = {
-  id:           config.cid,
-  type:        'client-app',
-  name:        'API Errors Test App',
-  secret:       config.secret,
   confidential: true,
-  scope:       'public',
-  redirects: ['http://localhost:3000/oauth'],
+  id:           config.cid,
+  name:        'API Errors Test App',
   permissions: {
-    owner:       [],
     contributor: [],
-    viewer:      [],
+    owner:       [],
     public:      false,
+    viewer:      [],
   },
+  redirects:   ['http://localhost:3000/oauth'],
+  scope:       'public',
+  secret:       config.secret,
+  type:        'client-app',
 };
 
 // The "v" parameter is a version path, e.g. "/v0", "/v1", etc.
@@ -90,8 +88,7 @@ module.exports = (v = '') => {
 
     it('HTTP > HTTPS', function(done) {
 
-      // TODO: change this URL once you've enabled the api.digitallinguistics.io domain
-      const req = http.get(`http://dlx-api.azurewebsites.net/test`, res => {
+      const req = http.get(`http://api.digitallinguistics.io/test`, res => {
 
         let data = '';
 

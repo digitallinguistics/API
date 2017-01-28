@@ -1,6 +1,6 @@
 {
   "spec_dir": "test",
-  "spec_files": ["master.js"],
+  "spec_files": ["index.js"],
   "stopSpecOnExpectationFailure": false,
   "random": true
 }
