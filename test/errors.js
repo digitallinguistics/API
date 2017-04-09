@@ -8,12 +8,10 @@
   prefer-arrow-callback
 */
 
-const app    = require('../app');
 const config = require('../lib/config');
 const db     = require('../lib/db');
 const http   = require('http');
 const jwt    = require('jsonwebtoken');
-const req    = require('supertest').agent(app);
 
 const handleError = done => function(err) {
   fail(err);
@@ -74,7 +72,7 @@ const clientApp = {
 };
 
 // The "v" parameter is a version path, e.g. "/v0", "/v1", etc.
-module.exports = (v = '') => {
+module.exports = (req, v = '') => {
 
   // API Errors Spec
   describe('API Errors', function() {
