@@ -38,8 +38,8 @@ const options = (attrs = {}) => {
     audience:  'https://api.digitallinguistics.io',
     expiresIn:  3600,
     issuer:    'https://login.digitallinguistics.io',
-    jwtid:      config.jwtid,
-    subject:    config.subject,
+    jwtid:      '05700b02-a66a-4450-b658-344d8c78dcfe',
+    subject:    'linguist@university.edu',
   };
 
   const opts = Object.assign({}, defaults, attrs);
@@ -53,9 +53,9 @@ const options = (attrs = {}) => {
 };
 
 const secret = config.secret;
-const p = payload();
-const opts = options();
-const token = jwt.sign(payload(), secret, options());
+const p      = payload();
+const opts   = options();
+const token  = jwt.sign(payload(), secret, options());
 
 const clientApp = {
   confidential: true,
