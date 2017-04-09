@@ -43,6 +43,9 @@
   "schemes" : [ "https" ],
   "consumes" : [ "application/json" ],
   "produces" : [ "application/json" ],
+  "security" : [ {
+    "token" : [ ]
+  } ],
   "paths" : {
     "/languages" : {
       "get" : {
@@ -59,7 +62,8 @@
           "items" : {
             "type" : "string"
           },
-          "collectionFormat" : "csv"
+          "collectionFormat" : "csv",
+          "allowEmptyValue" : false
         } ],
         "responses" : {
           "200" : {
@@ -138,7 +142,8 @@
           "items" : {
             "type" : "string"
           },
-          "collectionFormat" : "csv"
+          "collectionFormat" : "csv",
+          "allowEmptyValue" : false
         } ],
         "responses" : {
           "200" : {
@@ -217,7 +222,8 @@
           "items" : {
             "type" : "string"
           },
-          "collectionFormat" : "csv"
+          "collectionFormat" : "csv",
+          "allowEmptyValue" : false
         } ],
         "responses" : {
           "200" : {
@@ -296,7 +302,8 @@
           "items" : {
             "type" : "string"
           },
-          "collectionFormat" : "csv"
+          "collectionFormat" : "csv",
+          "allowEmptyValue" : false
         } ],
         "responses" : {
           "200" : {
@@ -375,7 +382,8 @@
           "items" : {
             "type" : "string"
           },
-          "collectionFormat" : "csv"
+          "collectionFormat" : "csv",
+          "allowEmptyValue" : false
         } ],
         "responses" : {
           "200" : {
@@ -454,7 +462,8 @@
           "items" : {
             "type" : "string"
           },
-          "collectionFormat" : "csv"
+          "collectionFormat" : "csv",
+          "allowEmptyValue" : false
         } ],
         "responses" : {
           "200" : {
@@ -533,7 +542,8 @@
           "items" : {
             "type" : "string"
           },
-          "collectionFormat" : "csv"
+          "collectionFormat" : "csv",
+          "allowEmptyValue" : false
         } ],
         "responses" : {
           "200" : {
@@ -612,7 +622,8 @@
           "items" : {
             "type" : "string"
           },
-          "collectionFormat" : "csv"
+          "collectionFormat" : "csv",
+          "allowEmptyValue" : false
         } ],
         "responses" : {
           "200" : {
@@ -720,7 +731,8 @@
       "items" : {
         "type" : "string"
       },
-      "collectionFormat" : "csv"
+      "collectionFormat" : "csv",
+      "allowEmptyValue" : false
     }
   },
   "responses" : {
@@ -736,6 +748,6 @@
   },
   "externalDocs" : {
     "description" : "How to use the API",
-    "url" : "http://digitallinguistics.github.io/dlx-api/"
+    "url" : "http://digitallinguistics.github.io/api/"
   }
 }
