@@ -5,9 +5,9 @@ const config = require('./lib/config');
 const authenticate = require('./lib/authenticate');
 const bodyParser   = require('body-parser');
 const express      = require('express');
-const handlers     = require('./lib/handlers');
 const helmet       = require('helmet');
 const middleware   = require('./lib/middleware');
+const passport     = require('./lib/passport');
 const routers      = require('./lib/routers');
 const server       = require('./lib/server');
 
@@ -21,16 +21,13 @@ app.set('port', config.port);       // set port for the app
 
 // middleware
 app.use(helmet());                  // basic security features
-app.use(express.static('public'));  // routing for static files
-app.use(middleware);                // custom middleware (logs URL)
 app.use(bodyParser.json());         // parse JSON data in the request body
+app.use(express.static('public'));  // routing for static files
+app.use(passport.initialize());     // initialize Passport
+app.use(middleware);                // custom middleware (logs URL)
 app.use(authenticate.unless({       // authenticate requests to the API
   path: [/auth/, /oauth/, /token/], // don't authenticate OAuth routes
 }));
-
-// add routes for OAuth
-app.get('/auth', handlers.auth);
-app.post('/auth', handlers.auth);
 
 // add routes to routers for each API version
 routers.v0(v0);
@@ -39,10 +36,6 @@ routers.v0(v0);
 app.use(v0);                        // default routing
 app.use('/v0', v0);
 
-// generic error handlers
-app.use(handlers.notFound);         // 404 error
-app.use(handlers.errors);           // 500 error
-
+routers.common(app);                // add generic routes and error handlers
 server(app);                        // create the server
-
 module.exports = app;               // export app for testing

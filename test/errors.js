@@ -8,6 +8,7 @@
   prefer-arrow-callback
 */
 
+const client     = require('./client');
 const config     = require('../lib/config');
 const db         = require('../lib/db');
 const http       = require('http');
@@ -55,22 +56,6 @@ const p     = payload();
 const opts  = options();
 const token = jwt.sign(payload(), secret, options());
 
-const clientApp = {
-  confidential: true,
-  id:           config.cid,
-  name:        'API Test App',
-  permissions: {
-    contributor: [],
-    owner:       [],
-    public:      false,
-    viewer:      [],
-  },
-  redirects:   ['http://localhost:3000/oauth'],
-  scope:       'public',
-  secret,
-  type:        'client-app',
-};
-
 // The "v" parameter is a version path, e.g. "/v0", "/v1", etc.
 module.exports = (req, v = '') => {
 
@@ -78,7 +63,7 @@ module.exports = (req, v = '') => {
   describe('API Errors', function() {
 
     beforeAll(function(done) {
-      db.upsert(clientApp).then(done).catch(fail);
+      db.upsert(client).then(done).catch(fail);
     });
 
     it('HTTP > HTTPS', function(done) {

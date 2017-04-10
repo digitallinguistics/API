@@ -5,29 +5,21 @@
   prefer-arrow-callback
 */
 
+const client = require('./client');
 const config = require('../lib/config');
 const db     = require('../lib/db');
 const qs     = require('querystring');
 
-const clientApp = {
-  confidential: true,
-  id:           config.cid,
-  name:        'API Test App',
-  permissions: {
-    contributor: [],
-    owner:       [],
-    public:      false,
-    viewer:      [],
-  },
-  redirects:   ['http://localhost:3000/oauth'],
-  scope:       'public',
-  secret:       config.secret,
-  type:        'client-app',
-};
-
 const handleError = done => function(err) {
   fail(err);
   done();
+};
+
+const parameters = {
+  client_id:     config.cid,
+  redirect_uri:  `${config.baseUrl}/oauth`,
+  response_type: 'code',
+  state:         '12345',
 };
 
 // The "v" parameter is a version path, e.g. "/v0", "/v1", etc.
@@ -36,24 +28,45 @@ module.exports = (req, v = '') => {
   describe('OAuth 2.0', function() {
 
     beforeAll(function(done) {
-      db.upsert(clientApp).then(done).catch(fail);
+      db.upsert(client).then(done).catch(fail);
+    });
+
+    it('unsupported_response_type', function(done) {
+      const params = Object.assign({}, parameters, { response_type: 'bad' });
+      return req.get(`/auth?${qs.stringify(params)}`)
+      .expect(400)
+      .then(res => {
+        expect(res.body.error).toBe('unsupported_response_type');
+        done();
+      }).catch(handleError(done));
+    });
+
+    it('invalid_scope', function(done) {
+      const params = Object.assign({}, parameters, { scope: 'bad' });
+      return req.get(`/auth?${qs.stringify(params)}`)
+      .expect(400)
+      .then(res => {
+        expect(res.body.error).toBe('invalid_scope');
+        done();
+      }).catch(handleError(done));
+    });
+
+    it('invalid_request: bad client ID', function(done) {
+      const params = Object.assign({}, parameters, { client_id: '' });
+      return req.get(`/auth?${qs.stringify(params)}`)
+      .expect(400)
+      .then(res => {
+        expect(res.body.error).toBe('invalid_request');
+        done();
+      }).catch(handleError(done));
     });
 
     it('Authorization Code', function(done) {
-
-      const params = {
-        client_id:     config.cid,
-        redirect_uri:  'http://localhost:3000/oauth',
-        response_type: 'code',
-        state:         '12345',
-      };
-
-      return req.get(`/auth?${qs.stringify(params)}`)
+      return req.get(`/auth?${qs.stringify(parameters)}`)
       .expect(302)
       .then(res => expect(res.headers.location.startsWith('https://digitallinguistics.auth0.com/')).toBe(true))
       .then(done)
       .catch(handleError(done));
-
     });
 
   });
