@@ -8,10 +8,11 @@
   prefer-arrow-callback
 */
 
-const config = require('../lib/config');
-const db     = require('../lib/db');
-const http   = require('http');
-const jwt    = require('jsonwebtoken');
+const config     = require('../lib/config');
+const db         = require('../lib/db');
+const http       = require('http');
+const jwt        = require('jsonwebtoken');
+const { secret } = config;
 
 const handleError = done => function(err) {
   fail(err);
@@ -50,15 +51,14 @@ const options = (attrs = {}) => {
 
 };
 
-const secret = config.secret;
-const p      = payload();
-const opts   = options();
-const token  = jwt.sign(payload(), secret, options());
+const p     = payload();
+const opts  = options();
+const token = jwt.sign(payload(), secret, options());
 
 const clientApp = {
   confidential: true,
   id:           config.cid,
-  name:        'API Errors Test App',
+  name:        'API Test App',
   permissions: {
     contributor: [],
     owner:       [],
@@ -67,7 +67,7 @@ const clientApp = {
   },
   redirects:   ['http://localhost:3000/oauth'],
   scope:       'public',
-  secret:       config.secret,
+  secret,
   type:        'client-app',
 };
 
@@ -78,10 +78,7 @@ module.exports = (req, v = '') => {
   describe('API Errors', function() {
 
     beforeAll(function(done) {
-      db.upsertDocument(db.coll, clientApp, err => {
-        if (err) return fail(err);
-        return done();
-      });
+      db.upsert(clientApp).then(done).catch(fail);
     });
 
     it('HTTP > HTTPS', function(done) {
