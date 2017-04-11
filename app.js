@@ -2,12 +2,13 @@
 const config = require('./lib/config');
 
 // load dependencies
-const authenticate = require('./lib/authenticate');
+const authenticate = require('./lib/middleware/authenticate');
 const bodyParser   = require('body-parser');
+const error        = require('./lib/middleware/error').middleware;
 const express      = require('express');
 const helmet       = require('helmet');
-const middleware   = require('./lib/middleware');
-const passport     = require('./lib/passport');
+const logger       = require('./lib/middleware/logger');
+const passport     = require('./lib/middleware/passport');
 const routers      = require('./lib/routers');
 const server       = require('./lib/server');
 
@@ -24,7 +25,8 @@ app.use(helmet());                 // basic security features
 app.use(bodyParser.json());        // parse JSON data in the request body
 app.use(express.static('public')); // routing for static files
 app.use(passport.initialize());    // initialize Passport
-app.use(middleware);               // custom middleware (logs URL)
+app.use(error);                    // adds res.error method to response
+app.use(logger);                   // custom middleware (logs URL)
 app.use(authenticate.unless({      // authenticate requests to the API
   path: [                          // don't authenticate OAuth or test routes
     /auth/,

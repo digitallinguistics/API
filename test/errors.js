@@ -106,7 +106,7 @@ module.exports = (req, v = '') => {
       .expect(401)
       .then(res => {
         expect(res.headers['www-authenticate']).toBeDefined();
-        expect(res.body.code).toBe('credentials_required');
+        expect(res.body.error).toBe('credentials_required');
         done();
       }).catch(handleError(done));
     });
