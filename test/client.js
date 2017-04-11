@@ -10,8 +10,8 @@ module.exports = {
     public:      false,
     viewer:      [],
   },
-  redirects:   ['http://localhost:3000/oauth'],
-  scope:       'public',
+  redirects:   ['http://localhost:3000/oauth', 'http://localhost:3000/test/callback'],
+  scope:       'user',
   secret:       config.secret,
-  type:        'client-app',
+  type:        'client',
 };

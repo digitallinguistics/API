@@ -35,9 +35,9 @@ const options = (attrs = {}) => {
 
   const defaults = {
     algorithm: 'HS256',
-    audience:  'https://api.digitallinguistics.io',
+    audience:  'https://api.digitallinguistics.io/',
     expiresIn:  3600,
-    issuer:    'https://login.digitallinguistics.io',
+    issuer:    'https://api.digitallinguistics.io/',
     jwtid:      '05700b02-a66a-4450-b658-344d8c78dcfe',
     subject:    'linguist@university.edu',
   };

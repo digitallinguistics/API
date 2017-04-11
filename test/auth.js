@@ -84,6 +84,16 @@ module.exports = (req, v = '') => {
         }).catch(handleError(done));
       });
 
+      it('invalid_request: bad redirect URI', function(done) {
+        const params = Object.assign({}, parameters, { redirect_uri: 'http://localhost:3000/test' });
+        return req.get(`/auth?${qs.stringify(params)}`)
+        .expect(400)
+        .then(res => {
+          expect(res.body.error).toBe('invalid_request');
+          done();
+        }).catch(handleError(done));
+      });
+
       it('invalid_request: bad client ID', function(done) {
         const params = Object.assign({}, parameters, { client_id: '12345' });
         return req.get(`/auth?${qs.stringify(params)}`)
@@ -100,31 +110,6 @@ module.exports = (req, v = '') => {
         .then(res => expect(res.headers.location.startsWith('https://digitallinguistics.auth0.com/')).toBe(true))
         .then(done)
         .catch(handleError(done));
-      });
-
-    });
-
-    describe('OAuth Callback', function() {
-
-      const parameters = {
-        code:  'OtnroUrBTI_ppf5m',
-        state: 'c315179d-a465-5af5-6e8e-223d302fda87',
-      };
-
-      it('server_error: could not retrieve authReq', function(done) {
-        return req.get(`/oauth?${qs.stringify(parameters)}`)
-        .then(res => {
-          expect(res.body.code).toBe('invalid_grant');
-          done();
-        }).catch(handleError(done));
-      });
-
-      xit('access_denied', function() {
-        pending(`This error won't occur, because Passport returns a 401 Unauthorized first.`);
-      });
-
-      xit('other error from authentication provider', function() {
-        pending(`This error won't occur, because Passport returns a 401 Unauthorized first.`);
       });
 
     });
