@@ -13,7 +13,7 @@ const config     = require('../lib/config');
 const db         = require('../lib/db');
 const http       = require('http');
 const jwt        = require('jsonwebtoken');
-const { secret } = config;
+const { key }    = config;
 
 const handleError = done => function(err) {
   fail(err);
@@ -34,7 +34,7 @@ const payload = (attrs = {}) => {
 const options = (attrs = {}) => {
 
   const defaults = {
-    algorithm: 'HS256',
+    algorithm: 'RS256',
     audience:  'https://api.digitallinguistics.io/',
     expiresIn:  3600,
     issuer:    'https://api.digitallinguistics.io/',
@@ -54,7 +54,7 @@ const options = (attrs = {}) => {
 
 const p     = payload();
 const opts  = options();
-const token = jwt.sign(payload(), secret, options());
+const token = jwt.sign(payload(), key, options());
 
 // The "v" parameter is a version path, e.g. "/v0", "/v1", etc.
 module.exports = (req, v = '') => {
@@ -115,7 +115,7 @@ module.exports = (req, v = '') => {
 
       const p = payload({ aud: '' });
       const opts = options({ audience: '' });
-      const token = jwt.sign(p, secret, opts);
+      const token = jwt.sign(p, key, opts);
 
       req.get(`${v}/test`)
       .set('Authorization', `Bearer ${token}`)
@@ -130,7 +130,7 @@ module.exports = (req, v = '') => {
     it('invalid_token: aud invalid', function(done) {
 
       const opts = options({ audience: 'https://api.wrongdomain.io' });
-      const token = jwt.sign(p, secret, opts);
+      const token = jwt.sign(p, key, opts);
 
       req.get(`${v}/test`)
       .set('Authorization', `Bearer ${token}`)
@@ -145,22 +145,7 @@ module.exports = (req, v = '') => {
     it('invalid_token: cid missing', function(done) {
 
       const p = payload({ cid: '' });
-      const token = jwt.sign(p, secret, opts);
-
-      req.get(`${v}/test`)
-      .set('Authorization', `Bearer ${token}`)
-      .expect(401)
-      .then(res => {
-        expect(res.headers['www-authenticate']).toBeDefined();
-        done();
-      }).catch(handleError(done));
-
-    });
-
-    it('invalid_token: cid invalid', function(done) {
-
-      const p = payload({ cid: 'a1b2c3d4e5' });
-      const token = jwt.sign(p, secret, opts);
+      const token = jwt.sign(p, key, opts);
 
       req.get(`${v}/test`)
       .set('Authorization', `Bearer ${token}`)
@@ -175,7 +160,7 @@ module.exports = (req, v = '') => {
     it('invalid_token: iss missing', function(done) {
 
       const p = payload({ iss: '' });
-      const token = jwt.sign(p, secret, options({ issuer: '' }));
+      const token = jwt.sign(p, key, options({ issuer: '' }));
 
       req.get(`${v}/test`)
       .set('Authorization', `Bearer ${token}`)
@@ -191,7 +176,7 @@ module.exports = (req, v = '') => {
 
       const p = payload({ iss: 'https://login.wrongdomain.io' });
       const opts = options({ issuer: '' });
-      const token = jwt.sign(p, secret, opts);
+      const token = jwt.sign(p, key, opts);
 
       req.get(`${v}/test`)
       .set('Authorization', `Bearer ${token}`)
@@ -206,7 +191,7 @@ module.exports = (req, v = '') => {
     it('invalid_token: expired', function(done) {
 
       const opts = options({ expiresIn: 1 });
-      const token = jwt.sign(p, secret, opts);
+      const token = jwt.sign(p, key, opts);
 
       setTimeout(() => {
         req.get(`${v}/test`)

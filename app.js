@@ -4,7 +4,7 @@ const config = require('./lib/config');
 // load dependencies
 const authenticate = require('./lib/middleware/authenticate');
 const bodyParser   = require('body-parser');
-const error        = require('./lib/middleware/error').middleware;
+const error        = require('./lib/middleware/error');
 const express      = require('express');
 const helmet       = require('helmet');
 const logger       = require('./lib/middleware/logger');
