@@ -66,7 +66,7 @@ module.exports = (req, v = '') => {
       db.upsert(client).then(done).catch(fail);
     });
 
-    it('HTTP > HTTPS', function(done) {
+    xit('HTTP > HTTPS', function(done) {
 
       const req = http.get(`http://api.digitallinguistics.io/test`, res => {
 
