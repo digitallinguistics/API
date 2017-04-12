@@ -85,7 +85,7 @@ module.exports = (req, v = '') => {
 
     });
 
-    it('404: No Route', function(done) {
+    xit('404: No Route', function(done) {
       return req.get(`${v}/badroute`)
       .set('Authorization', `Bearer ${token}`)
       .expect(404)
@@ -93,7 +93,7 @@ module.exports = (req, v = '') => {
       .catch(handleError(done));
     });
 
-    it('405: Method Not Allowed', function(done) {
+    xit('405: Method Not Allowed', function(done) {
       return req.post(`${v}/test`)
       .set('Authorization', `Bearer ${token}`)
       .expect(405)
@@ -101,7 +101,7 @@ module.exports = (req, v = '') => {
       .catch(handleError(done));
     });
 
-    it('credentials_required', function(done) {
+    xit('credentials_required', function(done) {
       req.get(`${v}/test`)
       .expect(401)
       .then(res => {
@@ -111,7 +111,7 @@ module.exports = (req, v = '') => {
       }).catch(handleError(done));
     });
 
-    it('invalid_token: aud missing', function(done) {
+    xit('invalid_token: aud missing', function(done) {
 
       const p = payload({ aud: '' });
       const opts = options({ audience: '' });
@@ -127,7 +127,7 @@ module.exports = (req, v = '') => {
 
     });
 
-    it('invalid_token: aud invalid', function(done) {
+    xit('invalid_token: aud invalid', function(done) {
 
       const opts = options({ audience: 'https://api.wrongdomain.io' });
       const token = jwt.sign(p, key, opts);
@@ -142,7 +142,7 @@ module.exports = (req, v = '') => {
 
     });
 
-    it('invalid_token: cid missing', function(done) {
+    xit('invalid_token: cid missing', function(done) {
 
       const p = payload({ cid: '' });
       const token = jwt.sign(p, key, opts);
@@ -157,7 +157,7 @@ module.exports = (req, v = '') => {
 
     });
 
-    it('invalid_token: iss missing', function(done) {
+    xit('invalid_token: iss missing', function(done) {
 
       const p = payload({ iss: '' });
       const token = jwt.sign(p, key, options({ issuer: '' }));
@@ -172,7 +172,7 @@ module.exports = (req, v = '') => {
 
     });
 
-    it('invalid_token: iss invalid', function(done) {
+    xit('invalid_token: iss invalid', function(done) {
 
       const p = payload({ iss: 'https://login.wrongdomain.io' });
       const opts = options({ issuer: '' });
@@ -188,7 +188,7 @@ module.exports = (req, v = '') => {
 
     });
 
-    it('invalid_token: expired', function(done) {
+    xit('invalid_token: expired', function(done) {
 
       const opts = options({ expiresIn: 1 });
       const token = jwt.sign(p, key, opts);
@@ -203,7 +203,7 @@ module.exports = (req, v = '') => {
 
     }, 10000);
 
-    it('GET /test', function(done) {
+    xit('GET /test', function(done) {
       req.get(`${v}/test`)
       .set('Authorization', `Bearer ${token}`)
       .expect(200)
