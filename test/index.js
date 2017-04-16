@@ -1,5 +1,7 @@
-const errors = require('./errors');
+const app  = require('../app');
+const test = require('./test');
+const req  = require('supertest').agent(app);
 
 // run error tests on each API version
-errors();
-errors('/v0');
+test(req);
+test(req, '/v0');

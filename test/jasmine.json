@@ -2,5 +2,5 @@
   "spec_dir": "test",
   "spec_files": ["index.js"],
   "stopSpecOnExpectationFailure": false,
-  "random": true
+  "random": false
 }
