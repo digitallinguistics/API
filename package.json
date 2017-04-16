@@ -39,7 +39,9 @@
     "express": "^4.15.2",
     "express-jwt": "^5.1.0",
     "helmet": "^3.5.0",
-    "jsonwebtoken": "^7.3.0"
+    "jsonwebtoken": "^7.3.0",
+    "socket.io": "^1.7.3",
+    "socketio-jwt": "^4.5.0"
   },
   "devDependencies": {
     "jasmine": "^2.5.3",
