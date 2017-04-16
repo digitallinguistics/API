@@ -1,12 +1,45 @@
-const config = require('../lib/config');
-const http   = require('http');
-const qs     = require('querystring');
+/* eslint-disable camelcase */
+
+const config = require(`../lib/config`);
+const https  = require(`https`);
+const qs     = require(`querystring`);
+
+const audience      = `https://api.digitallinguistics.io/`;
+const authUrl       = `https://${config.authDomain}`;
+const client_id     = config.authClientId;
+const client_secret = config.authClientSecret;
+const redirect_uri  = `${config.baseUrl}/test/callback`;
+const state         = `12345`;
 
 const callback = (req, res) => {
 
   if (req.query.code) {
 
-    // TODO: exchange code for access token
+    const body = {
+      audience,
+      client_id,
+      client_secret,
+      code:          req.query.code,
+      grant_type:    `authorization_code`,
+      redirect_uri,
+    };
+
+    const opts = {
+      headers:  { 'Content-Type': `application/json` },
+      hostname: config.authDomain,
+      method:   `POST`,
+      path:     `/oauth/token`,
+    };
+
+    const request = https.request(opts, response => {
+      let data = ``;
+      response.on(`data`, chunk => { data += chunk; });
+      response.on(`error`, err => res.send(err.message));
+      response.on(`end`, () => { res.json(JSON.parse(data)); });
+    });
+
+    request.on(`error`, err => res.send(err.message));
+    request.end(JSON.stringify(body), `utf8`);
 
   } else {
 
@@ -16,60 +49,47 @@ const callback = (req, res) => {
 
 };
 
-const client = (req, res) => {};
-
 const code = (req, res) => {
 
   const params = {
-    client_id:     config.cid,
-    redirect_uri:  `${config.baseUrl}/test/callback`,
-    response_type: 'code',
-    state:         '12345',
+    audience,
+    client_id,
+    redirect_uri,
+    response_type: `code`,
+    scope:         `offline_access openid`,
+    state,
   };
 
-  const request = http.get(`${config.baseUrl}/auth?${qs.stringify(params)}`, response => {
-    let data = '';
-    response.on('error', err => res.send(err.message));
-    response.on('data', chunk => { data += chunk; });
-    response.on('end', () => res.redirect(response.headers.location));
-  });
-
-  request.on('error', err => res.send(err.message));
+  res.redirect(`${authUrl}/authorize?${qs.stringify(params)}`);
 
 };
 
 const implicit = (req, res) => {
 
   const params = {
-    client_id:     config.cid,
-    redirect_uri:  `${config.baseUrl}/test/callback`,
-    response_type: 'token',
-    scope:         'user',
-    state:         'abcde',
+    audience,
+    client_id,
+    nonce:         `abcde`,
+    redirect_uri,
+    response_type: `id_token`,
+    scope:         `openid`,
+    state,
   };
 
-  const request = http.get(`${config.baseUrl}/auth?${qs.stringify(params)}`, response => {
-    let data = '';
-    response.on('error', err => res.send(err.message));
-    response.on('data', chunk => { data += chunk; });
-    response.on('end', () => res.redirect(response.headers.location));
-  });
-
-  request.on('error', err => res.send(err.message));
+  res.redirect(`${authUrl}/authorize?${qs.stringify(params)}`);
 
 };
 
 const main = (req, res) => {
   res.status(200);
   res.json({
-    message: 'Test successful.',
+    message: `Test successful.`,
     status:   200,
   });
 };
 
 module.exports = {
   callback,
-  client,
   code,
   implicit,
   main,
