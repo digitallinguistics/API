@@ -18,27 +18,6 @@
   "tags" : [ {
     "name" : "Language",
     "description" : "Operations on Languages"
-  }, {
-    "name" : "Lexeme",
-    "description" : "Operations on Lexemes"
-  }, {
-    "name" : "Lexicon",
-    "description" : "Operations on Lexicons"
-  }, {
-    "name" : "Location",
-    "description" : "Operations on Locations"
-  }, {
-    "name" : "Media",
-    "description" : "Operations on Media Items"
-  }, {
-    "name" : "Orthography",
-    "description" : "Operations on Orthographies"
-  }, {
-    "name" : "Person",
-    "description" : "Operations on Persons"
-  }, {
-    "name" : "Text",
-    "description" : "Operations on Texts"
   } ],
   "schemes" : [ "https" ],
   "consumes" : [ "application/json" ],
@@ -176,11 +155,44 @@
     }
   },
   "responses" : {
+    "BadRequest" : {
+      "description" : "There was a problem with the request."
+    },
+    "Conflict" : {
+      "description" : "There was a data conflict in the database."
+    },
     "DeleteSuccessful" : {
       "description" : "Delete operation successful."
     },
+    "Forbidden" : {
+      "description" : "Unauthorized."
+    },
+    "LargePayload" : {
+      "description" : "Request payload is too large."
+    },
+    "MethodNotAllowed" : {
+      "description" : "Method not allowed."
+    },
+    "NotAcceptable" : {
+      "description" : "Cannot return data in requested format."
+    },
+    "NotFound" : {
+      "description" : "Database resource not found."
+    },
+    "ServerError" : {
+      "description" : "An error occurred on the server."
+    },
     "Success" : {
       "description" : "Operation successful."
+    },
+    "TokenExpired" : {
+      "description" : "Access token expired."
+    },
+    "TooManyRequests" : {
+      "description" : "Too many requests."
+    },
+    "Unauthorized" : {
+      "description" : "Authorization missing or invalid."
     },
     "UpsertSuccessful" : {
       "description" : "Upsert successful."
