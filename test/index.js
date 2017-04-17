@@ -1,5 +1,12 @@
-const errors = require('./errors');
+const app    = require('../app');
+const req    = require('supertest').agent(app);
+const socket = require('./socket');
+const test   = require('./test');
 
 // run error tests on each API version
-errors();
-errors('/v0');
+test(req);
+test(req, '/v0');
+
+// run Socket.IO tests
+socket();
+socket(`/v0`);
