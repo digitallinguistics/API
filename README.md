@@ -22,6 +22,11 @@ Each item in the database must be formatted according to the Digital Linguistics
 
 Some types of resources contain subitems that may also be accessed with the API. For example, texts contain phrases, so a user may request one or more phrases from a text, rather than having to request the entire text at once.
 
+### IDs
+Each resource in the database is given a unique ID which cannot be altered or set by your application. If you attempt to create a new document with an `id` property, the API will return an error. (If you are just updating a document, however, including the `id` property will not throw an error.)
+
+If your application needs to maintain its own set of IDs, it is recommended that you use the `cid` (Client ID) property for that purpose.
+
 ### Permissions
 Every resource in the database is given a set of permissions specifying who is allowed to view, edit, add/delete, or change permissions for that resource. There are three types of permissions that a user can have:
 
@@ -97,7 +102,7 @@ Each resource in the database corresponds to a different URL. For example, the l
 
 Resource    | URL Format
 ----------- | ----------
-Language    | `https://api.digitallinguistics.io/v1/languages/{language}`
+Language    | `https://api.digitallinguistics.io/languages/{language}`
 
 **[View the complete reference documentation for the REST API here.][3]**
 
@@ -109,8 +114,8 @@ You can add, update, or retrieve multiple items at once by making requests to a 
 
 Request Format                                             | Operation
 ---------------------------------------------------------- | ---------
-`GET https://api.digitallinguistics.io/{collection}`       | Retrieve items from the collection (an `ids` parameter in the querystring is required).
-`PUT https://api.digitallinguistics.io/{collection}`       | Upsert (add/update) a resource to the collection.
+`GET https://api.digitallinguistics.io/{collection}`       | Retrieve items from the collection
+`PUT https://api.digitallinguistics.io/{collection}`       | Upsert (add/update) one or more resources to the collection.
 
 #### Operations on Permissions **NOT YET SUPPORTED**
 To add or delete permissions for an object, simply make a POST or DELETE request to the resource URL with `/permissions` appended to the end. For example, to add a new permission for a text with the ID `17`, you would make a PUT request to `https://api.digitallinguistics.io/texts/17/permissions`.
@@ -173,6 +178,133 @@ Status | Description
 409    | Data conflict.
 419    | Authorization token expired.
 500    | Internal server error. [Open an issue.][12]
+
+### Web Socket API
+
+#### Connecting to the Socket
+To use the DLx web socket API, your application first needs to connect to the socket.
+
+If your application is running on the server, first install `socket.io-client` (`npm i --save socket.io-client`), and then include the following code in your app:
+
+```js
+const io     = require(`socket.io-client`);
+const opts   = { transports: [`websocket`, `xhr-polling`] };
+const socket = io.connect(`https://api.digitallinguistics.io/`, opts);
+```
+
+If your application is running in a browser, first link to the Socket.IO script in your web page, like so:
+
+```html
+<script src=https://api.digitallinguistics.io/socket.io/socket.io.js charset=utf-8></script>
+```
+
+This will make `io` available as a global variable. You can then use `io` to connect to the socket:
+
+```js
+const opts   = { transports: [`websocket`, `xhr-polling`] };
+const socket = io.connect(`https://api.digitallinguistics.io/`, opts);
+```
+
+If you would like to specify a particular version of the API, simply append the version to the connection URL, e.g. `https://api.digitallinguistics.io/v1`.
+
+#### Authenticating with the Socket
+Your application must authenticate with the socket API using an access token before it can make additional requests. To authenticate, simply emit an `authenticate` event once the socket is connected, sending the token in the body of the message:
+
+```js
+const token = YOUR_ACCESS_TOKEN;
+socket.on(`connect`, () => socket.emit(`authenticate`, { token }));
+socket.on(`authenticated`, () => { /* Do other things with the socket */ });
+```
+
+#### Making Requests
+You can make requests to the socket using `socket.emit({event}, arg1, arg2, ..., callback)`. The socket API follows a Node-style, error-first callback. If an error occurs, it will be the first argument passed to the callback function. Otherwise, the response will be passed as the second argument. For example:
+
+```js
+socket.emit(`get:text`, `TEXT_ID`, (err, text) => {
+  if (err) { /* handle error */ }
+  else { /* do something with the text */ }
+});
+```
+
+#### Event Syntax
+The events emitted and accepted by the socket API directly mirror the REST API. The table below compares how to make the same request in the REST API vs. the socket API:
+
+Operation                    | REST API                       | Socket API
+---------------------------- | ------------------------------ | ----------
+Get multiple languages       | `GET /languages`               | `get:languages`
+Upsert one or more languages | `PUT /languages`               | `upsert:languages`
+Get a language               | `GET /languages/{language}`    | `get:language`
+Upsert a language            | `PUT /languages/{language}`    | `upsert:language`
+Delete a language            | `DELETE /languages/{language}` | `delete:language`
+
+#### Parameters
+Parameters that are part of the path in the REST API must be passed as arguments in the socket API. For example, this is how you would run `GET /languages/12345` in the socket API:
+
+```js
+socket.emit(`get:language`, `12345`, (err, language) => {
+  /* Do something with the returned language object */
+});
+```
+
+Parameters that are part of the query string in the REST API must be passed as part of an optional options argument in the socket API. For example, this is how you would run `GET /languages?ids=10,20,30` in the socket API:
+
+```js
+socket.emit(`get:languages`, { ids: [`10`, `20`, `30`] }, (err, languages) => {
+  /* Do something with the returned array of languages */
+});
+```
+
+#### Operations on Subitems **NOT YET SUPPORTED**
+Operations on subitems can be performed by appending the type of subitem to the event name. The IDs for each item and subitem must be provided as arguments. The following example shows how to get all the phrases from the text with the ID `12345`, or how to retrieve the `10`th phrase from that text.
+
+```js
+socket.emit(`get:text:phrases`, `12345`, (err, phrases) => {
+  /* Do something with the returned array of phrases */
+})
+
+socket.emit(`get:text:phrase`, `12345`, `10`, (err, phrase) => {
+  /* Do something with the returned phrase */
+});
+```
+
+#### Operations on Permissions **NOT YET SUPPORTED**
+Operations on permissions have a special syntax:
+
+Operation                   | Syntax
+--------------------------- | ------
+Add a permission            | `add:permission`
+Delete a permission         | `delete:permission`
+Add multiple permissions    | `add:permissions`
+Delete multiple permissions | `delete:permissions`
+
+The ID of the resource to change permissions for must be provided as the first argument, followed by the permission object. The example below shows how to give the user `linguist@university.edu` a `Viewer` permission for the text with the ID `12345`.
+
+```js
+const permission = {
+  user:       `linguist@university.edu`,
+  permission: `viewer`
+};
+
+socket.emit(`add:permission`, `12345`, permission, (err, response) => {
+  /* Handle error or do something after getting success response */
+});
+```
+
+This example shows how to add permissions for multiple users:
+```js
+const permissions = {
+  users:      [`linguist@university.edu`, `anthropologist@university.edu`],
+  permission: `contributor`,
+};
+
+socket.emit(`add:permissions`, `12345`, permissions);
+```
+
+This example shows how to make a resource public:
+
+```js
+socket.emit(`update:permission`, `12345`, { public: true });
+```
 
 [1]:  https://github.com/digitallinguistics/dlx-api-js#readme (JavaScript Library)
 [2]:  https://github.com/digitallinguistics/dlx-api-node#readme (Node Library)
