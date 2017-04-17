@@ -50,8 +50,8 @@
     "/languages" : {
       "get" : {
         "tags" : [ "Language" ],
-        "summary" : "Retrieve multiple Languages by ID",
-        "description" : "If the \"ids\" parameter is omitted, returns all items that the user has permission to access.",
+        "summary" : "Retrieve multiple Languages",
+        "description" : "If the \"ids\" parameter is omitted, returns all items that the authenticated user or client has permission to access.",
         "operationId" : "getLanguages",
         "parameters" : [ {
           "name" : "ids",
