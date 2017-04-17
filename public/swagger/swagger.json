@@ -69,6 +69,17 @@
             "description" : "Upsert successful."
           }
         }
+      },
+      "delete" : {
+        "tags" : [ "Language" ],
+        "summary" : "Delete multiple languages",
+        "operationId" : "deleteLanguages",
+        "parameters" : [ ],
+        "responses" : {
+          "204" : {
+            "description" : "Delete operation successful."
+          }
+        }
       }
     },
     "/languages/{languageId}" : {
