@@ -1,112 +1,149 @@
 # The Digital Linguistics (DLx) API
-This repository contains the source code and documentation for the DLx API, a service that allows software developers to programmatically access the DLx database. By sending requests to the API, developers can add, update, delete, or retrieve resources in the database using code. This page describes the structure of the DLx database and the resources in it, how to register your app with the API service, how to authenticate users so that they may access resources, how to properly format requests to the database, and how to handle responses from the database. To send requests to the API, you will need to programmatically construct an HTTP request and send it to the appropriate URL. Below is information explaining how to format each part of your requests to the API.
+This repository contains the source code and documentation for the DLx API, a service that allows software developers to programmatically access the DLx database. By sending requests to the API, developers can add, update, delete, or retrieve resources in the database. This page describes the structure of the DLx database and the resources in it, how to register your app with the API service, how to authenticate users so that they may access resources, how to properly format requests to the database, and how to handle responses from the database. To send requests to the API, you will need to programmatically construct an HTTP request and send it to the appropriate URL. Alternatively, you can also connect to the API using a web socket. Details on how to access the API using either of these methods are below.
 
-**[View the API reference documentation here.](https://app.swaggerhub.com/api/DLx/dlx/)**
+If you are writing your application using JavaScript or Node, consider using the [JavaScript library][1] or [Node library][2] to access the database. These libraries contain a number of convenient methods for interacting with the DLx API, and handle most of the details on this page for you automatically.
 
-If you are writing your application using JavaScript, Node, or Python, consider using our [JavaScript SDK](https://github.com/digitallinguistics/dlx-api-js#readme), [Node SDK](https://github.com/digitallinguistics/dlx-api-node#readme), or [Python SDK](https://github.com/digitallinguistics/dlx-api-py#readme), which contain a number of convenient methods for interacting with the DLx API, and handle most of the details on this page.
+**[View the complete reference documentation for the REST API here.][3]**
+
+**NB:** The API always returns JSON data. If you would like to see HTML representations of the data instead, use the [Data Explorer][11].
+
+## Contents
+* [I. About the Database](i-about-the-database)
+* [II. App Registration](ii-app-registration)
+* [III. Authentication](iii-authentication)
+* [IV. Using the Database](iv-using-the-database)
 
 ## I. About the Database
 
-### Collections &amp; Resource Types
-The DLx database contains several types of resources, such as texts, lexicons, and media. There are separate collections for each type of resource in the database, shown below. The DLx API allows users to perform various operations on the resources in these collections, depending on the type of resource and whether the user has permission to perform that operation. For example, a user may add a text to the `texts` collection or, if they have `Owner` permission for that text, update or delete that text.
+### Types of Resources in the Database
+The DLx database contains several types of resources, such as texts, lexicons, and media. There are separate URLs for accessing each type of resource in the database, shown below. The DLx API allows users to perform various operations on these resources, depending on the type of resource and whether the user and the application have permission to perform that operation. For example, a user may add a text to the database or, if they have `Owner` permission for that text, update or delete that text.
 
-Each item in a collection must be formatted according to the Digital Linguistics (DLx) data format specification. This is a standard format in JSON for exchanging linguistic data on the web. You can read more about this format [here](http://digitallinguistics.github.io/dlx-spec/). If the user requests to add a resource to the database that is improperly formatted, the request returns an error and the resource is not uploaded. Click on any resource type to see its DLx specification.
+Each item in the database must be formatted according to the Digital Linguistics (DLx) data format. This is a standard format in JSON for exchanging linguistic data on the web. You can read more about this format [here][4]. If the user requests to add a resource to the database that is improperly formatted, the request returns an error and the resource is not uploaded.
 
 Some types of resources contain subitems that may also be accessed with the API. For example, texts contain phrases, so a user may request one or more phrases from a text, rather than having to request the entire text at once.
 
 ### Permissions
 Every resource in the database is given a set of permissions specifying who is allowed to view, edit, add/delete, or change permissions for that resource. There are three types of permissions that a user can have:
 
-#### User Roles
-* `Owner`: The user has full permissions to view, edit, delete, or change permissions for a resource. A user is automatically made an Owner for any resource they create. If a participant in a resource uses a pseudonym, both their real name and pseudonym are shown to the user.
+* `Owner`: The user has full permissions to view, edit, delete, or change permissions for a resource. A user is automatically made an Owner for any resource they create. A user with Owner permission for a Person resource will be able to see both the real name and the pseudonym of that Person.
 
-* `Contributor`: The user has permission to view or edit the resource, but may not delete it or change its permissions. If a participant in a resource uses a pseudonym, both their real name and pseudonym are shown to the user.
+* `Contributor`: The user has permission to view or edit the resource, but may not delete it or change its permissions. A user with Contributor permission for a Person resource will be able to see both the real name and the pseudonym of that Person.
 
-* `Viewer`: The user may view the resource, but cannot change it or its permissions in any way. If a participant in a resource uses a pseudonym, only the pseudonym is shown; their real name is hidden from the user.
+* `Viewer`: The user may view the resource, but cannot change it or its permissions in any way. Users with Viewer permissions for a Person resource will only be able to see the pseudonym of that Person.
 
-In addition to individual user permissions, resources can be made either Public or Private. Public resources may be viewed (but not edited) by anyone, even if they are not listed as a Viewer. Private resources may only be viewed by those with the appropriate permissions. Here are some additional things to note about Public resources:
+In addition to individual user permissions, resources can be made either `Public` or `Private`. Public resources may be viewed (but not edited) by anyone, even if they are not listed as a Viewer. Private resources may only be viewed by those with the appropriate permissions. Here are some additional things to note about Public resources:
 
 #### Public Resources
 - Can be downloaded
 - Can be viewed
 - Can be shared on social media
-- Can be added to other users' projects
 - Cannot be edited without permission
 - Cannot be deleted without permission
 - Display pseudonyms rather than real names
-- Display their public metadata
-- Do not display their private metadata
+- Display public metadata
+- Do not display private metadata
 - Do not display personal information (except for public metadata)
 - Could possibly be plagiarized or copied without permission (as with any publication)
 
-Public resources can sometimes become Community resources. This happens when the Owner of the resource gives up the Owner permission, but opts to leave the resource Public. When this happens, the original Owner can no longer delete the resource or set its visibility to private. The resource may now only be deleted by a DLx Administrator (or perhaps in the future, some kind of Community Moderator).
+## II. App Registration
+Before your app can interact programmatically with the DLx database API, you must register your application. Once registered, you will be provided with a client ID and a client secret which you can use to authenticate your app with the API service. It is important to keep both of these confidential, so that others cannot access DLx resources using your credentials.
 
-## II. How to Use the API Service
+DLx manages application registration through [Auth0][5]. In order to register your application, you will need to send a request to `https://digitallinguistics.auth0.com/oidc/register`, following the steps in [this documentation][6]. Be sure to save your client ID and client secret when you receive a the response from Auth0. You do not need to follow the instructions in the "Configure Your Client" section of Auth0's documentation at this time (though you will need to do so later in order to access the DLx API).
 
-### A. Making Requests to the API
+### III. Authentication
 
-#### Authentication
-Before making programmatic requests to the API, your application will need to authenticate itself and often the resource owner (the end user) with the API, and receive an access token. You must then include this access token for most kinds of requests to the database. For complete details on how to authenticate your app with the API, see the [authentication documentation](http://digitallinguistics.github.io/dlx-login/).
+#### How Authentication Works
+Once you've registered your application, you can use your client ID and secret to request access tokens that allow your application to access the DLx database. The type of access token you request determines which databases resources your application is allowed to access.
+
+Most of the time your application will request a token that provides access to a specific user's data. To do this, your application will direct the user to the DLx login page, where the user logs in and grants your application permission to access their data. The login page then sends your application an access token keyed to that specific user. Your application must include that access token with any future requests to the DLx API. The token allows your application to access to that user's resources (and only that user's resources - separate access tokens must be requested for each user). Follow the steps in either the [Authorization Code Grant](a-authorization-code-grant) or [Implicit Grant](b-implicit-grant) sections to receive this type of token.
+
+Some DLx resources are publicly available, and do not require user permissions to access. To request an access token for public resources, you simply provide your client ID and client secret. Follow the steps in the [Client Credentials Grant](c-client-credentials-grant) to receive this type of token.
+
+DLx uses [Auth0][5] to log in users and issue access tokens. Requests for tokens must be sent to the domain `digitallinguistics.auth0.com`.
+
+#### Authentication Strategies
+There are three ways to request tokens for use with the DLx API service:
+
+* **[Authorization Code](#a-authorization-code-grant):** A two-step process where you first authenticate the user, and then your application. This is the preferred method of authentication, and should be used whenever possible. It is best suited to server-side applications. Follow [these directions][7] to authenticate using this strategy.
+
+* **[Implicit](#b-implicit-grant):** A single-step process where you authenticate the user and the client simultaneously. This method is less secure because the DLx access token is provided in the redirect URI, and therefore visible to the user. However, this authentication strategy is well-suited to client-side (browser) applications. Follow [these directions][8] to authenticate using this strategy.
+
+* **[Client Credentials](#c-client-credentials-grant):** A single-step process where you authenticate your application and immediately receive an access token, without authenticating the user. In this strategy, your app will only have access to publicly-available resources. This is most useful when your app is acting on behalf of the app itself rather than on behalf of any particular user. Follow [these directions][9] to authenticate using this strategy.
+
+#### Scopes
+Every access token has associated *scopes* specifying the kinds of resources your application is requesting access to. Your application may only use scopes that it has been given permission to use. The scopes that can be requested are:
+
+Scope            | Description
+---------------- | -----------
+`admin`          | Administrative access to all resources in the database. This scope subsumes all other scopes, so it is not necessary to include any other scopes in the request. This should only be used with the Client Credentials authorization strategy. (For DLx-internal applications only. Requests for `admin` scope from third-party applications will be denied.)
+`offline_access` | (*requires user permission*) Access to a user's resources even when the user is offline.
+`public`         | Access to any public resources in the database.
+`user`           | (*requires user permission*) Access to all the resources that the authenticated user has permissions to view, including public resources. This scope subsumes the `public` scope, so it is not necessary to include both.
+
+#### Using Access Tokens
+Once your application receives an access token, it can begin making requests to the DLx API. There are two ways to interact with the database: via the REST API or via web sockets. If your application is using the REST API, it should include the access token in the `Authorization` header of the request, in the format `Bearer YOUR_ACCESS_TOKEN`. To use the token via web sockets, simply emit an `authenticate` event, and include a `token` attribute in the payload, like so: `{ token: YOUR_ACCESS_TOKEN }`
+
+#### Handling Authentication Errors
+Sometimes the requests you make during authentication will return an error. This can happen for a variety of reasons - incorrectly formatted URLs, bad request parameters, etc. If the redirect URI is invalid, the user will be directed to a generic error page with more information about the error. Otherwise, the server will return an error response with a JSON-format string in the body containing two parameters: an `error` parameter indicating the type of error, and an `error_description` parameter with a more detailed description of the problem. A `state` parameter is also included if a `state` was provided by your application. A list of possible values for the `error` parameter can be viewed [here][10].
+
+## IV. Using the Database
+Once you have [registered your application](ii-app-registration) and [received an access token](iii-authentication), you are ready to make requests to the database. There are two ways to interact with the database: via the *REST API*, and via *web sockets*.
+
+### REST API
+To use the REST API, your application will need to construct requests to various URLs that map to different kinds of resources in the database.
 
 #### URL Syntax
-Each resource and collection in the database corresponds to a different URL. Requests made to that URL can be used to perform various operations on that resource or collection. For example, the text with an ID of `17` can be retrieved by sending a GET request to `https://api.digitallinguistics.io/v1/texts/17`, and a lexicon can be added to the database by sending a PUT request to `https://api.digitallinguistics.io/v1/lexicons`. The following table shows the URL format for each type of resource, where items in {brackets} are variables that should be replaced with IDs. In the first row of the table, `{bundle}` would be replaced with the bundle's ID, so the URL might look like `https://api.digitallinguistics.io/v1/bundles/167`.
+Each resource in the database corresponds to a different URL. For example, the language with an ID of `17` can be retrieved by sending a GET request to `https://api.digitallinguistics.io/languages/17`; or a lexicon can be added to the database by sending a PUT request to `https://api.digitallinguistics.io/lexicons`. Each type of resource is given its own *collection* (the first part of the path after the domain, e.g. `languages` or `lexicons`). The following table shows the URL format for each type of resource, where items in {brackets} are variables that should be replaced with resource IDs.
 
 Resource    | URL Format
 ----------- | ----------
 Language    | `https://api.digitallinguistics.io/v1/languages/{language}`
-Lexicon     | `https://api.digitallinguistics.io/v1/lexicons/{lexicon}`
-Lexeme      | `https://api.digitallinguistics.io/v1/lexemes/{lexeme}`
-Location    | `https://api.digitallinguistics.io/v1/locations/{location}`
-Media       | `https://api.digitallinguistics.io/v1/media/{mediaItem}`
-Orthography | `https://api.digitallinguistics.io/v1/orthographies/{orthography}`
-Person      | `https://api.digitallinguistics.io/v1/persons/{person}`
-Text        | `https://api.digitallinguistics.io/v1/texts/{text}`
 
-##### General Operations
+**[View the complete reference documentation for the REST API here.][3]**
 
-###### Operations on Collections
-You can add, update, or retrieve multiple items at once by making requests to a collection. The following operations are available on most collections (see the full [API reference documentation](https://app.swaggerhub.com/api/DLx/dlx/0.1.0) for exceptions).
+#### Versioning
+The DLX REST API is versioned, so that applications can continue using older versions of the API. If no version is specified, requests to the API default to the most current version. To specify a version, simply include the version number in the form of `/vX` immediately after the domain. For example, `https://api.digitallinguistics.io/v1/languages` is a request to version 1 of the API, while `https://api.digitallinguistics.io/v2/languages` is a request to version 2.
+
+#### Operations on Collections
+You can add, update, or retrieve multiple items at once by making requests to a collection. The following operations are available on most collections (see the full [API reference documentation][3] for exceptions).
 
 Request Format                                             | Operation
 ---------------------------------------------------------- | ---------
-`DELETE https://api.digitallinguistics.io/v1/{collection}` | Delete items from the collection (an `ids` parameter in the querystring is required). **NOT YET SUPPORTED**
-`GET https://api.digitallinguistics.io/v1/{collection}`    | Retrieve items from the collection (an `ids` parameter in the querystring is required).
-`PUT https://api.digitallinguistics.io/v1/{collection}`    | Upsert (add/update) a resource to the collection.
+`GET https://api.digitallinguistics.io/{collection}`       | Retrieve items from the collection (an `ids` parameter in the querystring is required).
+`PUT https://api.digitallinguistics.io/{collection}`       | Upsert (add/update) a resource to the collection.
 
-###### Operations on Permissions **NOT YET SUPPORTED**
-To add or delete permissions for an object, simply make a POST or DELETE request to the resource URL with `/permissions` appended to the end. For example, to add a new permission for a text with the ID `17`, you would make a PUT request to `https://api.digitallinguistics.io/v1/texts/17/permissions`.
+#### Operations on Permissions **NOT YET SUPPORTED**
+To add or delete permissions for an object, simply make a POST or DELETE request to the resource URL with `/permissions` appended to the end. For example, to add a new permission for a text with the ID `17`, you would make a PUT request to `https://api.digitallinguistics.io/texts/17/permissions`.
 
-###### Operations on Subitems **NOT YET SUPPORTED**
-Certain resources contain subitems or references to other resources. These can often be accessed by appending additional segments to the URL. For example, to retrieve all the media items in a bundle, you would make a GET request to `https://api.digitallinguistics.io/v1/bundles/{bundle}/media`. To retrieve a specific phrase from a text, you would make a GET request to `https://api.digitallinguistics.io/v1/texts/17/phrases/12`. In general, the format for performing operations on collections of subitems or individual subitems is as follows:
+#### Operations on Subitems **NOT YET SUPPORTED**
+Certain resources contain subitems or references to other resources. These can often be accessed by appending additional segments to the URL. For example, to retrieve all the phrases in a text, you would make a GET request to `https://api.digitallinguistics.io/texts/{text}/phrases`. To retrieve a specific phrase from a text, you would make a GET request to `https://api.digitallinguistics.io/texts/{text}/phrases/{phrase}`. In general, the format for performing operations on collections of subitems or individual subitems is as follows:
 
-* Operations on collections of subitems: `https://api.digitallinguistics.io/v1/{collection}/{item}/{subitems}`
-* Operations on individual subitems: `https://api.digitallinguistics.io/v1/{collection}/{item}/{subitems}/{subitem}`
+* Operations on collections of subitems: `https://api.digitallinguistics.io/{collection}/{item}/{subitems}`
+* Operations on individual subitems: `https://api.digitallinguistics.io/{collection}/{item}/{subitems}/{subitem}`
 
-A complete list of the operations that can be performed on each type of resource and collection is available [here](https://app.swaggerhub.com/api/DLx/dlx/).
-
-**NB:** The API always returns JSON data in the response. If you would like to see HTML representations of the data instead, use the [Data Explorer](http://data.digitallinguistics.io/).
+A complete list of the operations that can be performed on each type of resource and collection is available [here][3].
 
 #### Parts of the Request
 
 * ##### Protocol
-All requests to the DLx API should use HTTPS protocol rather than HTTP.
+All requests to the DLx REST API should use HTTPS protocol rather than HTTP.
 
 * ##### Host
-The hostname for requests to the DLx API should always be `api.digitallinguistics.io`.
+The hostname for requests to the DLx REST API should always be `api.digitallinguistics.io`.
 
 * ##### Headers
-Every request to the API requires an Authorization header, which should contain the access token you received from `login.digitallinguistics.io` during authentication, in the format `Bearer {access_token}`.
+Every request to the REST API requires an Authorization header, which should contain the access token you received from `login.digitallinguistics.io` during authentication, in the format `Bearer {access_token}`.
 
 * ##### Path
-Requests to the DLx API may include the API version number immediately after the hostname, like so: `https://api.digitallinguistics.io/v1/`. The rest of the path should follow the URL syntax outlined above. The current version of the API is `v1`. If the version number is omitted, the service defaults to the latest version of the API.
+Requests to the DLx API may optionally include the API version number immediately after the hostname, like so: `https://api.digitallinguistics.io/v1/`. The rest of the path should follow the URL syntax outlined above. If the version number is omitted, the service defaults to the latest version of the API.
 
 * ##### Querystring
-Many requests to the API take optional or required querystring parameters. These are added to the end of the URL following a `?`, in the format `{parameter}={value}`. For example, the URL `https://api.digitallinguistics.io/v1/texts?ids=1,2,17,43,44,62` will retrieve texts with IDs 1, 2, 17, 43, 44, and 62 from the database. Be sure to encode the querystring as a URI component (using a method such as JavaScript's `encodeURIComponent`) to avoid errors due to spaces or special characters. For a complete list of which query parameters are accepted for which types of requests, visit the [API documentation](https://app.swaggerhub.com/api/DLx/dlx/).
+Many requests to the API take optional or required querystring parameters. These are added to the end of the URL following a `?`, in the format `{parameter}={value}`. For example, the URL `https://api.digitallinguistics.io/texts?ids=1,2,17,43,44,62` will retrieve texts with IDs 1, 2, 17, 43, 44, and 62 from the database. Be sure to encode the querystring as a URI component (using a method such as JavaScript's `encodeURIComponent`) to avoid errors due to spaces or special characters. For a complete list of which query parameters are accepted for which types of requests, visit the [API documentation][3].
 
 * ##### Body
-The body of the request should contain any resources to be uploaded to the database, in the [DLx JSON data format](http://digitallinguistics.github.io/dlx-spec/).
+The body of the request should contain any resources to be uploaded to the database, in the [DLx data format][4].
 
-### B. Handling Responses from the API
+#### Handling Responses from the REST API
 If the request is successful, the API will return a response with a `2xx` status and JSON data in the response body.
 
 Unsuccessful requests will return a response with a `4xx` or `5xx` status, as well as a JSON object in the response body containing additional details about the error. A `WWW-Authenticate` header may also be included for invalid authorization requests.
@@ -119,8 +156,8 @@ Attribute           | Description
 `error`             | a generic error code
 `error_description` | a more specific error message for help in debugging unsuccessful requests
 
-#### Response Headers &amp; Status Codes
-The following status codes are used in responses from the API. Your application should be prepared to handle any of these response types.
+#### Response Headers & Status Codes
+The following status codes are used in responses from the REST API. Your application should be prepared to handle any of these response types.
 
 Status | Description
 ------ | -----------
@@ -135,4 +172,17 @@ Status | Description
 405    | Method not allowed.
 409    | Data conflict.
 419    | Authorization token expired.
-500    | Internal server error. [Open an issue.](https://github.com/digitallinguistics/dlx-api/issues)
+500    | Internal server error. [Open an issue.][12]
+
+[1]:  https://github.com/digitallinguistics/dlx-api-js#readme (JavaScript Library)
+[2]:  https://github.com/digitallinguistics/dlx-api-node#readme (Node Library)
+[3]:  https://app.swaggerhub.com/api/DLx/dlx/ (Swagger Reference)
+[4]:  http://developer.digitallinguistics.io/spec/ (Spec Docs)
+[5]:  https://auth0.com/ (Auth0)
+[6]:  https://auth0.com/docs/api-auth/dynamic-client-registration#register-your-client (Auth0 Client Registration)
+[7]:  https://auth0.com/docs/api-auth/tutorials/authorization-code-grant (Authorization Code Grant)
+[8]:  https://auth0.com/docs/api-auth/tutorials/implicit-grant (Implicit Grant)
+[9]:  https://auth0.com/docs/api-auth/tutorials/client-credentials (Client Credentials Grant)
+[10]: http://tools.ietf.org/html/rfc6749#section-5.2 (Error Parameters)
+[11]: http://data.digitallinguistics.io/ (Data Explorer)
+[12]: https://github.com/digitallinguistics/api/issues (Issues)
