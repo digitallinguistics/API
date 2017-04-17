@@ -24,7 +24,7 @@ const handleError = done => function(err) {
 // The "v" parameter is a version path, e.g. "/v0", "/v1", etc.
 module.exports = (req, v = ``) => {
 
-  describe('API Errors', function() {
+  describe('Authentication', function() {
 
     it('Client Credentials', function(done) {
 
@@ -78,6 +78,50 @@ module.exports = (req, v = ``) => {
       request.end(JSON.stringify(body), `utf8`);
 
     });
+
+  });
+
+  describe('Client Registration', function() {
+
+    xit('registers client', function(done) {
+
+      const opts = {
+        headers: { 'Content-Type': `application/json` },
+        hostname: config.authDomain,
+        method:  `POST`,
+        path:    `/oidc/register`,
+      };
+
+      const body = {
+        client_name:   `3rd Party Test Client`,
+        redirect_uris: [
+          `https://client.example.com/callback`,
+          `https://client.example.com/callback2`,
+        ],
+      };
+
+      const request = https.request(opts, response => {
+
+        let data = ``;
+
+        response.on(`data`, chunk => { data += chunk; });
+        response.on(`error`, fail);
+        response.on(`end`, () => {
+          const client = JSON.parse(data);
+          expect(client.client_name).toBe(body.client_name);
+          done();
+        });
+
+      });
+
+      request.on(`error`, fail);
+      request.end(JSON.stringify(body), `utf8`);
+
+    });
+
+  });
+
+  describe('API Errors', function() {
 
     it(`HTTP > HTTPS`, function(done) {
 
