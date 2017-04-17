@@ -78,7 +78,7 @@
         "parameters" : [ {
           "in" : "body",
           "name" : "body",
-          "description" : "An database object to upsert",
+          "description" : "A database resource to upsert",
           "required" : true,
           "schema" : {
             "$ref" : "#/definitions/Document"
@@ -158,7 +158,7 @@
         "parameters" : [ {
           "in" : "body",
           "name" : "body",
-          "description" : "An database object to upsert",
+          "description" : "A database resource to upsert",
           "required" : true,
           "schema" : {
             "$ref" : "#/definitions/Document"
@@ -238,7 +238,7 @@
         "parameters" : [ {
           "in" : "body",
           "name" : "body",
-          "description" : "An database object to upsert",
+          "description" : "A database resource to upsert",
           "required" : true,
           "schema" : {
             "$ref" : "#/definitions/Document"
@@ -318,7 +318,7 @@
         "parameters" : [ {
           "in" : "body",
           "name" : "body",
-          "description" : "An database object to upsert",
+          "description" : "A database resource to upsert",
           "required" : true,
           "schema" : {
             "$ref" : "#/definitions/Document"
@@ -398,7 +398,7 @@
         "parameters" : [ {
           "in" : "body",
           "name" : "body",
-          "description" : "An database object to upsert",
+          "description" : "A database resource to upsert",
           "required" : true,
           "schema" : {
             "$ref" : "#/definitions/Document"
@@ -478,7 +478,7 @@
         "parameters" : [ {
           "in" : "body",
           "name" : "body",
-          "description" : "An database object to upsert",
+          "description" : "A database resource to upsert",
           "required" : true,
           "schema" : {
             "$ref" : "#/definitions/Document"
@@ -558,7 +558,7 @@
         "parameters" : [ {
           "in" : "body",
           "name" : "body",
-          "description" : "An database object to upsert",
+          "description" : "A database resource to upsert",
           "required" : true,
           "schema" : {
             "$ref" : "#/definitions/Document"
@@ -638,7 +638,7 @@
         "parameters" : [ {
           "in" : "body",
           "name" : "body",
-          "description" : "An database object to upsert",
+          "description" : "A database resource to upsert",
           "required" : true,
           "schema" : {
             "$ref" : "#/definitions/Document"
@@ -716,7 +716,7 @@
     "body" : {
       "in" : "body",
       "name" : "body",
-      "description" : "An database object to upsert",
+      "description" : "A database resource to upsert",
       "required" : true,
       "schema" : {
         "$ref" : "#/definitions/Document"
@@ -748,6 +748,6 @@
   },
   "externalDocs" : {
     "description" : "How to use the API",
-    "url" : "http://digitallinguistics.github.io/api/"
+    "url" : "http://developer.digitallinguistics.io/api/"
   }
 }
