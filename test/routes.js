@@ -59,6 +59,7 @@ module.exports = (req, v = ``) => {
       .expect(res => expect(res.body.emptyProp).toBeUndefined())
       .then(done)
       .catch(handleError(done));
+
     });
 
     it(`returns objects without database properties`, function(done) {
@@ -99,6 +100,10 @@ module.exports = (req, v = ``) => {
 
       });
 
+    });
+
+    it(`returns a continuation token`, function() {
+      pending(`There aren't currently enough resources in the database to test this.`);
     });
 
     it(`PUT /languages (one language)`, function(done) {
@@ -146,26 +151,40 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`GET /languages`, function(done) {
+    it(`GET /languages`, function(done) {
       req.get(`${v}/languages`)
       .set(`Authorization`, `Bearer ${this.token}`)
       .expect(200)
-      .expect(res => expect(Array.isArray(res)).toBe(true))
+      .expect(res => expect(res.body.length).toBeDefined())
       .then(done)
       .catch(handleError(done));
     });
 
-    xit(`GET /languages?ids={ids}`, function(done) {
-      req.get(`${v}/languages?ids=${tid}`)
-      .set(`Authorization`, `Bearer ${this.token}`)
-      .expect(200)
-      .expect(res => {
-        expect(Array.isArray(res.body)).toBe(true);
-        expect(Array.body.length).toBe(1);
-        expect(res.body[0].id).toBe(tid);
-      })
-      .then(done)
-      .catch(handleError(done));
+    it(`GET /languages?ids={ids}`, function(done) {
+
+      const lang = {
+        id: `idsTest`,
+        permissions: { public: true },
+        test,
+        ttl,
+      };
+
+      db.upsertDocument(coll, lang, err => {
+
+        if (err) return fail(err);
+
+        req.get(`${v}/languages?ids=${tid},idsTest`)
+        .set(`Authorization`, `Bearer ${this.token}`)
+        .expect(200)
+        .expect(res => {
+          expect(Array.isArray(res.body)).toBe(true);
+          expect(res.body.length).toBe(2);
+        })
+        .then(done)
+        .catch(handleError(done));
+
+      });
+
     });
 
     it(`GET /languages/{language}`, function(done) {
