@@ -28,7 +28,7 @@ app.use(express.static('public'));   // routing for static files
 app.use(error);                      // adds res.error method to response
 app.use(logger);                     // custom middleware (logs URL)
 app.use(authenticate.unless({        // authenticate requests to the API
-  path: [/test/],                    // don't authenticate test routes
+  path: [/\/test\//],                // don't authenticate test routes
 }));
 
 // add routes to routers

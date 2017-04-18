@@ -84,6 +84,16 @@ module.exports = (req, v = ``) => {
       // user doesn`t have permission to access a resource
     });
 
+    it(`enforces rate limits`, function() {
+    });
+
+    it(`supports pagination`, function() {
+    });
+
+    it(`does not allow public clients to modify data`, function() {
+      // TODO: should not allow PUT or DELETE methods
+    });
+
   });
 
 };

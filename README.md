@@ -27,6 +27,9 @@ Each resource in the database is given a unique ID which cannot be altered or se
 
 If your application needs to maintain its own set of IDs, it is recommended that you use the `cid` (Client ID) property for that purpose.
 
+### Empty Properties
+If a property of a resource is empty (i.e. an empty string, array, or object), it will often be removed when it is added to the database. This helps keep the size of the files in the database relatively small. So if you save a resource with a `"myProperty": ""` attribute to the database, and then retrieve that resource from the database, the `myProperty` attribute will be undefined.
+
 ### Permissions
 Every resource in the database is given a set of permissions specifying who is allowed to view, edit, add/delete, or change permissions for that resource. There are three types of permissions that a user can have:
 
@@ -82,7 +85,7 @@ Scope            | Description
 ---------------- | -----------
 `admin`          | Administrative access to all resources in the database. This scope subsumes all other scopes, so it is not necessary to include any other scopes in the request. This should only be used with the Client Credentials authorization strategy. (For DLx-internal applications only. Requests for `admin` scope from third-party applications will be denied.)
 `offline_access` | (*requires user permission*) Access to a user's resources even when the user is offline.
-`public`         | Access to any public resources in the database.
+`public`         | Access to any public resources in the database. Data cannot be added, deleted, or modified using the `public` scope, only retrieved.
 `user`           | (*requires user permission*) Access to all the resources that the authenticated user has permissions to view, including public resources. This scope subsumes the `public` scope, so it is not necessary to include both.
 
 #### Using Access Tokens
