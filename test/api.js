@@ -131,20 +131,32 @@ module.exports = (req, v = ``) => {
 
     it(`supports pagination`, function(done) {
 
-      const test = () => req.get(`${v}/languages`)
-      .set(`Authorization`, `Bearer ${this.token}`)
-      .expect(200)
-      .expect(res => console.log(res.body.length))
-      .expect(res => expect(res.body.length).toBe(100));
+      const continuationHeader = `x-dlx-continuation`;
+      const maxItemHeader      = `x-dlx-max-item-count`;
 
-      Array(101)
+      const test1 = () => req.get(`${v}/languages`)
+      .set(`Authorization`, `Bearer ${this.token}`)
+      .set(maxItemHeader, 10)
+      .expect(200)
+      .expect(res => expect(res.body.length).toBe(10))
+      .expect(res => expect(res.headers[continuationHeader]).toBeDefined())
+      .then(res => res.headers[continuationHeader]);
+
+      const test2 = continuation => req.get(`${v}/languages`)
+      .set(maxItemHeader, 10)
+      .set(`Authorization`, `Bearer ${this.token}`)
+      .set(continuationHeader, continuation)
+      .expect(200);
+
+      Array(15)
       .fill({})
       .reduce(p => p.then(() => upsertDocument({
         permissions: { public: true },
         test: true,
         type,
       })), Promise.resolve())
-      .then(test)
+      .then(test1)
+      .then(test2)
       .then(done)
       .catch(fail);
 
@@ -231,7 +243,7 @@ module.exports = (req, v = ``) => {
     });
 
     // NB: this test assumes that there are currently multiple languages in the database
-    xit(`GET /languages`, function(done) {
+    it(`GET /languages`, function(done) {
       req.get(`${v}/languages`)
       .set(`Authorization`, `Bearer ${this.token}`)
       .expect(200)

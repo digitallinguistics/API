@@ -94,7 +94,7 @@ Once your application receives an access token, it can begin making requests to 
 #### Handling Authentication Errors
 Sometimes the requests you make during authentication will return an error. This can happen for a variety of reasons - incorrectly formatted URLs, bad request parameters, etc. If the redirect URI is invalid, the user will be directed to a generic error page with more information about the error. Otherwise, the server will return an error response with a JSON-format string in the body containing two parameters: an `error` parameter indicating the type of error, and an `error_description` parameter with a more detailed description of the problem. A `state` parameter is also included if a `state` was provided by your application. A list of possible values for the `error` parameter can be viewed [here][10].
 
-## IV. Using the Database
+## IV. Using the API
 Once you have [registered your application](ii-app-registration) and [received an access token](iii-authentication), you are ready to make requests to the database. There are two ways to interact with the database: via the *REST API*, and via *web sockets*.
 
 ### REST API
@@ -164,6 +164,11 @@ Attribute           | Description
 `error`             | a generic error code
 `error_description` | a more specific error message for help in debugging unsuccessful requests
 
+#### Paging
+By default, the DLx REST API will return all the results of a request in a single response. You can set the number of results to return in a response at one time by (the *page size*) by including a `x-dlx-max-item-count` header in the request, whose value is the number of results you want returned for each request (between 1 and 1000).
+
+If the request finds more items than the page size, a continuation token will be returned with the response in the `x-dlx-continuation` header, along with the first set of results. You can then send this continuation token with your next request (in the `x-dlx-continuation` header) to retrieve the next set of results.
+
 #### Response Headers & Status Codes
 The following status codes are used in responses from the REST API. Your application should be prepared to handle any of these response types.
 
@@ -172,10 +177,10 @@ Status | Description
 200    | Operation successful.
 201    | Upsert successful.
 204    | Delete operation successful.
-207    | Some resources unauthorized or not found.
+207    | Some resources were not found.
 400    | Bad request. The request URL, headers, or body are invalid.
 401    | `Authorization` header missing or invalid.
-403    | Unauthorized. (Insufficient user permissions.)
+403    | Unauthorized. (Insufficient permissions.)
 404    | Not found.
 405    | Method not allowed.
 409    | Data conflict.
