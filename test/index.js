@@ -11,7 +11,7 @@
 const app    = require(`../app`);
 const errors = require(`./errors`);
 const req    = require(`supertest`).agent(app);
-const routes = require(`./routes`);
+const api = require(`./api`);
 const socket = require(`./socket`);
 
 // require(`./authentication`);
@@ -22,8 +22,8 @@ const socket = require(`./socket`);
 // errors(req, `/v0`);
 
 // run routes tests
-routes(req);
-// routes(req, `/v0`);
+api(req);
+// api(req, `/v0`);
 
 // run Socket.IO tests
 // socket();

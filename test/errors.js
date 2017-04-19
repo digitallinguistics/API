@@ -82,16 +82,19 @@ module.exports = (req, v = ``) => {
 
     it(`bad permissions`, function() {
       // user doesn`t have permission to access a resource
+      // should return 403
+      // test this with GET, PUT, and DELETE
     });
 
     it(`enforces rate limits`, function() {
     });
 
-    it(`supports pagination`, function() {
-    });
-
     it(`does not allow public clients to modify data`, function() {
       // TODO: should not allow PUT or DELETE methods
+    });
+
+    it(`404 not found for resources that don't exist`, function() {
+      // check this for both getLanguage and getLanguages
     });
 
   });
