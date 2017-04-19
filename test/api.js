@@ -78,7 +78,7 @@ module.exports = (req, v = ``) => {
 
     }, 20000);
 
-    xit(`returns simplified data objects`, function(done) {
+    it(`returns simplified data objects`, function(done) {
 
       const lang = { emptyProp: '', ttl };
 
@@ -92,7 +92,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`returns objects without database properties`, function(done) {
+    it(`returns objects without database properties`, function(done) {
 
       const lang = { ttl };
 
@@ -111,7 +111,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`does not return resources that have a TTL`, function(done) {
+    it(`does not return resources that have a TTL`, function(done) {
 
       const lang = {
         permissions: { public: true },
@@ -162,7 +162,7 @@ module.exports = (req, v = ``) => {
 
     }, 10000);
 
-    xit(`returns 207 for partial finds`, function(done) {
+    it(`returns 207 for partial finds`, function(done) {
 
       const lang = {
         id: `test-207`,
@@ -182,7 +182,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`PUT /languages (one language)`, function(done) {
+    it(`PUT /languages (one language)`, function(done) {
 
       const lang = {
         permissions: { owner: [config.testUser] },
@@ -200,7 +200,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`PUT /languages (multiple languages)`, function(done) {
+    it(`PUT /languages (multiple languages)`, function(done) {
       req.put(`${v}/languages`)
       .send([
         { tid: `putMany1`, ttl },
@@ -217,7 +217,7 @@ module.exports = (req, v = ``) => {
       .catch(fail);
     });
 
-    xit(`PUT /languages/{language}`, function(done) {
+    it(`PUT /languages/{language}`, function(done) {
 
       const lang = {
         permissions: { owner: [config.testUser] },
@@ -252,7 +252,7 @@ module.exports = (req, v = ``) => {
       .catch(fail);
     });
 
-    xit(`GET /languages/{language}`, function(done) {
+    it(`GET /languages/{language}`, function(done) {
 
       const lang = {
         id: `test-getLanguage`,
@@ -271,7 +271,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`GET /languages?ids={ids}`, function(done) {
+    it(`GET /languages?ids={ids}`, function(done) {
 
       const id1 = `test-getByIds1`;
       const id2 = `test-getByIds2`;
@@ -297,7 +297,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`DELETE /languages/{language}`, function(done) {
+    it(`DELETE /languages/{language}`, function(done) {
 
       const lang = {
         permissions: { owner: [config.testUser] },
@@ -315,7 +315,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`DELETE /languages`, function(done) {
+    it(`DELETE /languages`, function(done) {
 
       const lang = {
         permissions: { owner: [config.testUser] },
