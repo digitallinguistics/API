@@ -13,6 +13,7 @@ const logger       = require(`./lib/middleware/logger`);
 const query        = require(`./lib/middleware/query`);
 const routers      = require(`./lib/routers/rest`);
 const sockets      = require(`./lib/routers/socket`);
+const type       = require(`./lib/middleware/type`);
 
 // initialize Express and routers
 const app = express();               // create the Express app
@@ -29,6 +30,7 @@ app.use(express.static(`public`));   // routing for static files
 app.use(error);                      // adds res.error method to response
 app.use(logger);                     // custom middleware (logs URL)
 app.use(query);                      // format req.query for easier handling
+app.use(type);                       // set req.type
 app.use(authenticate.unless({        // authenticate requests to the API
   path: [/\/test\//],                // don't authenticate test routes
 }));

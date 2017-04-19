@@ -8,9 +8,13 @@
   prefer-arrow-callback
 */
 
-const getToken    = require(`./getToken`);
-const handleError = require(`./handleError`);
-const http        = require(`http`);
+const config   = require(`../lib/config`);
+const getToken = require(`./token`);
+const http     = require(`http`);
+const jwt      = require(`jsonwebtoken`);
+const { client: db, coll } = require(`../lib/modules/db`);
+
+const test = true;
 
 // The "v" parameter is a version path, e.g. "/v0", "/v1", etc.
 module.exports = (req, v = ``) => {
@@ -40,61 +44,124 @@ module.exports = (req, v = ``) => {
 
     });
 
+    it(`400: malformed data`, function(done) {
+
+      const lang = {
+        name: true,
+        test,
+      };
+
+      req.put(`${v}/languages`)
+      .set(`Authorization`, `Bearer ${this.token}`)
+      .send(lang)
+      .expect(400)
+      .then(done)
+      .catch(fail);
+
+    });
+
+    it(`401: credentials_required`, function(done) {
+      req.get(`${v}/test`)
+      .expect(401)
+      .expect(res => {
+        expect(res.headers[`www-authenticate`]).toBeDefined();
+        expect(res.body.error).toBe(`credentials_required`);
+      })
+      .then(done)
+      .catch(fail);
+    });
+
+    it(`403: bad user permissions`, function(done) {
+
+      const lang = { test };
+
+      db.upsertDocument(coll, lang, (err, doc) => {
+
+        if (err) fail(err);
+
+        req.get(`${v}/languages/${doc.id}`)
+        .set(`Authorization`, `Bearer ${this.token}`)
+        .expect(403)
+        .then(done)
+        .catch(fail);
+
+      });
+
+    });
+
+    it(`403: bad scope`, function(done) {
+
+      const payload = {
+        azp:   config.authClientId,
+        scope: `public`,
+      };
+
+      const opts = {
+        audience: [`https://api.digitallinguistics.io/`],
+        issuer:   `https://${config.authDomain}/`,
+        subject:  config.testUser,
+      };
+
+      jwt.sign(payload, config.authSecret, opts, (err, token) => {
+
+        if (err) fail(err);
+
+        const lang = { test };
+
+        const put = () => req.put(`${v}/languages`)
+        .set(`Authorization`, `Bearer ${token}`)
+        .send(lang)
+        .expect(403);
+
+        const destroy = () => req.delete(`${v}/languages`)
+        .set(`Authorization`, `Bearer ${token}`)
+        .expect(403);
+
+        put()
+        .then(destroy)
+        .then(done)
+        .catch(fail);
+
+      });
+
+    });
+
     it(`404: No Route`, function(done) {
-      return req.get(`${v}/badroute`)
+      req.get(`${v}/badroute`)
       .set(`Authorization`, `Bearer ${this.token}`)
       .expect(404)
       .then(done)
-      .catch(handleError(done));
+      .catch(fail);
+    });
+
+    it(`404: resource does not exist`, function(done) {
+
+      req.get(`${v}/languages/does-not-exist`)
+      .set(`Authorization`, `Bearer ${this.token}`)
+      .expect(404)
+      .then(done)
+      .catch(fail);
+
     });
 
     it(`405: Method Not Allowed`, function(done) {
-      return req.post(`${v}/test`)
+      req.post(`${v}/test`)
       .set(`Authorization`, `Bearer ${this.token}`)
       .expect(405)
       .then(done)
-      .catch(handleError(done));
+      .catch(fail);
     });
 
-    it(`credentials_required`, function(done) {
-      req.get(`${v}/test`)
-      .expect(401)
-      .then(res => {
-        expect(res.headers[`www-authenticate`]).toBeDefined();
-        expect(res.body.error).toBe(`credentials_required`);
-        done();
-      }).catch(handleError(done));
+    xit(`429: rate limit`, function(done) {
     });
 
     it(`GET /test`, function(done) {
       req.get(`${v}/test`)
       .set(`Authorization`, `Bearer ${this.token}`)
       .expect(200)
-      .then(res => {
-        expect(res.body.message).toBe(`Test successful.`);
-        done();
-      }).catch(handleError(done));
-    });
-
-    it(`malformed data`, function() {
-      // data doesn`t adhere to DLx spec
-    });
-
-    it(`bad permissions`, function() {
-      // user doesn`t have permission to access a resource
-      // should return 403
-      // test this with GET, PUT, and DELETE
-    });
-
-    it(`enforces rate limits`, function() {
-    });
-
-    it(`does not allow public clients to modify data`, function() {
-      // TODO: should not allow PUT or DELETE methods
-    });
-
-    it(`404 not found for resources that don't exist`, function() {
-      // check this for both getLanguage and getLanguages
+      .expect(res => expect(res.body.message).toBe(`Test successful.`))
+      .then(done)
+      .catch(fail);
     });
 
   });

@@ -14,8 +14,8 @@
   prefer-arrow-callback
 */
 
-const config = require(`../lib/config`);
-const jwt    = require(`jsonwebtoken`);
+const config   = require(`../lib/config`);
+const getToken = require(`./token`);
 const { client: db, coll } = require(`../lib/modules/db`);
 
 const ttl  = 500; // 3 minutes
@@ -27,7 +27,6 @@ const deleteDocument = link => new Promise((resolve, reject) => {
     else resolve(res);
   });
 });
-
 
 const upsertDocument = data => new Promise((resolve, reject) => {
   db.upsertDocument(coll, data, (err, res) => {
@@ -41,24 +40,7 @@ module.exports = (req, v = ``) => {
   describe(`REST API`, function() {
 
     beforeAll(function(done) {
-
-      const payload = {
-        azp:   config.authClientId,
-        scope: `user`,
-      };
-
-      const opts = {
-        audience: [`https://api.digitallinguistics.io/`],
-        issuer:   `https://${config.authDomain}/`,
-        subject:  config.testUser,
-      };
-
-      jwt.sign(payload, config.authSecret, opts, (err, token) => {
-        if (err) return fail(err);
-        this.token = token;
-        done();
-      });
-
+      getToken().then(token => { this.token = token; }).then(done).catch(fail);
     });
 
     // NB: This may have to be run multiple times to clear the database
