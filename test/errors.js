@@ -153,6 +153,20 @@ module.exports = (req, v = ``) => {
     });
 
     xit(`429: rate limit`, function(done) {
+
+      const arr = Array(600).fill({});
+
+      const test = () => req.get(`${v}/test`)
+      .set(`Authorization`, `Bearer ${this.token}`)
+      .expect(200);
+
+      Promise.all(arr.map(test))
+      .then(fail)
+      .catch(err => {
+        console.error(err);
+        done();
+      });
+
     });
 
     it(`GET /test`, function(done) {

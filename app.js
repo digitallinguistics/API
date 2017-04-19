@@ -9,11 +9,12 @@ const createSocket = require(`./lib/modules/socket`);
 const error        = require(`./lib/middleware/error`);
 const express      = require(`express`);
 const helmet       = require(`helmet`);
+const limiter      = require(`./lib/middleware/limit`);
 const logger       = require(`./lib/middleware/logger`);
 const query        = require(`./lib/middleware/query`);
 const routers      = require(`./lib/routers/rest`);
 const sockets      = require(`./lib/routers/socket`);
-const type       = require(`./lib/middleware/type`);
+const type         = require(`./lib/middleware/type`);
 
 // initialize Express and routers
 const app = express();               // create the Express app
@@ -25,6 +26,7 @@ app.set(`port`, config.port);        // set port for the app
 
 // middleware
 app.use(helmet());                   // basic security features
+app.use(limiter);                    // rate limiting
 app.use(bodyParser.json());          // parse JSON data in the request body
 app.use(express.static(`public`));   // routing for static files
 app.use(error);                      // adds res.error method to response
