@@ -152,6 +152,10 @@ module.exports = (req, v = ``) => {
       .catch(fail);
     });
 
+    it(`412: Precondition Failed`, function(done) {
+      pending(`Not yet implemented`);
+    });
+
     xit(`429: rate limit`, function(done) {
 
       const arr = Array(600).fill({});

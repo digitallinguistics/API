@@ -15,20 +15,19 @@ If you are writing your application using JavaScript or Node, consider using the
 
 ## I. About the Database
 
-### Types of Resources in the Database
+### Resources
 The DLx database contains several types of resources, such as texts, lexicons, and media. There are separate URLs for accessing each type of resource in the database, shown below. The DLx API allows users to perform various operations on these resources, depending on the type of resource and whether the user and the application have permission to perform that operation. For example, a user may add a text to the database or, if they have `Owner` permission for that text, update or delete that text.
 
 Each item in the database must be formatted according to the Digital Linguistics (DLx) data format. This is a standard format in JSON for exchanging linguistic data on the web. You can read more about this format [here][4]. If the user requests to add a resource to the database that is improperly formatted, the request returns an error and the resource is not uploaded.
 
 Some types of resources contain subitems that may also be accessed with the API. For example, texts contain phrases, so a user may request one or more phrases from a text, rather than having to request the entire text at once.
 
-### IDs
-Each resource in the database is given a unique ID which cannot be altered or set by your application. If you attempt to create a new document with an `id` property, the API will return an error. (If you are just updating a document, however, including the `id` property will not throw an error.)
+#### Resource Properties
+- **IDs (`id`):** Each resource in the database is given a unique ID which cannot be altered or set by your application. If you attempt to create a new resource with an `id` property, the API will return an error. (If you are just updating a resource, however, including the `id` property will not throw an error.) If your application needs to maintain its own set of IDs, it is recommended that you use the `cid` (Client ID) property for that purpose.
 
-If your application needs to maintain its own set of IDs, it is recommended that you use the `cid` (Client ID) property for that purpose.
+- **ETag (`_etag`):** Each resource in the database has an `_etag` property. It is important not to change or delete this property, since it is used by the database to determine if you have the most up-to-date version of the resource. If you attempt to update or delete a resource with a missing or incorrect `_etag` property, a `412: Precondition Failed` error will be returned.
 
-### Empty Properties
-If a property of a resource is empty (i.e. an empty string, array, or object), it will often be removed when it is added to the database. This helps keep the size of the files in the database relatively small. So if you save a resource with a `"myProperty": ""` attribute to the database, and then retrieve that resource from the database, the `myProperty` attribute will be undefined.
+- **Empty Properties:** If a property of a resource is empty (i.e. an empty string, array, or object), it will often be removed when it is added to the database. This helps keep the size of the files in the database relatively small. So if you save a resource with a `"myProperty": ""` attribute to the database, and then retrieve that resource from the database, the `myProperty` attribute will be undefined.
 
 ### Permissions
 Every resource in the database is given a set of permissions specifying who is allowed to view, edit, add/delete, or change permissions for that resource. There are three types of permissions that a user can have:
@@ -52,6 +51,11 @@ In addition to individual user permissions, resources can be made either `Public
 - Do not display private metadata
 - Do not display personal information (except for public metadata)
 - Could possibly be plagiarized or copied without permission (as with any publication)
+
+### Concurrency
+*Concurrency* refers to how a database deals with simultaneous operations, i.e. if you and another person both make updates to the same resource. The DLx API supports *optimistic concurrency*, providing you with a way to easily check whether you have the most up-to-date version of a resource before making changes to it, and to avoid having to retrieve the same resource multiple times. Details on how to use optimistic concurrency with the REST API and Web Socket API are below.
+
+**Note:** The DLx API does not use the `dateModified` field for concurrency, and does not update this field automatically. Your application is free to change the `dateModified` field as appropriate.
 
 ## II. App Registration
 Before your app can interact programmatically with the DLx database API, you must register your application. Once registered, you will be provided with a client ID and a client secret which you can use to authenticate your app with the API service. It is important to keep both of these confidential, so that others cannot access DLx resources using your credentials.
@@ -165,27 +169,34 @@ Attribute           | Description
 `error_description` | a more specific error message for help in debugging unsuccessful requests
 
 #### Paging
-By default, the DLx REST API will return all the results of a request in a single response. You can set the number of results to return in a response at one time by (the *page size*) by including a `x-dlx-max-item-count` header in the request, whose value is the number of results you want returned for each request (between 1 and 1000).
+By default, the DLx REST API will return all the results of a request in a single response. You can set the number of results to return in a response at one time by (the *page size*) by including a `dlx-max-item-count` header in the request, whose value is the number of results you want returned for each request (between 1 and 1000).
 
-If the request finds more items than the page size, a continuation token will be returned with the response in the `x-dlx-continuation` header, along with the first set of results. You can then send this continuation token with your next request (in the `x-dlx-continuation` header) to retrieve the next set of results.
+If the request finds more items than the page size, a continuation token will be returned with the response in the `dlx-continuation` header, along with the first set of results. You can then send this continuation token with your next request (in the `dlx-continuation` header) to retrieve the next set of results.
+
+#### Concurrency
+It is generally a good idea to check whether you have the most recent version of a resource before attempting to update or delete it in the database. The DLx API allows you to do this by including an `If-Match` header with a PUT or DELETE request, whose value is the ETag (`_etag` property) of the resource you wish to change. If you already have the most up-to-date version of the resource, it will be updated/deleted as normal. If your version of the resource is out of date, the API will return a `412: Precondition Failed` error. Your application can then retrieve the most recent version of the resource from the database, and try making the change again.
+
+It is also a good idea to check whether you already have the latest version of a resource before retrieving it from the database again. This helps cut down on bandwidth, since the resource doesn't have to be sent to your application multiple times. To check whether you already have the latest version of a resource, include an `If-None-Match` header in the GET request, whose value is the ETag (`_etag` property) of the resource you wish to retrieve. If you already have the most up-to-date version of the resource, the API will return a `304: Not Modified` response. Otherwise, the requested resource will be returned as normal.
 
 #### Response Headers & Status Codes
 The following status codes are used in responses from the REST API. Your application should be prepared to handle any of these response types.
 
 Status | Description
 ------ | -----------
-200    | Operation successful.
-201    | Upsert successful.
-204    | Delete operation successful.
-207    | Some resources were not found.
-400    | Bad request. The request URL, headers, or body are invalid.
-401    | `Authorization` header missing or invalid.
-403    | Unauthorized. (Insufficient permissions.)
-404    | Not found.
-405    | Method not allowed.
-409    | Data conflict.
-419    | Authorization token expired.
-500    | Internal server error. [Open an issue.][12]
+200    | Operation successful
+201    | Upsert successful
+204    | Delete operation successful
+207    | Some resources were not found
+304    | Not Modified
+400    | Bad request The request URL, headers, or body are invalid
+401    | `Authorization` header missing or invalid
+403    | Unauthorized (Insufficient permissions)
+404    | Not found
+405    | Method not allowed
+409    | Data conflict
+412    | Precondition Failed
+419    | Authorization token expired
+500    | Internal server error [Open an issue][12]
 
 ### Web Socket API
 

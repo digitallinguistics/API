@@ -18,13 +18,13 @@ require(`./authentication`);
 require(`./registration`);
 
 // run error tests
-errors(req);
-errors(req, `/v0`);
+// errors(req);
+// errors(req, `/v0`);
 
 // run routes tests
 api(req);
-api(req, `/v0`);
+// api(req, `/v0`);
 
 // run Socket.IO tests
-socket();
-socket(`/v0`);
+// socket();
+// socket(`/v0`);

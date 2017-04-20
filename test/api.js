@@ -60,7 +60,7 @@ module.exports = (req, v = ``) => {
 
     }, 20000);
 
-    it(`returns simplified data objects`, function(done) {
+    xit(`returns simplified data objects`, function(done) {
 
       const lang = { emptyProp: '', ttl };
 
@@ -74,7 +74,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`returns objects without database properties`, function(done) {
+    xit(`returns objects without database properties`, function(done) {
 
       const lang = { ttl };
 
@@ -83,9 +83,10 @@ module.exports = (req, v = ``) => {
       .set(`Authorization`, `Bearer ${this.token}`)
       .expect(201)
       .expect(res => {
+        expect(res.body._attachments).toBeUndefined();
         expect(res.body._rid).toBeUndefined();
         expect(res.body._self).toBeUndefined();
-        expect(res.body._attachments).toBeUndefined();
+        expect(res.body._ts).toBeUndefined();
         expect(res.body.permissions).toBeUndefined();
       })
       .then(done)
@@ -93,7 +94,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`does not return resources that have a TTL`, function(done) {
+    xit(`does not return resources that have a TTL`, function(done) {
 
       const lang = {
         permissions: { public: true },
@@ -111,10 +112,10 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`supports pagination`, function(done) {
+    xit(`supports pagination`, function(done) {
 
-      const continuationHeader = `x-dlx-continuation`;
-      const maxItemHeader      = `x-dlx-max-item-count`;
+      const continuationHeader = `dlx-continuation`;
+      const maxItemHeader      = `dlx-max-item-count`;
 
       const test1 = () => req.get(`${v}/languages`)
       .set(`Authorization`, `Bearer ${this.token}`)
@@ -144,7 +145,7 @@ module.exports = (req, v = ``) => {
 
     }, 10000);
 
-    it(`returns 207 for partial finds`, function(done) {
+    xit(`207: some found`, function(done) {
 
       const lang = {
         id: `test-207`,
@@ -164,7 +165,24 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`PUT /languages (one language)`, function(done) {
+    it(`304: Not Modified`, function(done) {
+
+      const lang = { ttl };
+
+      const test = doc => req.get(`${v}/languages/${doc.id}`)
+      .set(`Authorization`, `Bearer ${this.token}`)
+      .set(`If-None-Match`, doc._etag)
+      .expect(304)
+      .expect(res => console.log(res.headers, res.body));
+
+      upsertDocument(lang)
+      .then(test)
+      .then(done)
+      .catch(fail);
+
+    });
+
+    xit(`PUT /languages (one language)`, function(done) {
 
       const lang = {
         permissions: { owner: [config.testUser] },
@@ -182,7 +200,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`PUT /languages (multiple languages)`, function(done) {
+    xit(`PUT /languages (multiple languages)`, function(done) {
       req.put(`${v}/languages`)
       .send([
         { tid: `putMany1`, ttl },
@@ -199,7 +217,7 @@ module.exports = (req, v = ``) => {
       .catch(fail);
     });
 
-    it(`PUT /languages/{language}`, function(done) {
+    xit(`PUT /languages/{language}`, function(done) {
 
       const lang = {
         permissions: { owner: [config.testUser] },
@@ -225,7 +243,7 @@ module.exports = (req, v = ``) => {
     });
 
     // NB: this test assumes that there are currently multiple languages in the database
-    it(`GET /languages`, function(done) {
+    xit(`GET /languages`, function(done) {
       req.get(`${v}/languages`)
       .set(`Authorization`, `Bearer ${this.token}`)
       .expect(200)
@@ -234,7 +252,7 @@ module.exports = (req, v = ``) => {
       .catch(fail);
     });
 
-    it(`GET /languages/{language}`, function(done) {
+    xit(`GET /languages/{language}`, function(done) {
 
       const lang = {
         id: `test-getLanguage`,
@@ -253,7 +271,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`GET /languages?ids={ids}`, function(done) {
+    xit(`GET /languages?ids={ids}`, function(done) {
 
       const id1 = `test-getByIds1`;
       const id2 = `test-getByIds2`;
@@ -279,7 +297,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`DELETE /languages/{language}`, function(done) {
+    xit(`DELETE /languages/{language}`, function(done) {
 
       const lang = {
         permissions: { owner: [config.testUser] },
@@ -297,7 +315,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`DELETE /languages`, function(done) {
+    xit(`DELETE /languages`, function(done) {
 
       const lang = {
         permissions: { owner: [config.testUser] },
