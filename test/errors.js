@@ -28,7 +28,7 @@ module.exports = (req, v = ``) => {
       .catch(fail);
     });
 
-    xit(`HTTP > HTTPS`, function(done) {
+    it(`HTTP > HTTPS`, function(done) {
 
       const req = http.get(`http://api.digitallinguistics.io/test`, res => {
         let data = ``;
@@ -44,7 +44,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`400: malformed data`, function(done) {
+    it(`400: malformed data`, function(done) {
 
       const lang = {
         name: true,
@@ -60,7 +60,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`401: credentials_required`, function(done) {
+    it(`401: credentials_required`, function(done) {
       req.get(`${v}/test`)
       .expect(401)
       .expect(res => {
@@ -71,7 +71,7 @@ module.exports = (req, v = ``) => {
       .catch(fail);
     });
 
-    xit(`403: bad user permissions`, function(done) {
+    it(`403: bad user permissions`, function(done) {
 
       const lang = { test };
 
@@ -89,7 +89,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`403: bad scope`, function(done) {
+    it(`403: bad scope`, function(done) {
 
       const payload = {
         azp:   config.authClientId,
@@ -126,7 +126,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`404: No Route`, function(done) {
+    it(`404: No Route`, function(done) {
       req.get(`${v}/badroute`)
       .set(`Authorization`, `Bearer ${this.token}`)
       .expect(404)
@@ -134,7 +134,7 @@ module.exports = (req, v = ``) => {
       .catch(fail);
     });
 
-    xit(`404: resource does not exist`, function(done) {
+    it(`404: resource does not exist`, function(done) {
 
       req.get(`${v}/languages/does-not-exist`)
       .set(`Authorization`, `Bearer ${this.token}`)
@@ -144,7 +144,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`405: Method Not Allowed`, function(done) {
+    it(`405: Method Not Allowed`, function(done) {
       req.post(`${v}/test`)
       .set(`Authorization`, `Bearer ${this.token}`)
       .expect(405)
@@ -200,7 +200,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`GET /test`, function(done) {
+    it(`GET /test`, function(done) {
       req.get(`${v}/test`)
       .set(`Authorization`, `Bearer ${this.token}`)
       .expect(200)
