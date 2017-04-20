@@ -52,6 +52,14 @@ In addition to individual user permissions, resources can be made either `Public
 - Do not display personal information (except for public metadata)
 - Could possibly be plagiarized or copied without permission (as with any publication)
 
+You can set a resource to be public or private by including a `permissions` attribute on the resource:
+
+```js
+{
+  permissions: { public: true }
+}
+```
+
 ### Concurrency
 *Concurrency* refers to how a database deals with simultaneous operations, i.e. if you and another person both make updates to the same resource. The DLx API supports *optimistic concurrency*, providing you with a way to easily check whether you have the most up-to-date version of a resource before making changes to it, and to avoid having to retrieve the same resource multiple times. Details on how to use optimistic concurrency with the REST API and Web Socket API are below.
 
