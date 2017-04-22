@@ -52,8 +52,9 @@
       },
       "put" : {
         "tags" : [ "Language" ],
-        "summary" : "Upsert a Language",
-        "operationId" : "upsertLanguage",
+        "summary" : "Upsert one or more Languages",
+        "description" : "The body may be either a single database object or an array of objects.",
+        "operationId" : "upsertLanguages",
         "parameters" : [ {
           "in" : "body",
           "name" : "body",
@@ -68,6 +69,28 @@
             "description" : "Upsert successful."
           }
         }
+      },
+      "delete" : {
+        "tags" : [ "Language" ],
+        "summary" : "Delete multiple Languages",
+        "operationId" : "deleteLanguages",
+        "parameters" : [ {
+          "name" : "ids",
+          "in" : "query",
+          "description" : "A comma-separated list of IDs",
+          "required" : false,
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          },
+          "collectionFormat" : "csv",
+          "allowEmptyValue" : false
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Delete operation successful."
+          }
+        }
       }
     },
     "/languages/{languageId}" : {
@@ -75,6 +98,23 @@
         "tags" : [ "Language" ],
         "summary" : "Retrieve a Language by ID",
         "operationId" : "getLanguage",
+        "parameters" : [ {
+          "name" : "languageId",
+          "in" : "path",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Operation successful."
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Language" ],
+        "summary" : "Update a Language",
+        "operationId" : "updateLanguage",
         "parameters" : [ {
           "name" : "languageId",
           "in" : "path",
