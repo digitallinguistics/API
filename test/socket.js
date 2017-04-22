@@ -15,7 +15,7 @@ module.exports = (v = ``) => {
   const authenticate = token => new Promise((resolve, reject) => {
 
     const socketOpts = { transports: [`websocket`, `xhr-polling`] };
-    const client     = io.connect(`${config.baseUrl}${v}`, socketOpts);
+    const client     = io.connect(`${v}`, socketOpts);
 
     client.on(`authenticated`, () => resolve(client));
     client.on(`connect`, () => client.emit(`authenticate`, { token }));
