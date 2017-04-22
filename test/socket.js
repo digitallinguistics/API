@@ -10,6 +10,8 @@ const config   = require(`../lib/config`);
 const getToken = require(`./token`);
 const io       = require(`socket.io-client`);
 
+console.log(config);
+
 module.exports = (v = ``) => {
 
   const authenticate = token => new Promise((resolve, reject) => {
@@ -47,31 +49,31 @@ module.exports = (v = ``) => {
 
     });
 
-    it(`returns an error when not authenticated`, function() {
+    xit(`returns an error when not authenticated`, function() {
     });
 
-    it(`upsert:languages (one language)`, function() {
+    xit(`upsert:languages (one language)`, function() {
     });
 
-    it(`upsert:languages (multiple languages)`, function() {
+    xit(`upsert:languages (multiple languages)`, function() {
     });
 
-    it(`upsert:language`, function() {
+    xit(`upsert:language`, function() {
     });
 
-    it(`get:languages`, function() {
+    xit(`get:languages`, function() {
     });
 
-    it(`get:languages | ids`, function() {
+    xit(`get:languages | ids`, function() {
     });
 
-    it(`get:language`, function() {
+    xit(`get:language`, function() {
     });
 
-    it(`delete:language`, function() {
+    xit(`delete:language`, function() {
     });
 
-    it(`delete:languages`, function() {
+    xit(`delete:languages`, function() {
     });
 
   });
