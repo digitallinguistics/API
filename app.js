@@ -1,34 +1,40 @@
 // load config file before loading other modules
-const config = require('./lib/config');
+const config = require(`./lib/config`);
 
 // load modules
-const authenticate = require('./lib/middleware/authenticate');
-const bodyParser   = require('body-parser');
-const createServer = require('./lib/server');
-const createSocket = require('./lib/socket');
-const error        = require('./lib/middleware/error');
-const express      = require('express');
-const helmet       = require('helmet');
-const logger       = require('./lib/middleware/logger');
-const routers      = require('./lib/routers/rest');
-const sockets      = require('./lib/routers/socket');
+const authenticate = require(`./lib/middleware/authenticate`);
+const bodyParser   = require(`body-parser`);
+const createServer = require(`./lib/modules/server`);
+const createSocket = require(`./lib/modules/socket`);
+const error        = require(`./lib/middleware/error`);
+const express      = require(`express`);
+const helmet       = require(`helmet`);
+const limiter      = require(`./lib/middleware/limit`);
+const logger       = require(`./lib/middleware/logger`);
+const query        = require(`./lib/middleware/query`);
+const routers      = require(`./lib/routers/rest`);
+const sockets      = require(`./lib/routers/socket`);
+const type         = require(`./lib/middleware/type`);
 
 // initialize Express and routers
 const app = express();               // create the Express app
 const v0  = express.Router();        // create the Version 0.x router
 
 // app settings
-app.enable('trust proxy');           // trust the Azure proxy server
-app.set('port', config.port);        // set port for the app
+app.enable(`trust proxy`);           // trust the Azure proxy server
+app.set(`port`, config.port);        // set port for the app
 
 // middleware
 app.use(helmet());                   // basic security features
+app.use(limiter);                    // rate limiting
 app.use(bodyParser.json());          // parse JSON data in the request body
-app.use(express.static('public'));   // routing for static files
+app.use(express.static(`public`));   // routing for static files
 app.use(error);                      // adds res.error method to response
 app.use(logger);                     // custom middleware (logs URL)
+app.use(query);                      // format req.query for easier handling
+app.use(type);                       // set req.type
 app.use(authenticate.unless({        // authenticate requests to the API
-  path: [/test/],                    // don't authenticate test routes
+  path: [/\/test\//],                // don't authenticate test routes
 }));
 
 // add routes to routers
@@ -36,7 +42,7 @@ routers.v0(v0);
 
 // mount routers to their respective version paths
 app.use(v0);
-app.use('/v0', v0);
+app.use(`/v0`, v0);
 
 // add test routes and error handlers
 routers.common(app);

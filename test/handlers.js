@@ -49,6 +49,8 @@ const callback = (req, res) => {
 
 };
 
+// TODO: implement endpoint for client grant test (even though you already have a test for it)
+
 const code = (req, res) => {
 
   const params = {
@@ -71,7 +73,7 @@ const implicit = (req, res) => {
     client_id,
     nonce:         `abcde`,
     redirect_uri,
-    response_type: `id_token`,
+    response_type: `token`,
     scope:         `openid`,
     state,
   };
