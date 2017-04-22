@@ -10,8 +10,6 @@ const config   = require(`../lib/config`);
 const getToken = require(`./token`);
 const io       = require(`socket.io-client`);
 
-console.log(config);
-
 module.exports = (v = ``) => {
 
   const authenticate = token => new Promise((resolve, reject) => {
