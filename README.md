@@ -15,12 +15,19 @@ If you are writing your application using JavaScript or Node, consider using the
 
 ## I. About the Database
 
-### Types of Resources in the Database
+### Resources
 The DLx database contains several types of resources, such as texts, lexicons, and media. There are separate URLs for accessing each type of resource in the database, shown below. The DLx API allows users to perform various operations on these resources, depending on the type of resource and whether the user and the application have permission to perform that operation. For example, a user may add a text to the database or, if they have `Owner` permission for that text, update or delete that text.
 
 Each item in the database must be formatted according to the Digital Linguistics (DLx) data format. This is a standard format in JSON for exchanging linguistic data on the web. You can read more about this format [here][4]. If the user requests to add a resource to the database that is improperly formatted, the request returns an error and the resource is not uploaded.
 
 Some types of resources contain subitems that may also be accessed with the API. For example, texts contain phrases, so a user may request one or more phrases from a text, rather than having to request the entire text at once.
+
+#### Resource Properties
+- **IDs (`id`):** Each resource in the database is given a unique ID which cannot be altered or set by your application. If you attempt to create a new resource with an `id` property, the API will return an error. (If you are just updating a resource, however, including the `id` property will not throw an error.) If your application needs to maintain its own set of IDs, it is recommended that you use the `cid` (Client ID) property for that purpose.
+
+- **ETag (`_etag`):** Each resource in the database has an `_etag` property. It is important not to change or delete this property, since it is used by the database to determine if you have the most up-to-date version of the resource. If you attempt to update or delete a resource with a missing or incorrect `_etag` property, a `412: Precondition Failed` error will be returned.
+
+- **Empty Properties:** If a property of a resource is empty (i.e. an empty string, array, or object), it will often be removed when it is added to the database. This helps keep the size of the files in the database relatively small. So if you save a resource with a `"myProperty": ""` attribute to the database, and then retrieve that resource from the database, the `myProperty` attribute will be undefined.
 
 ### Permissions
 Every resource in the database is given a set of permissions specifying who is allowed to view, edit, add/delete, or change permissions for that resource. There are three types of permissions that a user can have:
@@ -44,6 +51,19 @@ In addition to individual user permissions, resources can be made either `Public
 - Do not display private metadata
 - Do not display personal information (except for public metadata)
 - Could possibly be plagiarized or copied without permission (as with any publication)
+
+You can set a resource to be public or private by including a `permissions` attribute on the resource:
+
+```js
+{
+  permissions: { public: true }
+}
+```
+
+### Concurrency
+*Concurrency* refers to how a database deals with simultaneous operations, i.e. if you and another person both make updates to the same resource. The DLx API supports *optimistic concurrency*, providing you with a way to easily check whether you have the most up-to-date version of a resource before making changes to it, and to avoid having to retrieve the same resource multiple times. Details on how to use optimistic concurrency with the REST API and Web Socket API are below.
+
+**Note:** The DLx API does not use the `dateModified` field for concurrency, and does not update this field automatically. Your application is free to change the `dateModified` field as appropriate.
 
 ## II. App Registration
 Before your app can interact programmatically with the DLx database API, you must register your application. Once registered, you will be provided with a client ID and a client secret which you can use to authenticate your app with the API service. It is important to keep both of these confidential, so that others cannot access DLx resources using your credentials.
@@ -77,7 +97,7 @@ Scope            | Description
 ---------------- | -----------
 `admin`          | Administrative access to all resources in the database. This scope subsumes all other scopes, so it is not necessary to include any other scopes in the request. This should only be used with the Client Credentials authorization strategy. (For DLx-internal applications only. Requests for `admin` scope from third-party applications will be denied.)
 `offline_access` | (*requires user permission*) Access to a user's resources even when the user is offline.
-`public`         | Access to any public resources in the database.
+`public`         | Access to any public resources in the database. Data cannot be added, deleted, or modified using the `public` scope, only retrieved.
 `user`           | (*requires user permission*) Access to all the resources that the authenticated user has permissions to view, including public resources. This scope subsumes the `public` scope, so it is not necessary to include both.
 
 #### Using Access Tokens
@@ -86,7 +106,7 @@ Once your application receives an access token, it can begin making requests to 
 #### Handling Authentication Errors
 Sometimes the requests you make during authentication will return an error. This can happen for a variety of reasons - incorrectly formatted URLs, bad request parameters, etc. If the redirect URI is invalid, the user will be directed to a generic error page with more information about the error. Otherwise, the server will return an error response with a JSON-format string in the body containing two parameters: an `error` parameter indicating the type of error, and an `error_description` parameter with a more detailed description of the problem. A `state` parameter is also included if a `state` was provided by your application. A list of possible values for the `error` parameter can be viewed [here][10].
 
-## IV. Using the Database
+## IV. Using the API
 Once you have [registered your application](ii-app-registration) and [received an access token](iii-authentication), you are ready to make requests to the database. There are two ways to interact with the database: via the *REST API*, and via *web sockets*.
 
 ### REST API
@@ -97,7 +117,7 @@ Each resource in the database corresponds to a different URL. For example, the l
 
 Resource    | URL Format
 ----------- | ----------
-Language    | `https://api.digitallinguistics.io/v1/languages/{language}`
+Language    | `https://api.digitallinguistics.io/languages/{language}`
 
 **[View the complete reference documentation for the REST API here.][3]**
 
@@ -109,8 +129,8 @@ You can add, update, or retrieve multiple items at once by making requests to a 
 
 Request Format                                             | Operation
 ---------------------------------------------------------- | ---------
-`GET https://api.digitallinguistics.io/{collection}`       | Retrieve items from the collection (an `ids` parameter in the querystring is required).
-`PUT https://api.digitallinguistics.io/{collection}`       | Upsert (add/update) a resource to the collection.
+`GET https://api.digitallinguistics.io/{collection}`       | Retrieve items from the collection
+`PUT https://api.digitallinguistics.io/{collection}`       | Upsert (add/update) one or more resources to the collection.
 
 #### Operations on Permissions **NOT YET SUPPORTED**
 To add or delete permissions for an object, simply make a POST or DELETE request to the resource URL with `/permissions` appended to the end. For example, to add a new permission for a text with the ID `17`, you would make a PUT request to `https://api.digitallinguistics.io/texts/17/permissions`.
@@ -156,23 +176,162 @@ Attribute           | Description
 `error`             | a generic error code
 `error_description` | a more specific error message for help in debugging unsuccessful requests
 
+#### Paging
+By default, the DLx REST API will return all the results of a request in a single response. You can set the number of results to return in a response at one time by (the *page size*) by including a `dlx-max-item-count` header in the request, whose value is the number of results you want returned for each request (between 1 and 1000).
+
+If the request finds more items than the page size, a continuation token will be returned with the response in the `dlx-continuation` header, along with the first set of results. You can then send this continuation token with your next request (in the `dlx-continuation` header) to retrieve the next set of results.
+
+#### Concurrency
+It is generally a good idea to check whether you have the most recent version of a resource before attempting to update or delete it in the database. The DLx API allows you to do this by including an `If-Match` header with a PUT or DELETE request, whose value is the ETag (`_etag` property) of the resource you wish to change. If you already have the most up-to-date version of the resource, it will be updated/deleted as normal. If your version of the resource is out of date, the API will return a `412: Precondition Failed` error. Your application can then retrieve the most recent version of the resource from the database, and try making the change again.
+
+It is also a good idea to check whether you already have the latest version of a resource before retrieving it from the database again. This helps cut down on bandwidth, since the resource doesn't have to be sent to your application multiple times. To check whether you already have the latest version of a resource, include an `If-None-Match` header in the GET request, whose value is the ETag (`_etag` property) of the resource you wish to retrieve. If you already have the most up-to-date version of the resource, the API will return a `304: Not Modified` response. Otherwise, the requested resource will be returned as normal.
+
 #### Response Headers & Status Codes
 The following status codes are used in responses from the REST API. Your application should be prepared to handle any of these response types.
 
 Status | Description
 ------ | -----------
-200    | Operation successful.
-201    | Upsert successful.
-204    | Delete operation successful.
-207    | Some resources unauthorized or not found.
-400    | Bad request. The request URL, headers, or body are invalid.
-401    | `Authorization` header missing or invalid.
-403    | Unauthorized. (Insufficient user permissions.)
-404    | Not found.
-405    | Method not allowed.
-409    | Data conflict.
-419    | Authorization token expired.
-500    | Internal server error. [Open an issue.][12]
+200    | Operation successful
+201    | Upsert successful
+204    | Delete operation successful
+207    | Some resources were not found
+304    | Not Modified
+400    | Bad request The request URL, headers, or body are invalid
+401    | `Authorization` header missing or invalid
+403    | Unauthorized (Insufficient permissions)
+404    | Not found
+405    | Method not allowed
+409    | Data conflict
+412    | Precondition Failed
+419    | Authorization token expired
+500    | Internal server error [Open an issue][12]
+
+### Web Socket API
+
+#### Connecting to the Socket
+To use the DLx web socket API, your application first needs to connect to the socket.
+
+If your application is running on the server, first install `socket.io-client` (`npm i --save socket.io-client`), and then include the following code in your app:
+
+```js
+const io     = require(`socket.io-client`);
+const opts   = { transports: [`websocket`, `xhr-polling`] };
+const socket = io.connect(`https://api.digitallinguistics.io/`, opts);
+```
+
+If your application is running in a browser, first link to the Socket.IO script in your web page, like so:
+
+```html
+<script src=https://api.digitallinguistics.io/socket.io/socket.io.js charset=utf-8></script>
+```
+
+This will make `io` available as a global variable. You can then use `io` to connect to the socket:
+
+```js
+const opts   = { transports: [`websocket`, `xhr-polling`] };
+const socket = io.connect(`https://api.digitallinguistics.io/`, opts);
+```
+
+If you would like to specify a particular version of the API, simply append the version to the connection URL, e.g. `https://api.digitallinguistics.io/v1`.
+
+#### Authenticating with the Socket
+Your application must authenticate with the socket API using an access token before it can make additional requests. To authenticate, simply emit an `authenticate` event once the socket is connected, sending the token in the body of the message:
+
+```js
+const token = YOUR_ACCESS_TOKEN;
+socket.on(`connect`, () => socket.emit(`authenticate`, { token }));
+socket.on(`authenticated`, () => { /* Do other things with the socket */ });
+```
+
+#### Making Requests
+You can make requests to the socket using `socket.emit({event}, arg1, arg2, ..., callback)`. The socket API follows a Node-style, error-first callback. If an error occurs, it will be the first argument passed to the callback function. Otherwise, the response will be passed as the second argument. For example:
+
+```js
+socket.emit(`get:text`, `TEXT_ID`, (err, text) => {
+  if (err) { /* handle error */ }
+  else { /* do something with the text */ }
+});
+```
+
+#### Event Syntax
+The events emitted and accepted by the socket API directly mirror the REST API. The table below compares how to make the same request in the REST API vs. the socket API:
+
+Operation                    | REST API                       | Socket API
+---------------------------- | ------------------------------ | ----------
+Get multiple languages       | `GET /languages`               | `get:languages`
+Upsert one or more languages | `PUT /languages`               | `upsert:languages`
+Get a language               | `GET /languages/{language}`    | `get:language`
+Upsert a language            | `PUT /languages/{language}`    | `upsert:language`
+Delete a language            | `DELETE /languages/{language}` | `delete:language`
+
+#### Parameters
+Parameters that are part of the path in the REST API must be passed as arguments in the socket API. For example, this is how you would run `GET /languages/12345` in the socket API:
+
+```js
+socket.emit(`get:language`, `12345`, (err, language) => {
+  /* Do something with the returned language object */
+});
+```
+
+Parameters that are part of the query string in the REST API must be passed as part of an optional options argument in the socket API. For example, this is how you would run `GET /languages?ids=10,20,30` in the socket API:
+
+```js
+socket.emit(`get:languages`, { ids: [`10`, `20`, `30`] }, (err, languages) => {
+  /* Do something with the returned array of languages */
+});
+```
+
+#### Operations on Subitems **NOT YET SUPPORTED**
+Operations on subitems can be performed by appending the type of subitem to the event name. The IDs for each item and subitem must be provided as arguments. The following example shows how to get all the phrases from the text with the ID `12345`, or how to retrieve the `10`th phrase from that text.
+
+```js
+socket.emit(`get:text:phrases`, `12345`, (err, phrases) => {
+  /* Do something with the returned array of phrases */
+})
+
+socket.emit(`get:text:phrase`, `12345`, `10`, (err, phrase) => {
+  /* Do something with the returned phrase */
+});
+```
+
+#### Operations on Permissions **NOT YET SUPPORTED**
+Operations on permissions have a special syntax:
+
+Operation                   | Syntax
+--------------------------- | ------
+Add a permission            | `add:permission`
+Delete a permission         | `delete:permission`
+Add multiple permissions    | `add:permissions`
+Delete multiple permissions | `delete:permissions`
+
+The ID of the resource to change permissions for must be provided as the first argument, followed by the permission object. The example below shows how to give the user `linguist@university.edu` a `Viewer` permission for the text with the ID `12345`.
+
+```js
+const permission = {
+  user:       `linguist@university.edu`,
+  permission: `viewer`
+};
+
+socket.emit(`add:permission`, `12345`, permission, (err, response) => {
+  /* Handle error or do something after getting success response */
+});
+```
+
+This example shows how to add permissions for multiple users:
+```js
+const permissions = {
+  users:      [`linguist@university.edu`, `anthropologist@university.edu`],
+  permission: `contributor`,
+};
+
+socket.emit(`add:permissions`, `12345`, permissions);
+```
+
+This example shows how to make a resource public:
+
+```js
+socket.emit(`update:permission`, `12345`, { public: true });
+```
 
 [1]:  https://github.com/digitallinguistics/dlx-api-js#readme (JavaScript Library)
 [2]:  https://github.com/digitallinguistics/dlx-api-node#readme (Node Library)

@@ -6,3 +6,5 @@ branches:
     - dev
 notifications:
   email: false
+env:
+  NODE_ENV=development
