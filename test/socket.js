@@ -6,15 +6,18 @@
   prefer-arrow-callback,
 */
 
+const config   = require(`../lib/config`);
 const getToken = require(`./token`);
 const io       = require(`socket.io-client`);
+
+console.log(config.baseUrl);
 
 module.exports = (v = ``) => {
 
   const authenticate = token => new Promise((resolve, reject) => {
 
     const socketOpts = { transports: [`websocket`, `xhr-polling`] };
-    const client     = io.connect(`${v}`, socketOpts);
+    const client     = io(`${config.baseUrl}${v}`, socketOpts);
 
     client.on(`authenticated`, () => resolve(client));
     client.on(`connect`, () => client.emit(`authenticate`, { token }));
