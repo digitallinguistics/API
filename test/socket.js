@@ -6,7 +6,6 @@
   prefer-arrow-callback,
 */
 
-const config   = require(`../lib/config`);
 const getToken = require(`./token`);
 const io       = require(`socket.io-client`);
 
