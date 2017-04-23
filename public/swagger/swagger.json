@@ -51,10 +51,30 @@
           }
         }
       },
+      "post" : {
+        "tags" : [ "Language" ],
+        "summary" : "Create one or more Languages",
+        "description" : "The body may be either a single Language object or an array of Language objects.",
+        "operationId" : "createLanguages",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "A database resource to upsert",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Document"
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "The resource was created successfully."
+          }
+        }
+      },
       "put" : {
         "tags" : [ "Language" ],
         "summary" : "Upsert one or more Languages",
-        "description" : "The body may be either a single database object or an array of objects.",
+        "description" : "The body may be either a single Language object or an array of Language objects.",
         "operationId" : "upsertLanguages",
         "parameters" : [ {
           "in" : "body",
@@ -68,17 +88,6 @@
         "responses" : {
           "201" : {
             "description" : "Upsert successful."
-          }
-        }
-      },
-      "delete" : {
-        "tags" : [ "Language" ],
-        "summary" : "Delete multiple Languages",
-        "operationId" : "deleteLanguages",
-        "parameters" : [ ],
-        "responses" : {
-          "204" : {
-            "description" : "Delete operation successful."
           }
         }
       }
@@ -224,6 +233,9 @@
     },
     "Conflict" : {
       "description" : "There was a data conflict in the database."
+    },
+    "Created" : {
+      "description" : "The resource was created successfully."
     },
     "DeleteSuccessful" : {
       "description" : "Delete operation successful."
