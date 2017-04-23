@@ -33,17 +33,6 @@
         "description" : "If the `ids` parameter is omitted, returns all items that the authenticated user or client has permission to access.",
         "operationId" : "getLanguages",
         "parameters" : [ {
-          "name" : "ids",
-          "in" : "query",
-          "description" : "A comma-separated list of IDs",
-          "required" : false,
-          "type" : "array",
-          "items" : {
-            "type" : "string"
-          },
-          "collectionFormat" : "csv",
-          "allowEmptyValue" : false
-        }, {
           "name" : "continuation",
           "in" : "header",
           "description" : "The `dlx-continuation` header is used to send a continuation token with the request, when retrieving the next page of results.",
@@ -86,18 +75,7 @@
         "tags" : [ "Language" ],
         "summary" : "Delete multiple Languages",
         "operationId" : "deleteLanguages",
-        "parameters" : [ {
-          "name" : "ids",
-          "in" : "query",
-          "description" : "A comma-separated list of IDs",
-          "required" : false,
-          "type" : "array",
-          "items" : {
-            "type" : "string"
-          },
-          "collectionFormat" : "csv",
-          "allowEmptyValue" : false
-        } ],
+        "parameters" : [ ],
         "responses" : {
           "204" : {
             "description" : "Delete operation successful."
@@ -217,18 +195,6 @@
       "description" : "The `dlx-continuation` header is used to send a continuation token with the request, when retrieving the next page of results.",
       "required" : false,
       "type" : "string"
-    },
-    "ids" : {
-      "name" : "ids",
-      "in" : "query",
-      "description" : "A comma-separated list of IDs",
-      "required" : false,
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      },
-      "collectionFormat" : "csv",
-      "allowEmptyValue" : false
     },
     "ifMatch" : {
       "name" : "ifMatch",
