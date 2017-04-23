@@ -60,6 +60,11 @@ module.exports = (req, v = ``) => {
 
     }, 20000);
 
+    it(`anonymizes data`, function(done) {
+      pending(`Need to add Person or Media routes to test this.`);
+      done();
+    });
+
     it(`returns simplified data objects`, function(done) {
 
       const lang = { emptyProp: '', ttl };
