@@ -7,13 +7,14 @@ const bodyParser   = require(`body-parser`);
 const createServer = require(`./lib/modules/server`);
 const createSocket = require(`./lib/modules/socket`);
 const error        = require(`./lib/middleware/error`);
+const errors       = require(`./lib/routers/error-router`);
 const express      = require(`express`);
 const helmet       = require(`helmet`);
 const limiter      = require(`./lib/middleware/limit`);
 const logger       = require(`./lib/middleware/logger`);
 const query        = require(`./lib/middleware/query`);
-const routers      = require(`./lib/routers/rest`);
-const sockets      = require(`./lib/routers/socket`);
+const routes       = require(`./lib/routers/rest-router`);
+const socket       = require(`./lib/routers/socket-router`);
 const type         = require(`./lib/middleware/type`);
 
 // initialize Express and routers
@@ -38,20 +39,20 @@ app.use(authenticate.unless({        // authenticate requests to the API
 }));
 
 // add routes to routers
-routers.v0(v0);
+routes(v0);
 
 // mount routers to their respective version paths
 app.use(v0);
 app.use(`/v0`, v0);
 
-// add test routes and error handlers
-routers.common(app);
+// generic error handlers
+errors(app);
 
 const server = createServer(app);    // create the server
 const io     = createSocket(server); // create the socket
 
 // create a socket for each version namespace
-sockets.v0(io);
-sockets.v0(io.router(`/v0`));
+socket(io);
+socket(io.router(`/v0`));
 
 module.exports = app;                // export app for testing
