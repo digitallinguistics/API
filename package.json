@@ -34,7 +34,7 @@
     "test": "jasmine JASMINE_CONFIG_PATH=test/jasmine.json"
   },
   "dependencies": {
-    "@digitallinguistics/dlx-js": "^0.9.1",
+    "@digitallinguistics/dlx-js": "^0.9.4",
     "body-parser": "^1.17.1",
     "documentdb": "^1.11.0",
     "express": "^4.15.2",
