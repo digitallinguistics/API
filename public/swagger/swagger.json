@@ -95,25 +95,6 @@
             "description" : "Upsert successful."
           }
         }
-      },
-      "patch" : {
-        "tags" : [ "Language" ],
-        "summary" : "Perform a partial update on a Language",
-        "operationId" : "updateLanguage",
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "body",
-          "description" : "A database resource to upsert",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/definitions/Document"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Update successful."
-          }
-        }
       }
     },
     "/languages/{languageId}" : {
@@ -160,6 +141,32 @@
         "responses" : {
           "204" : {
             "description" : "Delete operation successful."
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Language" ],
+        "summary" : "Perform a partial update on a Language",
+        "description" : "Performs a partial update the Language whose ID is specified in the URL. If the Language object has an `id` property, is ignore in favor of the ID in the URL.",
+        "operationId" : "updateLanguage",
+        "parameters" : [ {
+          "name" : "languageId",
+          "in" : "path",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "A database resource to upsert",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Document"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Update successful."
           }
         }
       }
