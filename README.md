@@ -177,7 +177,7 @@ Attribute           | Description
 `error_description` | a more specific error message for help in debugging unsuccessful requests
 
 #### Paging
-By default, the DLx REST API will return all the results of a request in a single response. You can set the number of results to return in a response at one time by (the *page size*) by including a `dlx-max-item-count` header in the request, whose value is the number of results you want returned for each request (between 1 and 1000).
+By default, most endpoints in the DLx REST API will return all the results of a request in a single response (some endpoints, such as `/lexemes` return only 100 by default). You can set the number of results to return in a response at one time by (the *page size*) by including a `dlx-max-item-count` header in the request, whose value is the number of results you want returned for each request (between 1 and 1000).
 
 If the request finds more items than the page size, a continuation token will be returned with the response in the `dlx-continuation` header, along with the first set of results. You can then send this continuation token with your next request (in the `dlx-continuation` header) to retrieve the next set of results.
 
