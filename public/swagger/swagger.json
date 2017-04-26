@@ -29,8 +29,8 @@
     "/languages" : {
       "get" : {
         "tags" : [ "Language" ],
-        "summary" : "Retrieve multiple Languages",
-        "description" : "If the `ids` parameter is omitted, returns all items that the authenticated user or client has permission to access.",
+        "summary" : "Get all Languages",
+        "description" : "Retrieves all the resources that the authenticated user or client has permission to access.",
         "operationId" : "getLanguages",
         "parameters" : [ {
           "name" : "continuation",
@@ -51,11 +51,10 @@
           }
         }
       },
-      "put" : {
+      "post" : {
         "tags" : [ "Language" ],
-        "summary" : "Upsert one or more Languages",
-        "description" : "The body may be either a single database object or an array of objects.",
-        "operationId" : "upsertLanguages",
+        "summary" : "Create a new Language",
+        "operationId" : "createLanguage",
         "parameters" : [ {
           "in" : "body",
           "name" : "body",
@@ -67,18 +66,33 @@
         } ],
         "responses" : {
           "201" : {
-            "description" : "Upsert successful."
+            "description" : "The resource was created successfully."
           }
         }
       },
-      "delete" : {
+      "put" : {
         "tags" : [ "Language" ],
-        "summary" : "Delete multiple Languages",
-        "operationId" : "deleteLanguages",
-        "parameters" : [ ],
+        "summary" : "Upsert (create or replace) a Language",
+        "description" : "Creates a Language if it does not yet exist (i.e. if the resource does not have an `id` property yet), or replaces the existing Language resource if it does. Note that this replaces the *entire* Language object. It is not just a partial update.",
+        "operationId" : "upsertLanguage",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "A database resource to upsert",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Document"
+          }
+        }, {
+          "name" : "ifMatch",
+          "in" : "header",
+          "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
+          "required" : false,
+          "type" : "string"
+        } ],
         "responses" : {
-          "204" : {
-            "description" : "Delete operation successful."
+          "201" : {
+            "description" : "Upsert successful."
           }
         }
       }
@@ -98,29 +112,6 @@
           "name" : "ifNoneMatch",
           "in" : "header",
           "description" : "If `If-None-Match` header is used with GET requests to check whether you already have the most up-to-date version of the resource, and therefore do not need the resource sent again. The value of the `If-None-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to reduce bandwidth.",
-          "required" : false,
-          "type" : "string"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Operation successful."
-          }
-        }
-      },
-      "put" : {
-        "tags" : [ "Language" ],
-        "summary" : "Update a Language",
-        "operationId" : "updateLanguage",
-        "parameters" : [ {
-          "name" : "languageId",
-          "in" : "path",
-          "description" : "The ID of the Language to perform the operation on",
-          "required" : true,
-          "type" : "string"
-        }, {
-          "name" : "ifMatch",
-          "in" : "header",
-          "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
           "required" : false,
           "type" : "string"
         } ],
@@ -150,6 +141,38 @@
         "responses" : {
           "204" : {
             "description" : "Delete operation successful."
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Language" ],
+        "summary" : "Perform a partial update on a Language",
+        "description" : "Performs a partial update the Language whose ID is specified in the URL. If the Language object has an `id` property, is ignore in favor of the ID in the URL.",
+        "operationId" : "updateLanguage",
+        "parameters" : [ {
+          "name" : "languageId",
+          "in" : "path",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "A database resource to upsert",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Document"
+          }
+        }, {
+          "name" : "ifMatch",
+          "in" : "header",
+          "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Update successful."
           }
         }
       }
@@ -225,6 +248,9 @@
     "Conflict" : {
       "description" : "There was a data conflict in the database."
     },
+    "Created" : {
+      "description" : "The resource was created successfully."
+    },
     "DeleteSuccessful" : {
       "description" : "Delete operation successful."
     },
@@ -257,6 +283,9 @@
     },
     "Unauthorized" : {
       "description" : "Authorization missing or invalid."
+    },
+    "UpdateSuccessful" : {
+      "description" : "Update successful."
     },
     "UpsertSuccessful" : {
       "description" : "Upsert successful."
