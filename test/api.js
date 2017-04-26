@@ -29,7 +29,9 @@ const deleteDocument = link => new Promise((resolve, reject) => {
 });
 
 const upsertDocument = data => new Promise((resolve, reject) => {
+  const hasId = data.id;
   db.upsertDocument(coll, data, (err, res) => {
+    if (!hasId) Reflect.deleteProperty(data, `id`);
     if (err) reject(err);
     resolve(res);
   });
@@ -43,8 +45,6 @@ module.exports = (req, v = ``) => {
       getToken().then(token => { this.token = token; }).then(done).catch(fail);
     });
 
-    // NB: This may have to be run multiple times to clear the database
-    // using .reduce() causes problems where only one document is deleted
     afterAll(function(done) {
 
       const query = `
@@ -60,12 +60,12 @@ module.exports = (req, v = ``) => {
 
     }, 20000);
 
-    it(`anonymizes data`, function(done) {
+    xit(`anonymizes data`, function(done) {
       pending(`Need to add Person or Media routes to test this.`);
       done();
     });
 
-    it(`returns simplified data objects`, function(done) {
+    xit(`returns simplified data objects`, function(done) {
 
       const lang = { emptyProp: '', ttl, type };
 
@@ -79,7 +79,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`returns objects without database properties`, function(done) {
+    xit(`returns objects without database properties`, function(done) {
 
       const lang = { ttl, type };
 
@@ -99,7 +99,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`does not return resources that have a TTL`, function(done) {
+    xit(`does not return resources that have a TTL`, function(done) {
 
       const lang = {
         permissions: { public: true },
@@ -118,7 +118,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`supports pagination`, function(done) {
+    xit(`supports pagination`, function(done) {
 
       const continuationHeader = `dlx-continuation`;
       const maxItemHeader      = `dlx-max-item-count`;
@@ -151,7 +151,7 @@ module.exports = (req, v = ``) => {
 
     }, 10000);
 
-    it(`304: Not Modified`, function(done) {
+    xit(`304: Not Modified`, function(done) {
 
       const lang = {
         permissions: { public: true },
@@ -172,11 +172,30 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`PUT /languages (one language)`, function(done) {
+    xit(`POST /languages`, function(done) {
 
       const lang = {
         permissions: { owner: [config.testUser] },
-        tid: `putOne`,
+        tid: `post`,
+        ttl,
+        type,
+      };
+
+      req.post(`${v}/languages`)
+      .send(lang)
+      .set(`Authorization`, `Bearer ${this.token}`)
+      .expect(201)
+      .expect(res => expect(res.body.tid).toBe(lang.tid))
+      .then(done)
+      .catch(fail);
+
+    });
+
+    xit(`PUT /languages`, function(done) {
+
+      const lang = {
+        permissions: { owner: [config.testUser] },
+        tid: `put`,
         ttl,
         type,
       };
@@ -191,7 +210,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`PATCH /languages/{language}`, function(done) {
+    xit(`PATCH /languages/{language}`, function(done) {
 
       const lang = {
         notChanged: `This property should not be changed.`,
@@ -217,7 +236,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`GET /languages`, function(done) {
+    xit(`GET /languages`, function(done) {
 
       const lang1 = {
         permissions: { owner: [`some-other-user`] },
@@ -248,7 +267,34 @@ module.exports = (req, v = ``) => {
 
     }, 10000);
 
-    it(`GET /languages/{language}`, function(done) {
+    it(`GET /languages - If-Modified-Since`, function(done) {
+
+      const lang = {
+        permissions: { public: true },
+        test: true,
+        type,
+      };
+
+      const request = ts => req.get(`${v}/languages`)
+      .set(`Authorization`, `Bearer ${this.token}`)
+      .set(`If-Modified-Since`, ts)
+      .expect(200)
+      .expect(res => expect(res.body.length).toBe(1));
+
+      const wait = () => new Promise(resolve => setTimeout(resolve, 1000));
+
+      const test = async () => {
+        await upsertDocument(lang);
+        await wait();
+        const doc2 = await upsertDocument(lang);
+        await request(new Date(doc2._ts * 1000).toUTCString());
+      };
+
+      test().then(done).catch(fail);
+
+    });
+
+    xit(`GET /languages/{language}`, function(done) {
 
       const lang = {
         id: `test-getLanguage`,
@@ -258,7 +304,8 @@ module.exports = (req, v = ``) => {
 
       const test = () => req.get(`${v}/languages/${lang.id}`)
       .set(`Authorization`, `Bearer ${this.token}`)
-      .expect(200);
+      .expect(200)
+      .expect(res => expect(res.headers[`last-modified`]).toBeDefined());
 
       upsertDocument(lang)
       .then(test)
@@ -267,7 +314,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`DELETE /languages/{language}`, function(done) {
+    xit(`DELETE /languages/{language}`, function(done) {
 
       const lang = {
         permissions: { owner: [config.testUser] },

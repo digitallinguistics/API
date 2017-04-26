@@ -52,14 +52,6 @@ In addition to individual user permissions, resources can be made either `Public
 - Do not display personal information (except for public metadata)
 - Could possibly be plagiarized or copied without permission (as with any publication)
 
-You can set a resource to be public or private by including a `permissions` attribute on the resource:
-
-```js
-{
-  permissions: { public: true }
-}
-```
-
 ### Concurrency
 *Concurrency* refers to how a database deals with simultaneous operations, i.e. if you and another person both make updates to the same resource. The DLx API supports *optimistic concurrency*, providing you with a way to easily check whether you have the most up-to-date version of a resource before making changes to it, and to avoid having to retrieve the same resource multiple times. Details on how to use optimistic concurrency with the REST API and Web Socket API are below.
 
@@ -113,7 +105,7 @@ Once you have [registered your application](ii-app-registration) and [received a
 To use the REST API, your application will need to construct requests to various URLs that map to different kinds of resources in the database.
 
 #### URL Syntax
-Each resource in the database corresponds to a different URL. For example, the language with an ID of `17` can be retrieved by sending a GET request to `https://api.digitallinguistics.io/languages/17`; or a lexicon can be added to the database by sending a PUT request to `https://api.digitallinguistics.io/lexicons`. Each type of resource is given its own *collection* (the first part of the path after the domain, e.g. `languages` or `lexicons`). The following table shows the URL format for each type of resource, where items in {brackets} are variables that should be replaced with resource IDs.
+Each resource in the database corresponds to a different URL. For example, the language with an ID of `17` can be retrieved by sending a GET request to `https://api.digitallinguistics.io/languages/17`; or a lexicon can be added to the database by sending a PUT request to `https://api.digitallinguistics.io/lexicons`. Each type of resource is given its own *collection* (the first part of the path after the domain and version number, e.g. `languages` or `lexicons`). The following table shows the URL format for each type of resource, where items in {brackets} are variables that should be replaced with resource IDs.
 
 Resource    | URL Format
 ----------- | ----------
@@ -181,10 +173,12 @@ By default, most endpoints in the DLx REST API will return all the results of a 
 
 If the request finds more items than the page size, a continuation token will be returned with the response in the `dlx-continuation` header, along with the first set of results. You can then send this continuation token with your next request (in the `dlx-continuation` header) to retrieve the next set of results.
 
-#### Concurrency
+#### Conditional Requests
 It is generally a good idea to check whether you have the most recent version of a resource before attempting to update or delete it in the database. The DLx API allows you to do this by including an `If-Match` header with a PUT or DELETE request, whose value is the ETag (`_etag` property) of the resource you wish to change. If you already have the most up-to-date version of the resource, it will be updated/deleted as normal. If your version of the resource is out of date, the API will return a `412: Precondition Failed` error. Your application can then retrieve the most recent version of the resource from the database, and try making the change again.
 
 It is also a good idea to check whether you already have the latest version of a resource before retrieving it from the database again. This helps cut down on bandwidth, since the resource doesn't have to be sent to your application multiple times. To check whether you already have the latest version of a resource, include an `If-None-Match` header in the GET request, whose value is the ETag (`_etag` property) of the resource you wish to retrieve. If you already have the most up-to-date version of the resource, the API will return a `304: Not Modified` response. Otherwise, the requested resource will be returned as normal.
+
+If you are requesting multiple resources, you can include a `If-Modified-Since` header to return only the resources modified since the timestamp in the header. The timestamp should be a valid UTC string ([see MDN for more documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since)).
 
 #### Response Headers & Status Codes
 The following status codes are used in responses from the REST API. Your application should be prepared to handle any of these response types.
