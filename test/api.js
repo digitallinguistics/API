@@ -67,7 +67,7 @@ module.exports = (req, v = ``) => {
 
     it(`returns simplified data objects`, function(done) {
 
-      const lang = { emptyProp: '', ttl };
+      const lang = { emptyProp: '', ttl, type };
 
       req.put(`${v}/languages`)
       .send(lang)
@@ -81,7 +81,7 @@ module.exports = (req, v = ``) => {
 
     it(`returns objects without database properties`, function(done) {
 
-      const lang = { ttl };
+      const lang = { ttl, type };
 
       req.put(`${v}/languages`)
       .send(lang)
@@ -104,6 +104,7 @@ module.exports = (req, v = ``) => {
       const lang = {
         permissions: { public: true },
         ttl,
+        type,
       };
 
       const test = doc => req.get(`${v}/languages/${doc.id}`)
@@ -150,31 +151,12 @@ module.exports = (req, v = ``) => {
 
     }, 10000);
 
-    it(`207: some found`, function(done) {
-
-      const lang = {
-        id: `test-207`,
-        permissions: { public: true },
-        type,
-      };
-
-      const test = () => req.get(`${v}/languages?ids=${lang.id},207test`)
-      .set(`Authorization`, `Bearer ${this.token}`)
-      .expect(207)
-      .expect(res => expect(res.body.length).toBe(1));
-
-      upsertDocument(lang)
-      .then(test)
-      .then(done)
-      .catch(fail);
-
-    });
-
     it(`304: Not Modified`, function(done) {
 
       const lang = {
         permissions: { public: true },
         test: true,
+        type,
         // don't set a ttl here
       };
 
@@ -196,6 +178,7 @@ module.exports = (req, v = ``) => {
         permissions: { owner: [config.testUser] },
         tid: `putOne`,
         ttl,
+        type,
       };
 
       req.put(`${v}/languages`)
@@ -208,57 +191,62 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`PUT /languages (multiple languages)`, function(done) {
-      req.put(`${v}/languages`)
-      .send([
-        { tid: `putMany1`, ttl },
-        { tid: `putMany2`, ttl },
-      ])
-      .set(`Authorization`, `Bearer ${this.token}`)
-      .expect(201)
-      .expect(res => {
-        expect(res.body.length).toBe(2);
-        expect(res.body.some(lang => lang.tid === `putMany1`)).toBe(true);
-        expect(res.body.some(lang => lang.tid === `putMany2`)).toBe(true);
-      })
-      .then(done)
-      .catch(fail);
-    });
-
-    it(`PUT /languages/{language}`, function(done) {
+    it(`PATCH /languages/{language}`, function(done) {
 
       const lang = {
+        notChanged: `This property should not be changed.`,
         permissions: { owner: [config.testUser] },
         tid: `upsertOne`,
         ttl,
+        type,
       };
 
-      const test = doc => req.put(`${v}/languages/${doc.id}`)
-      .send(doc)
+      const test = doc => req.patch(`${v}/languages/${doc.id}`)
+      .send({ tid: `upsertOneAgain` })
       .set(`Authorization`, `Bearer ${this.token}`)
-      .expect(201)
-      .expect(res => expect(res.body.tid).toBe(doc.tid));
+      .expect(200)
+      .expect(res => {
+        expect(res.body.notChanged).toBe(lang.notChanged);
+        expect(res.body.tid).toBe(`upsertOneAgain`);
+      });
 
       upsertDocument(lang)
-      .then(doc => {
-        doc.tid = `upsertOneAgain`;
-        return doc;
-      })
       .then(test)
       .then(done)
       .catch(fail);
 
     });
 
-    // NB: this test assumes that there are currently multiple languages in the database
     it(`GET /languages`, function(done) {
-      req.get(`${v}/languages`)
+
+      const lang1 = {
+        permissions: { owner: [`some-other-user`] },
+        test: true,
+        tid: `GET languages test`,
+        type,
+      };
+
+      const lang2 = {
+        permissions: { public: true },
+        test: true,
+        type,
+      };
+
+      const filter = results => results.filter(item => item.tid === `some-other-user`);
+
+      const test = () => req.get(`${v}/languages`)
       .set(`Authorization`, `Bearer ${this.token}`)
       .expect(200)
-      .expect(res => expect(res.body.length).toBeDefined())
+      .expect(res => expect(res.body.length).toBeGreaterThan(0))
+      .expect(res => expect(filter(res.body).length).toBe(0));
+
+      upsertDocument(lang1)
+      .then(() => upsertDocument(lang2))
+      .then(test)
       .then(done)
       .catch(fail);
-    });
+
+    }, 10000);
 
     it(`GET /languages/{language}`, function(done) {
 
@@ -273,32 +261,6 @@ module.exports = (req, v = ``) => {
       .expect(200);
 
       upsertDocument(lang)
-      .then(test)
-      .then(done)
-      .catch(fail);
-
-    });
-
-    it(`GET /languages?ids={ids}`, function(done) {
-
-      const id1 = `test-getByIds1`;
-      const id2 = `test-getByIds2`;
-
-      const lang = {
-        id: id1,
-        permissions: { public: true },
-        test: true,
-        type,
-      };
-
-      const test = () => req.get(`${v}/languages?ids=${id1},${id2}`)
-      .set(`Authorization`, `Bearer ${this.token}`)
-      .expect(200)
-      .expect(res => expect(res.body.length).toBe(2));
-
-      upsertDocument(lang)
-      .then(() => { lang.id = id2; })
-      .then(() => upsertDocument(lang))
       .then(test)
       .then(done)
       .catch(fail);
@@ -320,37 +282,6 @@ module.exports = (req, v = ``) => {
       .then(test)
       .then(done)
       .catch(fail);
-
-    });
-
-    it(`DELETE /languages`, function(done) {
-
-      const lang = {
-        permissions: { owner: [config.testUser] },
-        ttl,
-      };
-
-      db.upsertDocument(coll, lang, (err, doc) => {
-
-        if (err) return fail(err);
-
-        const id1 = doc.id;
-
-        db.upsertDocument(coll, lang, (err, doc) => {
-
-          if (err) return fail(err);
-
-          const id2 = doc.id;
-
-          req.delete(`${v}/languages?ids=${id1},${id2}`)
-          .set(`Authorization`, `Bearer ${this.token}`)
-          .expect(204)
-          .then(done)
-          .catch(fail);
-
-        });
-
-      });
 
     });
 

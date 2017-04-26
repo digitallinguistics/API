@@ -194,7 +194,6 @@ Status | Description
 200    | Operation successful
 201    | Upsert successful
 204    | Delete operation successful
-207    | Some resources were not found
 304    | Not Modified
 400    | Bad request The request URL, headers, or body are invalid
 401    | `Authorization` header missing or invalid
