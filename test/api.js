@@ -60,12 +60,12 @@ module.exports = (req, v = ``) => {
 
     }, 20000);
 
-    xit(`anonymizes data`, function(done) {
+    it(`anonymizes data`, function(done) {
       pending(`Need to add Person or Media routes to test this.`);
       done();
     });
 
-    xit(`returns simplified data objects`, function(done) {
+    it(`returns simplified data objects`, function(done) {
 
       const lang = { emptyProp: '', ttl, type };
 
@@ -79,7 +79,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`returns objects without database properties`, function(done) {
+    it(`returns objects without database properties`, function(done) {
 
       const lang = { ttl, type };
 
@@ -99,7 +99,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`does not return resources that have a TTL`, function(done) {
+    it(`does not return resources that have a TTL`, function(done) {
 
       const lang = {
         permissions: { public: true },
@@ -118,7 +118,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`supports pagination`, function(done) {
+    it(`supports pagination`, function(done) {
 
       const continuationHeader = `dlx-continuation`;
       const maxItemHeader      = `dlx-max-item-count`;
@@ -151,7 +151,7 @@ module.exports = (req, v = ``) => {
 
     }, 10000);
 
-    xit(`304: Not Modified`, function(done) {
+    it(`304: Not Modified`, function(done) {
 
       const lang = {
         permissions: { public: true },
@@ -172,7 +172,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`POST /languages`, function(done) {
+    it(`POST /languages`, function(done) {
 
       const lang = {
         permissions: { owner: [config.testUser] },
@@ -191,7 +191,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`PUT /languages`, function(done) {
+    it(`PUT /languages`, function(done) {
 
       const lang = {
         permissions: { owner: [config.testUser] },
@@ -210,7 +210,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`PATCH /languages/{language}`, function(done) {
+    it(`PATCH /languages/{language}`, function(done) {
 
       const lang = {
         notChanged: `This property should not be changed.`,
@@ -236,7 +236,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`GET /languages`, function(done) {
+    it(`GET /languages`, function(done) {
 
       const lang1 = {
         permissions: { owner: [`some-other-user`] },
@@ -294,7 +294,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`GET /languages/{language}`, function(done) {
+    it(`GET /languages/{language}`, function(done) {
 
       const lang = {
         id: `test-getLanguage`,
@@ -314,7 +314,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`DELETE /languages/{language}`, function(done) {
+    it(`DELETE /languages/{language}`, function(done) {
 
       const lang = {
         permissions: { owner: [config.testUser] },
