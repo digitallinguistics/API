@@ -1,9 +1,19 @@
 # The Digital Linguistics (DLx) API
-This repository contains the source code and documentation for the DLx API, a service that allows software developers to programmatically access the DLx database. By sending requests to the API, developers can add, update, delete, or retrieve resources in the database. This page describes the structure of the DLx database and the resources in it, how to register your app with the API service, how to authenticate users so that they may access resources, how to properly format requests to the database, and how to handle responses from the database. To send requests to the API, you will need to programmatically construct an HTTP request and send it to the appropriate URL. Alternatively, you can also connect to the API using a web socket. Details on how to access the API using either of these methods are below.
+This repository contains the source code and documentation for the DLx API, a service that allows software developers to programmatically access the DLx database. By sending requests to the API, developers can add, update, delete, or retrieve resources in the database. This readme includes the following information:
 
-If you are writing your application using JavaScript or Node, consider using the [JavaScript library][1] or [Node library][2] to access the database. These libraries contain a number of convenient methods for interacting with the DLx API, and handle most of the details on this page for you automatically.
+  - the structure of the DLx database and the resources in it
+  - how to register your app with the API service
+  - how to authenticate users so that your application may access resources on their behalf
+  - how to make requests to the database
+  - how to handle responses from the database
+
+There are two ways your application can connect to the database:
+1. the REST API, using HTTP requests to URLs
+2. the socket API, using a web socket connection
 
 **[View the complete reference documentation for the REST API here.][3]**
+
+If you are writing your application using JavaScript or Node, consider using the [JavaScript library][1] or [Node library][2] to access the database. These libraries contain a number of convenient methods for interacting with the DLx API, and handle most of the details on this page for you automatically.
 
 **NB:** The API always returns JSON data. If you would like to see HTML representations of the data instead, use the [Data Explorer][11].
 
@@ -16,29 +26,31 @@ If you are writing your application using JavaScript or Node, consider using the
 ## I. About the Database
 
 ### Resources
-The DLx database contains several types of resources, such as texts, lexicons, and media. There are separate URLs for accessing each type of resource in the database, shown below. The DLx API allows users to perform various operations on these resources, depending on the type of resource and whether the user and the application have permission to perform that operation. For example, a user may add a text to the database or, if they have `Owner` permission for that text, update or delete that text.
+The DLx database contains several types of resources relating to linguistic data, such as texts, lexicons, and media. The DLx API allows users to perform various operations on these resources, depending on the type of resource and whether the user and the application have permission to perform that operation. For example, a user may add a text to the database or, if they have `Owner` permission for that text, update or delete that text.
 
-Each item in the database must be formatted according to the Digital Linguistics (DLx) data format. This is a standard format in JSON for exchanging linguistic data on the web. You can read more about this format [here][4]. If the user requests to add a resource to the database that is improperly formatted, the request returns an error and the resource is not uploaded.
+Each item in the database must be formatted according to the Digital Linguistics (DLx) data format. This is a standard format in JSON for exchanging linguistic data on the web (you can read more about this format [here][4]). If your application attempts to add data to the database that is improperly formatted, the request will return an error and the operation will not be completed.
 
 Some types of resources contain subitems that may also be accessed with the API. For example, texts contain phrases, so a user may request one or more phrases from a text, rather than having to request the entire text at once.
 
 #### Resource Properties
-- **IDs (`id`):** Each resource in the database is given a unique ID which cannot be altered or set by your application. If you attempt to create a new resource with an `id` property, the API will return an error. (If you are just updating a resource, however, including the `id` property will not throw an error.) If your application needs to maintain its own set of IDs, it is recommended that you use the `cid` (Client ID) property for that purpose.
+- **IDs (`id`):** Each resource in the database is given a unique ID which cannot be altered or set by your application. If you attempt to create a new resource with an `id` property, the API will return an error. (If you are just updating a resource, however, including the `id` property will not throw an error.) If your application needs to maintain its own set of IDs, it is recommended that you create a `cid` (Client ID) property for that purpose.
 
-- **ETag (`_etag`):** Each resource in the database has an `_etag` property. It is important not to change or delete this property, since it is used by the database to determine if you have the most up-to-date version of the resource. If you attempt to update or delete a resource with a missing or incorrect `_etag` property, a `412: Precondition Failed` error will be returned.
+- **URL (`url`):** The `url` property of a resource is a unique URL where that resource can be accessed, or used to perform different operations on the resource.
 
-- **Empty Properties:** If a property of a resource is empty (i.e. an empty string, array, or object), it will often be removed when it is added to the database. This helps keep the size of the files in the database relatively small. So if you save a resource with a `"myProperty": ""` attribute to the database, and then retrieve that resource from the database, the `myProperty` attribute will be undefined.
+- **ETag (`_etag`):** Each resource in the database has an `_etag` property. This property can be used along with the `If-Match` or `If-None-Match` headers to ensure that you have the most up-to-date version of the resource before making any changes to it.
+
+- **Empty Properties:** If a property of a resource is empty (i.e. an empty string, array, or object), it will often be removed when it is added to the database. This helps keep the size of the files in the database relatively small. So if you save a resource with a `"myProperty": ""` attribute to the database, and then retrieve that resource from the database, the `myProperty` attribute will be undefined rather than an empty string.
 
 ### Permissions
-Every resource in the database is given a set of permissions specifying who is allowed to view, edit, add/delete, or change permissions for that resource. There are three types of permissions that a user can have:
+Every resource in the database is given a set of permissions specifying who is allowed to delete, edit, or view that resource. There are three types of permissions that a user can have:
 
-* `Owner`: The user has full permissions to view, edit, delete, or change permissions for a resource. A user is automatically made an Owner for any resource they create. A user with Owner permission for a Person resource will be able to see both the real name and the pseudonym of that Person.
+* `Owner`: The user has full permissions to view, edit, delete, or change permissions for a resource. A user is automatically made an Owner for any resource they create. A resource may have multiple Owners. A user with Owner permission for a Person resource will be able to see both the real name and the pseudonym of that Person.
 
 * `Contributor`: The user has permission to view or edit the resource, but may not delete it or change its permissions. A user with Contributor permission for a Person resource will be able to see both the real name and the pseudonym of that Person.
 
 * `Viewer`: The user may view the resource, but cannot change it or its permissions in any way. Users with Viewer permissions for a Person resource will only be able to see the pseudonym of that Person.
 
-In addition to individual user permissions, resources can be made either `Public` or `Private`. Public resources may be viewed (but not edited) by anyone, even if they are not listed as a Viewer. Private resources may only be viewed by those with the appropriate permissions. Here are some additional things to note about Public resources:
+In addition to individual user permissions, resources can be made either `Public` or `Private`. Resources are private by default. Public resources may be viewed (but not edited) by anyone, even if they are not listed as a Viewer. Private resources may only be viewed by those with the appropriate permissions. Here are some additional things to note about Public resources:
 
 #### Public Resources
 - Can be downloaded
@@ -105,27 +117,34 @@ Once you have [registered your application](ii-app-registration) and [received a
 To use the REST API, your application will need to construct requests to various URLs that map to different kinds of resources in the database.
 
 #### URL Syntax
-Each resource in the database corresponds to a different URL. For example, the language with an ID of `17` can be retrieved by sending a GET request to `https://api.digitallinguistics.io/languages/17`; or a lexicon can be added to the database by sending a PUT request to `https://api.digitallinguistics.io/lexicons`. Each type of resource is given its own *collection* (the first part of the path after the domain and version number, e.g. `languages` or `lexicons`). The following table shows the URL format for each type of resource, where items in {brackets} are variables that should be replaced with resource IDs.
+Each resource in the database corresponds to a different URL. For example, the language with an ID of `17` would be accessible at the URL `https://api.digitallinguistics.io/languages/17` (this URL is stored in the `url` property of every resource in the database). The type of request you make to the URL (i.e. either DELETE, GET, or PATCH) indicates the type of operation you are performing on the resource. For example, a GET request to the above URL would retrieve that Language, while a DELETE request would delete it (if the user has sufficient permissions).
 
-Resource    | URL Format
------------ | ----------
-Language    | `https://api.digitallinguistics.io/languages/{language}`
+The following table shows the different operations that can be performed on a resource.
+
+Method | Description
+------ | -----------
+DELETE | Deletes the resource
+GET    | Retrieves the resource
+PATCH  | Updates the resource
+
+You can also perform operations on multiple resources at once by sending requests to the entire collection (the first part of the path, e.g. `/languages` or `/lexicons`).
+
+You can retrieve multiple items at once by making a GET request to a collection. For example, a GET request to `https://api.digitallinguistics.io/languages` will retrieve all the Languages that the currently-authenticated user has permission to access.
+
+You can create new items in a collection or overwrite existing ones by making a POST or PUT request to the collection. For example, a POST request to `https://api.digitallinguistics.io/languages` with a Language object in the body will add that Language object to the database.
+
+The following operations are available on most collections (see the full [API reference documentation][3] for exceptions).
+
+Request Format                                        | Operation
+----------------------------------------------------- | ---------
+`GET https://api.digitallinguistics.io/{collection}`  | Retrieve items from the collection
+`POST https://api.digitallinguistics.io/{collection}` | Create a new item in the collection
+`PUT https://api.digitallinguistics.io/{collection}`  | Upsert (add/update) an item to the collection
 
 **[View the complete reference documentation for the REST API here.][3]**
 
 #### Versioning
-The DLX REST API is versioned, so that applications can continue using older versions of the API. If no version is specified, requests to the API default to the most current version. To specify a version, simply include the version number in the form of `/vX` immediately after the domain. For example, `https://api.digitallinguistics.io/v1/languages` is a request to version 1 of the API, while `https://api.digitallinguistics.io/v2/languages` is a request to version 2.
-
-#### Operations on Collections
-You can add, update, or retrieve multiple items at once by making requests to a collection. The following operations are available on most collections (see the full [API reference documentation][3] for exceptions).
-
-Request Format                                             | Operation
----------------------------------------------------------- | ---------
-`GET https://api.digitallinguistics.io/{collection}`       | Retrieve items from the collection
-`PUT https://api.digitallinguistics.io/{collection}`       | Upsert (add/update) one or more resources to the collection.
-
-#### Operations on Permissions **NOT YET SUPPORTED**
-To add or delete permissions for an object, simply make a POST or DELETE request to the resource URL with `/permissions` appended to the end. For example, to add a new permission for a text with the ID `17`, you would make a PUT request to `https://api.digitallinguistics.io/texts/17/permissions`.
+The DLX REST API is versioned, so that applications can continue using older versions of the API as new versions come out. If no version is specified, requests to the API default to the most current version. To specify a version, simply include the version number in the form of `/vX` immediately after the domain. For example, `https://api.digitallinguistics.io/v1/languages` is a request to version 1 of the API, while `https://api.digitallinguistics.io/v2/languages` is a request to version 2.
 
 #### Operations on Subitems **NOT YET SUPPORTED**
 Certain resources contain subitems or references to other resources. These can often be accessed by appending additional segments to the URL. For example, to retrieve all the phrases in a text, you would make a GET request to `https://api.digitallinguistics.io/texts/{text}/phrases`. To retrieve a specific phrase from a text, you would make a GET request to `https://api.digitallinguistics.io/texts/{text}/phrases/{phrase}`. In general, the format for performing operations on collections of subitems or individual subitems is as follows:
@@ -134,6 +153,9 @@ Certain resources contain subitems or references to other resources. These can o
 * Operations on individual subitems: `https://api.digitallinguistics.io/{collection}/{item}/{subitems}/{subitem}`
 
 A complete list of the operations that can be performed on each type of resource and collection is available [here][3].
+
+#### Operations on Permissions **NOT YET SUPPORTED**
+To add or delete permissions for an object, simply make a POST or DELETE request to the resource URL with `/permissions` appended to the end. For example, to add a new permission for a text with the ID `17`, you would make a PUT request to `https://api.digitallinguistics.io/texts/17/permissions`.
 
 #### Parts of the Request
 
@@ -146,19 +168,29 @@ The hostname for requests to the DLx REST API should always be `api.digitallingu
 * ##### Headers
 Every request to the REST API requires an Authorization header, which should contain the access token you received from `login.digitallinguistics.io` during authentication, in the format `Bearer {access_token}`.
 
+The REST API also supports the following headers:
+
+* `If-Match`: It is generally a good idea to check whether you have the most recent version of a resource before attempting to update or delete it in the database. The DLx API allows you to do this by including an `If-Match` header with a PUT or DELETE request, whose value is the ETag (`_etag` property) of the resource you wish to change. If you already have the most up-to-date version of the resource, it will be updated/deleted as normal. If your version of the resource is out of date, the API will return a `412: Precondition Failed` error. Your application can then retrieve the most recent version of the resource from the database, and try making the change again.
+
+* `If-None-Match`: It is also a good idea to check whether you already have the latest version of a resource before retrieving it from the database again. This helps cut down on bandwidth, since the resource doesn't have to be sent to your application multiple times. To check whether you already have the latest version of a resource, include an `If-None-Match` header in the GET request, whose value is the ETag (`_etag` property) of the resource you wish to retrieve. If you already have the most up-to-date version of the resource, the API will return a `304: Not Modified` response. Otherwise, the requested resource will be returned as normal.
+
+* `If-Modified-Since`: If you are requesting multiple resources, you can include a `If-Modified-Since` header to return only the resources modified since the timestamp in the header. The timestamp should be a valid UTC string ([see MDN for more documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since)).
+
 * ##### Path
 Requests to the DLx API may optionally include the API version number immediately after the hostname, like so: `https://api.digitallinguistics.io/v1/`. The rest of the path should follow the URL syntax outlined above. If the version number is omitted, the service defaults to the latest version of the API.
 
-* ##### Querystring
-Many requests to the API take optional or required querystring parameters. These are added to the end of the URL following a `?`, in the format `{parameter}={value}`. For example, the URL `https://api.digitallinguistics.io/texts?ids=1,2,17,43,44,62` will retrieve texts with IDs 1, 2, 17, 43, 44, and 62 from the database. Be sure to encode the querystring as a URI component (using a method such as JavaScript's `encodeURIComponent`) to avoid errors due to spaces or special characters. For a complete list of which query parameters are accepted for which types of requests, visit the [API documentation][3].
+* ##### Querystring **NOT YET SUPPORTED**
+Many requests to the API take optional or required querystring parameters. These are added to the end of the URL following a `?`, in the format `{parameter}={value}`. For example, the URL `https://api.digitallinguistics.io/texts?fields=id,title,` will retrieve all the user's texts, but only return the ID and title fields for each text. Be sure to encode the querystring as a URI component (using a method such as JavaScript's `encodeURIComponent`) to avoid errors due to spaces or special characters. For a complete list of which query parameters are accepted for which types of requests, visit the [API documentation][3].
 
 * ##### Body
-The body of the request should contain any resources to be uploaded to the database, in the [DLx data format][4].
+The body of the request should contain any resources to be uploaded to the database, in [DLx data format][4] (JSON).
 
 #### Handling Responses from the REST API
-If the request is successful, the API will return a response with a `2xx` status and JSON data in the response body.
+If the request is successful, the API will return a response with a `2xx` status and JSON data in the response body (or sometimes a `3xx` status and no response body, if an `If-None-Match` header was included).
 
-Unsuccessful requests will return a response with a `4xx` or `5xx` status, as well as a JSON object in the response body containing additional details about the error. A `WWW-Authenticate` header may also be included for invalid authorization requests.
+The response may also include a `Last-Modified` header, containing a timestamp of the last time that the resource was modified, in UTC format.
+
+Unsuccessful requests will return a response with a `4xx` or `5xx` status, and sometimes a JSON object in the response body containing additional details about the error. A `WWW-Authenticate` header may also be included for invalid authorization requests.
 
 An error response body may contain the following attributes:
 
@@ -169,18 +201,11 @@ Attribute           | Description
 `error_description` | a more specific error message for help in debugging unsuccessful requests
 
 #### Paging
-By default, most endpoints in the DLx REST API will return all the results of a request in a single response (some endpoints, such as `/lexemes` return only 100 by default). You can set the number of results to return in a response at one time by (the *page size*) by including a `dlx-max-item-count` header in the request, whose value is the number of results you want returned for each request (between 1 and 1000).
+By default, most endpoints in the DLx REST API will return all the results of a request in a single response (some endpoints, such as `/lexemes`, return only 100 by default). You can set the number of results to return in a response (the *page size*) by including a `dlx-max-item-count` header in the request, whose value is the number of results you want returned for each request (between 1 and 1000).
 
 If the request finds more items than the page size, a continuation token will be returned with the response in the `dlx-continuation` header, along with the first set of results. You can then send this continuation token with your next request (in the `dlx-continuation` header) to retrieve the next set of results.
 
-#### Conditional Requests
-It is generally a good idea to check whether you have the most recent version of a resource before attempting to update or delete it in the database. The DLx API allows you to do this by including an `If-Match` header with a PUT or DELETE request, whose value is the ETag (`_etag` property) of the resource you wish to change. If you already have the most up-to-date version of the resource, it will be updated/deleted as normal. If your version of the resource is out of date, the API will return a `412: Precondition Failed` error. Your application can then retrieve the most recent version of the resource from the database, and try making the change again.
-
-It is also a good idea to check whether you already have the latest version of a resource before retrieving it from the database again. This helps cut down on bandwidth, since the resource doesn't have to be sent to your application multiple times. To check whether you already have the latest version of a resource, include an `If-None-Match` header in the GET request, whose value is the ETag (`_etag` property) of the resource you wish to retrieve. If you already have the most up-to-date version of the resource, the API will return a `304: Not Modified` response. Otherwise, the requested resource will be returned as normal.
-
-If you are requesting multiple resources, you can include a `If-Modified-Since` header to return only the resources modified since the timestamp in the header. The timestamp should be a valid UTC string ([see MDN for more documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since)).
-
-#### Response Headers & Status Codes
+#### Status Codes
 The following status codes are used in responses from the REST API. Your application should be prepared to handle any of these response types.
 
 Status | Description
@@ -212,7 +237,7 @@ const opts   = { transports: [`websocket`, `xhr-polling`] };
 const socket = io.connect(`https://api.digitallinguistics.io/`, opts);
 ```
 
-If your application is running in a browser, first link to the Socket.IO script in your web page, like so:
+If your application is running in a browser, first add a link to the Socket.IO script in your web page, like so:
 
 ```html
 <script src=https://api.digitallinguistics.io/socket.io/socket.io.js charset=utf-8></script>
@@ -249,13 +274,14 @@ socket.emit(`get:text`, `TEXT_ID`, (err, text) => {
 #### Event Syntax
 The events emitted and accepted by the socket API directly mirror the REST API. The table below compares how to make the same request in the REST API vs. the socket API:
 
-Operation                    | REST API                       | Socket API
----------------------------- | ------------------------------ | ----------
-Get multiple languages       | `GET /languages`               | `get:languages`
-Upsert one or more languages | `PUT /languages`               | `upsert:languages`
-Get a language               | `GET /languages/{language}`    | `get:language`
-Upsert a language            | `PUT /languages/{language}`    | `upsert:language`
-Delete a language            | `DELETE /languages/{language}` | `delete:language`
+Operation                          | REST API                       | Socket API
+---------------------------------- | ------------------------------ | ----------
+Create a language                  | `POST   /languages`            | `create:language`
+Get multiple languages             | `GET    /languages`            | `get:languages`
+Upsert (add or replace) a language | `PUT    /languages`            | `upsert:language`
+Delete a language                  | `DELETE /languages/{language}` | `delete:language`
+Get a language                     | `GET    /languages/{language}` | `get:language`
+Update a language                  | `PATCH  /languages/{language}` | `update:language`
 
 #### Parameters
 Parameters that are part of the path in the REST API must be passed as arguments in the socket API. For example, this is how you would run `GET /languages/12345` in the socket API:
@@ -266,10 +292,10 @@ socket.emit(`get:language`, `12345`, (err, language) => {
 });
 ```
 
-Parameters that are part of the query string in the REST API must be passed as part of an optional options argument in the socket API. For example, this is how you would run `GET /languages?ids=10,20,30` in the socket API:
+Parameters that are part of the query string in the REST API must be passed as part of an optional options argument in the socket API. For example, this is how you would run `GET /languages?fields=id,title` in the socket API:
 
 ```js
-socket.emit(`get:languages`, { ids: [`10`, `20`, `30`] }, (err, languages) => {
+socket.emit(`get:languages`, { fields: [`id`, `title`] }, (err, languages) => {
   /* Do something with the returned array of languages */
 });
 ```
@@ -286,6 +312,16 @@ socket.emit(`get:text:phrase`, `12345`, `10`, (err, phrase) => {
   /* Do something with the returned phrase */
 });
 ```
+
+Certain subitems may be accessed as though they were top-level items. For example, to get the phrase with ID `12345`, you could make the following request:
+
+```js
+socket.emit(`get:phrase`, `12345`, (err, phrase) => {
+  /* Do something with the returned phrase */
+});
+```
+
+This is essentially a shorthand for the `get:text:phrase` event.
 
 #### Operations on Permissions **NOT YET SUPPORTED**
 Operations on permissions have a special syntax:

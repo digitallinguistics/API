@@ -12,7 +12,6 @@ const express      = require(`express`);
 const helmet       = require(`helmet`);
 const limiter      = require(`./lib/middleware/limit`);
 const logger       = require(`./lib/middleware/logger`);
-const query        = require(`./lib/middleware/query`);
 const routes       = require(`./lib/routers/rest-router`);
 const socket       = require(`./lib/routers/socket-router`);
 const type         = require(`./lib/middleware/type`);
@@ -32,7 +31,6 @@ app.use(bodyParser.json());          // parse JSON data in the request body
 app.use(express.static(`public`));   // routing for static files
 app.use(error);                      // adds res.error method to response
 app.use(logger);                     // custom middleware (logs URL)
-app.use(query);                      // format req.query for easier handling
 app.use(type);                       // set req.type
 app.use(authenticate.unless({        // authenticate requests to the API
   path: [/\/test\//],                // don't authenticate test routes
