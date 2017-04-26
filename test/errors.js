@@ -44,22 +44,6 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`400: malformed data`, function(done) {
-
-      const lang = {
-        name: true,
-        test,
-      };
-
-      req.put(`${v}/languages`)
-      .set(`Authorization`, `Bearer ${this.token}`)
-      .send(lang)
-      .expect(400)
-      .then(done)
-      .catch(fail);
-
-    });
-
     it(`401: credentials_required`, function(done) {
       req.get(`${v}/test`)
       .expect(401)
@@ -106,14 +90,17 @@ module.exports = (req, v = ``) => {
 
         if (err) fail(err);
 
-        const lang = { test };
+        const lang = {
+          id: `test-403`,
+          test,
+        };
 
         const put = () => req.put(`${v}/languages`)
         .set(`Authorization`, `Bearer ${token}`)
         .send(lang)
         .expect(403);
 
-        const destroy = () => req.delete(`${v}/languages`)
+        const destroy = () => req.delete(`${v}/languages/${lang.id}`)
         .set(`Authorization`, `Bearer ${token}`)
         .expect(403);
 
@@ -161,9 +148,9 @@ module.exports = (req, v = ``) => {
 
       db.upsertDocument(coll, lang, (err, doc) => {
 
-        if (err) fail(err);
+        if (err) return fail(err);
 
-        const test1 = () => req.put(`${v}/languages/${doc.id}`)
+        const test1 = () => req.put(`${v}/languages`)
         .set(`Authorization`, `Bearer ${this.token}`)
         .set(`If-Match`, `bad-etag`)
         .send(doc)
@@ -180,6 +167,22 @@ module.exports = (req, v = ``) => {
         .catch(fail);
 
       });
+
+    });
+
+    it(`422: malformed data`, function(done) {
+
+      const lang = {
+        name: true,
+        test,
+      };
+
+      req.put(`${v}/languages`)
+      .set(`Authorization`, `Bearer ${this.token}`)
+      .send(lang)
+      .expect(422)
+      .then(done)
+      .catch(fail);
 
     });
 
