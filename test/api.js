@@ -29,7 +29,9 @@ const deleteDocument = link => new Promise((resolve, reject) => {
 });
 
 const upsertDocument = data => new Promise((resolve, reject) => {
+  const hasId = data.id;
   db.upsertDocument(coll, data, (err, res) => {
+    if (!hasId) Reflect.deleteProperty(data, `id`);
     if (err) reject(err);
     resolve(res);
   });
@@ -43,8 +45,6 @@ module.exports = (req, v = ``) => {
       getToken().then(token => { this.token = token; }).then(done).catch(fail);
     });
 
-    // NB: This may have to be run multiple times to clear the database
-    // using .reduce() causes problems where only one document is deleted
     afterAll(function(done) {
 
       const query = `
@@ -172,11 +172,30 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`PUT /languages (one language)`, function(done) {
+    it(`POST /languages`, function(done) {
 
       const lang = {
         permissions: { owner: [config.testUser] },
-        tid: `putOne`,
+        tid: `post`,
+        ttl,
+        type,
+      };
+
+      req.post(`${v}/languages`)
+      .send(lang)
+      .set(`Authorization`, `Bearer ${this.token}`)
+      .expect(201)
+      .expect(res => expect(res.body.tid).toBe(lang.tid))
+      .then(done)
+      .catch(fail);
+
+    });
+
+    it(`PUT /languages`, function(done) {
+
+      const lang = {
+        permissions: { owner: [config.testUser] },
+        tid: `put`,
         ttl,
         type,
       };
@@ -248,6 +267,33 @@ module.exports = (req, v = ``) => {
 
     }, 10000);
 
+    it(`GET /languages - If-Modified-Since`, function(done) {
+
+      const lang = {
+        permissions: { public: true },
+        test: true,
+        type,
+      };
+
+      const request = ts => req.get(`${v}/languages`)
+      .set(`Authorization`, `Bearer ${this.token}`)
+      .set(`If-Modified-Since`, ts)
+      .expect(200)
+      .expect(res => expect(res.body.length).toBe(1));
+
+      const wait = () => new Promise(resolve => setTimeout(resolve, 1000));
+
+      const test = async () => {
+        await upsertDocument(lang);
+        await wait();
+        const doc2 = await upsertDocument(lang);
+        await request(new Date(doc2._ts * 1000).toUTCString());
+      };
+
+      test().then(done).catch(fail);
+
+    });
+
     it(`GET /languages/{language}`, function(done) {
 
       const lang = {
@@ -258,7 +304,8 @@ module.exports = (req, v = ``) => {
 
       const test = () => req.get(`${v}/languages/${lang.id}`)
       .set(`Authorization`, `Bearer ${this.token}`)
-      .expect(200);
+      .expect(200)
+      .expect(res => expect(res.headers[`last-modified`]).toBeDefined());
 
       upsertDocument(lang)
       .then(test)
