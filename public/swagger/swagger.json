@@ -33,16 +33,17 @@
         "description" : "If the `ids` parameter is omitted, returns all items that the authenticated user or client has permission to access.",
         "operationId" : "getLanguages",
         "parameters" : [ {
-          "name" : "ids",
-          "in" : "query",
-          "description" : "A comma-separated list of IDs",
+          "name" : "continuation",
+          "in" : "header",
+          "description" : "The `dlx-continuation` header is used to send a continuation token with the request, when retrieving the next page of results.",
           "required" : false,
-          "type" : "array",
-          "items" : {
-            "type" : "string"
-          },
-          "collectionFormat" : "csv",
-          "allowEmptyValue" : false
+          "type" : "string"
+        }, {
+          "name" : "maxItems",
+          "in" : "header",
+          "description" : "The `dlx-max-item-count` header is used to limit the number of results to a certain amount at a time (by default all results will be returned). If there are more results to be returned, a continuation token will also be sent in the `dlx-continuation` header.",
+          "required" : false,
+          "type" : "string"
         } ],
         "responses" : {
           "200" : {
@@ -74,18 +75,7 @@
         "tags" : [ "Language" ],
         "summary" : "Delete multiple Languages",
         "operationId" : "deleteLanguages",
-        "parameters" : [ {
-          "name" : "ids",
-          "in" : "query",
-          "description" : "A comma-separated list of IDs",
-          "required" : false,
-          "type" : "array",
-          "items" : {
-            "type" : "string"
-          },
-          "collectionFormat" : "csv",
-          "allowEmptyValue" : false
-        } ],
+        "parameters" : [ ],
         "responses" : {
           "204" : {
             "description" : "Delete operation successful."
@@ -104,6 +94,12 @@
           "description" : "The ID of the Language to perform the operation on",
           "required" : true,
           "type" : "string"
+        }, {
+          "name" : "ifNoneMatch",
+          "in" : "header",
+          "description" : "If `If-None-Match` header is used with GET requests to check whether you already have the most up-to-date version of the resource, and therefore do not need the resource sent again. The value of the `If-None-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to reduce bandwidth.",
+          "required" : false,
+          "type" : "string"
         } ],
         "responses" : {
           "200" : {
@@ -121,6 +117,12 @@
           "description" : "The ID of the Language to perform the operation on",
           "required" : true,
           "type" : "string"
+        }, {
+          "name" : "ifMatch",
+          "in" : "header",
+          "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
+          "required" : false,
+          "type" : "string"
         } ],
         "responses" : {
           "200" : {
@@ -137,6 +139,12 @@
           "in" : "path",
           "description" : "The ID of the Language to perform the operation on",
           "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "ifMatch",
+          "in" : "header",
+          "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
+          "required" : false,
           "type" : "string"
         } ],
         "responses" : {
@@ -181,17 +189,33 @@
         "$ref" : "#/definitions/Document"
       }
     },
-    "ids" : {
-      "name" : "ids",
-      "in" : "query",
-      "description" : "A comma-separated list of IDs",
+    "continuation" : {
+      "name" : "continuation",
+      "in" : "header",
+      "description" : "The `dlx-continuation` header is used to send a continuation token with the request, when retrieving the next page of results.",
       "required" : false,
-      "type" : "array",
-      "items" : {
-        "type" : "string"
-      },
-      "collectionFormat" : "csv",
-      "allowEmptyValue" : false
+      "type" : "string"
+    },
+    "ifMatch" : {
+      "name" : "ifMatch",
+      "in" : "header",
+      "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
+      "required" : false,
+      "type" : "string"
+    },
+    "ifNoneMatch" : {
+      "name" : "ifNoneMatch",
+      "in" : "header",
+      "description" : "If `If-None-Match` header is used with GET requests to check whether you already have the most up-to-date version of the resource, and therefore do not need the resource sent again. The value of the `If-None-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to reduce bandwidth.",
+      "required" : false,
+      "type" : "string"
+    },
+    "maxItems" : {
+      "name" : "maxItems",
+      "in" : "header",
+      "description" : "The `dlx-max-item-count` header is used to limit the number of results to a certain amount at a time (by default all results will be returned). If there are more results to be returned, a continuation token will also be sent in the `dlx-continuation` header.",
+      "required" : false,
+      "type" : "string"
     }
   },
   "responses" : {
