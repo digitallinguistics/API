@@ -1,6 +1,7 @@
 /* eslint-disable
   camelcase,
   func-names,
+  handle-callback-err,
   max-nested-callbacks,
   max-statements-per-line,
   prefer-arrow-callback,
@@ -26,6 +27,8 @@ module.exports = (v = ``) => {
 
   });
 
+  const testData = `test data`;
+
   describe(`Socket.IO`, function() {
 
     beforeAll(function(done) {
@@ -36,42 +39,27 @@ module.exports = (v = ``) => {
       .catch(fail);
     });
 
+    it(`returns an error when not authenticated`, function(done) {
+
+      const socketOpts = { transports: [`websocket`, `xhr-polling`] };
+      const client     = io(`${config.baseUrl}${v}`, socketOpts);
+
+      client.on(`error`, err => {
+        expect(err.status).toBe(401);
+        done();
+      });
+
+      client.emit(`test`, testData);
+
+    });
+
     it(`echoes test data`, function(done) {
 
-      const testData = `test data`;
-
-      this.client.emit(`test`, testData, res => {
+      this.client.emit(`test`, testData, (err, res) => {
         expect(res).toBe(testData);
         done();
       });
 
-    });
-
-    xit(`returns an error when not authenticated`, function() {
-    });
-
-    xit(`upsert:languages (one language)`, function() {
-    });
-
-    xit(`upsert:languages (multiple languages)`, function() {
-    });
-
-    xit(`upsert:language`, function() {
-    });
-
-    xit(`get:languages`, function() {
-    });
-
-    xit(`get:languages | ids`, function() {
-    });
-
-    xit(`get:language`, function() {
-    });
-
-    xit(`delete:language`, function() {
-    });
-
-    xit(`delete:languages`, function() {
     });
 
   });
