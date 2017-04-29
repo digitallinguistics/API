@@ -8,23 +8,26 @@
   prefer-arrow-callback
 */
 
-const app    = require(`../app`);
-const errors = require(`./errors`);
-const req    = require(`supertest`).agent(app);
-const api = require(`./api`);
-const socket = require(`./socket`);
+const app          = require(`../app`);
+const req          = require(`supertest`).agent(app);
+const rest         = require(`./rest`);
+const restErrors   = require(`./rest-errors`);
+const socketErrors = require(`./socket-errors`);
 
+// test client registration and authentication (with Auth0)
 // require(`./authentication`);
 // require(`./registration`);
 
-// run error tests
-// errors(req);
-// errors(req, `/v0`);
+// test errors for for REST API
+// restErrors(req);
+// restErrors(req, `/v0`);
 
-// run routes tests
-// api(req);
-// api(req, `/v0`);
+// test endpoints for REST API
+// rest(req);
+// rest(req, `/v0`);
 
-// run Socket.IO tests
-socket();
-// socket(`/v0`);
+// test errors for Socket API
+socketErrors();
+// socketErrors(`/v0`);
+
+// test events for Socket API
