@@ -55,7 +55,7 @@ module.exports = (v = ``) => {
 
     });
 
-    it(`403: Bad user permissions`, function(done) {
+    xit(`403: Bad user permissions`, function(done) {
 
       const lang = { test };
 

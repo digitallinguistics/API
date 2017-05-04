@@ -15,19 +15,19 @@ const restErrors   = require(`./rest-errors`);
 const socketErrors = require(`./socket-errors`);
 
 // test client registration and authentication (with Auth0)
-// require(`./authentication`);
-// require(`./registration`);
+require(`./authentication`);
+require(`./registration`);
 
 // test errors for for REST API
-// restErrors(req);
-// restErrors(req, `/v0`);
+restErrors(req);
+restErrors(req, `/v0`);
 
 // test endpoints for REST API
-// rest(req);
-// rest(req, `/v0`);
+rest(req);
+rest(req, `/v0`);
 
 // test errors for Socket API
 socketErrors();
-// socketErrors(`/v0`);
+socketErrors(`/v0`);
 
 // test events for Socket API
