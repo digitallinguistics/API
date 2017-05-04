@@ -2,18 +2,16 @@
 const config = require(`./lib/config`);
 
 // load modules
-const authenticate = require(`./lib/middleware/authenticate-rest`);
+const authenticate = require(`./lib/middleware/authenticate`);
 const bodyParser   = require(`body-parser`);
-const createServer = require(`./lib/modules/server`);
-const createSocket = require(`./lib/modules/socket`);
-const error        = require(`./lib/middleware/rest-error`);
-const errors       = require(`./lib/routers/error-router`);
+const createServer = require(`./lib/server`);
+const error        = require(`./lib/middleware/error`);
+const errors       = require(`./lib/errors`);
 const express      = require(`express`);
 const helmet       = require(`helmet`);
 const limiter      = require(`./lib/middleware/limit`);
 const logger       = require(`./lib/middleware/logger`);
-const routes       = require(`./lib/routers/rest-router`);
-const socket       = require(`./lib/routers/socket-router`);
+const routes       = require(`./lib/router`);
 const type         = require(`./lib/middleware/type`);
 
 // initialize Express and routers
@@ -43,14 +41,9 @@ routes(v0);
 app.use(v0);
 app.use(`/v0`, v0);
 
-// generic error handlers
-errors(app);
+// add generic error handlers
+app.use(errors.notFound);
+app.use(errors.serverError);
 
-const server = createServer(app);    // create the server
-const io     = createSocket(server); // create the socket
-
-// create a socket for each version namespace
-socket(io);
-socket(io.of(`/v0`));
-
+createServer(app);                   // create the server
 module.exports = app;                // export app for testing
