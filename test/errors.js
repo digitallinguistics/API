@@ -12,7 +12,7 @@ const config   = require(`../lib/config`);
 const getToken = require(`./token`);
 const http     = require(`http`);
 const jwt      = require(`jsonwebtoken`);
-const { client: db, coll } = require(`../lib/modules/db`);
+const { client: db, coll } = require(`../lib/db`);
 
 const test = true;
 

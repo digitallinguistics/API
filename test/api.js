@@ -16,7 +16,7 @@
 
 const config   = require(`../lib/config`);
 const getToken = require(`./token`);
-const { client: db, coll } = require(`../lib/modules/db`);
+const { client: db, coll } = require(`../lib/db`);
 
 const ttl  = 500; // 3 minutes
 const type = `Language`;
