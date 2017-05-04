@@ -2,11 +2,11 @@
 const config = require(`./lib/config`);
 
 // load modules
-const authenticate = require(`./lib/middleware/authenticate`);
+const authenticate = require(`./lib/middleware/authenticate-rest`);
 const bodyParser   = require(`body-parser`);
 const createServer = require(`./lib/modules/server`);
 const createSocket = require(`./lib/modules/socket`);
-const error        = require(`./lib/middleware/error`);
+const error        = require(`./lib/middleware/rest-error`);
 const errors       = require(`./lib/routers/error-router`);
 const express      = require(`express`);
 const helmet       = require(`helmet`);
@@ -51,6 +51,6 @@ const io     = createSocket(server); // create the socket
 
 // create a socket for each version namespace
 socket(io);
-socket(io.router(`/v0`));
+socket(io.of(`/v0`));
 
 module.exports = app;                // export app for testing

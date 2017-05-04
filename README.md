@@ -261,6 +261,10 @@ socket.on(`connect`, () => socket.emit(`authenticate`, { token }));
 socket.on(`authenticated`, () => { /* Do other things with the socket */ });
 ```
 
+If authentication fails, the socket will emit an `unauthenticated` event.
+
+If your application attempts to send a message to the socket API without authenticating, the socket will emit an `error` event and the message will not be processed.
+
 #### Making Requests
 You can make requests to the socket using `socket.emit({event}, arg1, arg2, ..., callback)`. The socket API follows a Node-style, error-first callback. If an error occurs, it will be the first argument passed to the callback function. Otherwise, the response will be passed as the second argument. For example:
 
