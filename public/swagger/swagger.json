@@ -53,8 +53,8 @@
       },
       "post" : {
         "tags" : [ "Language" ],
-        "summary" : "Create a new Language",
-        "operationId" : "createLanguage",
+        "summary" : "Add a new Language",
+        "operationId" : "addLanguage",
         "parameters" : [ {
           "in" : "body",
           "name" : "body",
