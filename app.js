@@ -5,6 +5,7 @@ const config = require(`./lib/config`);
 const authenticate = require(`./lib/middleware/authenticate`);
 const bodyParser   = require(`body-parser`);
 const createServer = require(`./lib/server`);
+const createSocket = require(`./lib/socket`);
 const error        = require(`./lib/middleware/error`);
 const errors       = require(`./lib/errors`);
 const express      = require(`express`);
@@ -45,5 +46,7 @@ app.use(`/v0`, v0);
 app.use(errors.notFound);
 app.use(errors.serverError);
 
-createServer(app);                   // create the server
+const server = createServer(app);    // create the server
+const io     = createSocket(server); // create the socket
+
 module.exports = app;                // export app for testing
