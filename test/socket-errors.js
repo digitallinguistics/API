@@ -13,6 +13,7 @@ const io       = require(`socket.io-client`);
 
 module.exports = (v = ``) => {
 
+  let client;
   const test     = true;
   const testData = `test data`;
 
@@ -26,8 +27,6 @@ module.exports = (v = ``) => {
     client.on(`error`, reject);
     client.on(`unauthorized`, reject);
 
-    resolve(client);
-
   });
 
   describe(`Socket API`, function() {
@@ -35,24 +34,51 @@ module.exports = (v = ``) => {
     beforeAll(function(done) {
       getToken()
       .then(authenticate)
-      .then(client => { this.client = client; })
+      .then(result => { client = result; })
       .then(done)
       .catch(fail);
     });
 
-  });
+    it(`401: Unauthorized`, function(done) {
 
-  it(`401: Unauthorized`, function(done) {
+      const socketOpts = { transports: [`websocket`, `xhr-polling`] };
+      const client     = io(`${config.baseUrl}${v}`, socketOpts);
 
-    const socketOpts = { transports: [`websocket`, `xhr-polling`] };
-    const client     = io(`${config.baseUrl}${v}`, socketOpts);
+      client.on(`error`, err => {
+        expect(err.status).toBe(401);
+        done();
+      });
 
-    client.on(`error`, err => {
-      expect(err.status).toBe(401);
+      client.emit(`401: Unauthorized`, testData);
+
+    });
+
+    it(`403: Bad user permissions`, function(done) {
+      pending(`Not yet implemented.`);
       done();
     });
 
-    client.emit(`test`, testData);
+    it(`403: Bad scope`, function(done) {
+      pending(`Not yet implemented.`);
+      done();
+    });
+
+    it(`404: No such event`, function(done) {
+      client.emit(`404: No such event`, err => {
+        expect(err.status).toBe(404);
+        done();
+      });
+    });
+
+    it(`412: Precondition failed`, function(done) {
+      pending(`Not yet implemented.`);
+      done();
+    });
+
+    it(`422: Malformed data`, function(done) {
+      pending(`Not yet implemented.`);
+      done();
+    });
 
   });
 
