@@ -7,12 +7,12 @@ const bodyParser   = require(`body-parser`);
 const createServer = require(`./lib/server`);
 const createSocket = require(`./lib/socket`);
 const error        = require(`./lib/middleware/error`);
-const errors       = require(`./lib/errors`);
+const errors       = require(`./lib/rest/errors`);
 const express      = require(`express`);
 const helmet       = require(`helmet`);
 const limiter      = require(`./lib/middleware/limit`);
 const logger       = require(`./lib/middleware/logger`);
-const routes       = require(`./lib/router`);
+const routes       = require(`./lib/rest/router`);
 const type         = require(`./lib/middleware/type`);
 
 // initialize Express and routers
@@ -48,5 +48,8 @@ app.use(errors.serverError);
 
 const server = createServer(app);    // create the server
 const io     = createSocket(server); // create the socket
+
+// create a socket namespace for each API version
+io.of(`/v0`);
 
 module.exports = app;                // export app for testing
