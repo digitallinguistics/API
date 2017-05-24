@@ -44,8 +44,6 @@ module.exports = (v = ``) => {
 
       const getFirstPage = () => new Promise((resolve, reject) => {
         client.emit(`getAll`, `Language`, { maxItemCount: 10 }, (err, res, info) => {
-          // console.log(err || res);
-          // console.log(info);
           if (err) return reject(err);
           expect(res.length).toBe(10);
           expect(info.continuation).toBeDefined();
@@ -66,13 +64,14 @@ module.exports = (v = ``) => {
       .reduce(p => p.then(() => upsertDocument({
         permissions: { public: true },
         test: true,
+        type: `Language`,
       })), Promise.resolve())
       .then(getFirstPage)
       .then(getSecondPage)
       .then(done)
       .catch(fail);
 
-    });
+    }, 10000);
 
     it(`304: Not Modified`, function(done) {
 
