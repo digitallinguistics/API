@@ -12,7 +12,8 @@ const express      = require(`express`);
 const helmet       = require(`helmet`);
 const limiter      = require(`./lib/rest/middleware/limit`);
 const logger       = require(`./lib/rest/middleware/logger`);
-const routes       = require(`./lib/rest/router`);
+const route        = require(`./lib/rest/router`);
+const routeSocket  = require(`./lib/socket/router`);
 const type         = require(`./lib/rest/middleware/type`);
 
 // initialize Express and routers
@@ -36,7 +37,7 @@ app.use(authenticate.unless({        // authenticate requests to the API
 }));
 
 // add routes to routers
-routes(v0);
+route(v0);
 
 // mount routers to their respective version paths
 app.use(v0);
@@ -50,6 +51,7 @@ const server = createServer(app);    // create the server
 const io     = createSocket(server); // create the socket
 
 // create a socket namespace for each API version
-io.of(`/v0`);
+routeSocket(io);
+routeSocket(io.of(`/v0`));
 
 module.exports = app;                // export app for testing

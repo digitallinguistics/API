@@ -7,29 +7,32 @@
   prefer-arrow-callback,
 */
 
-const config   = require(`../lib/config`);
-const getToken = require(`./token`);
-const io       = require(`socket.io-client`);
+const config         = require(`../lib/config`);
+const getToken       = require(`./token`);
+const io             = require(`socket.io-client`);
+const jwt            = require(`jsonwebtoken`);
+const upsertDocument = require(`./upsert`);
+const { client: db, coll } = require(`../lib/db`);
 
 module.exports = (v = ``) => {
 
-  let client;
-  const test     = true;
-  const testData = `test data`;
+  describe(`Socket Errors`, function() {
 
-  const authenticate = token => new Promise((resolve, reject) => {
+    let client;
+    const test     = true;
+    const testData = `test data`;
 
-    const socketOpts = { transports: [`websocket`, `xhr-polling`] };
-    const client     = io(`${config.baseUrl}${v}`, socketOpts);
+    const authenticate = token => new Promise((resolve, reject) => {
 
-    client.on(`authenticated`, () => resolve(client));
-    client.on(`connect`, () => client.emit(`authenticate`, { token }));
-    client.on(`error`, reject);
-    client.on(`unauthorized`, reject);
+      const socketOpts = { transports: [`websocket`, `xhr-polling`] };
+      const client     = io(`${config.baseUrl}${v}`, socketOpts);
 
-  });
+      client.on(`authenticated`, () => resolve(client));
+      client.on(`connect`, () => client.emit(`authenticate`, { token }));
+      client.on(`error`, reject);
+      client.on(`unauthorized`, reject);
 
-  describe(`Socket API`, function() {
+    });
 
     beforeAll(function(done) {
       getToken()
@@ -54,13 +57,60 @@ module.exports = (v = ``) => {
     });
 
     it(`403: Bad user permissions`, function(done) {
-      pending(`Not yet implemented.`);
-      done();
+
+      const lang = { test };
+
+      db.upsertDocument(coll, lang, (err, doc) => {
+
+        if (err) fail(err);
+
+        client.emit(`get`, `Language`, doc.id, err => {
+          expect(err.status).toBe(403);
+          done();
+        });
+
+      });
+
     });
 
     it(`403: Bad scope`, function(done) {
-      pending(`Not yet implemented.`);
-      done();
+
+      const payload = {
+        azp:   config.authClientId,
+        scope: `public`,
+      };
+
+      const opts = {
+        audience: [`https://api.digitallinguistics.io/`],
+        issuer:   `https://${config.authDomain}/`,
+        subject:  config.testUser,
+      };
+
+      jwt.sign(payload, config.authSecret, opts, (err, token) => {
+
+        if (err) fail(err);
+
+        const lang = {
+          id: `test-403`,
+          test,
+        };
+
+        const destroy = id => new Promise((resolve, reject) => {
+          client.emit(`delete`, id, err => {
+            expect(err.status).toBe(403);
+            if (err) resolve();
+            else reject();
+          });
+        });
+
+        authenticate(token)
+        .then(() => upsertDocument(lang))
+        .then(data => destroy(data.id))
+        .then(done)
+        .catch(fail);
+
+      });
+
     });
 
     it(`404: No such event`, function(done) {
@@ -71,13 +121,48 @@ module.exports = (v = ``) => {
     });
 
     it(`412: Precondition failed`, function(done) {
-      pending(`Not yet implemented.`);
-      done();
+
+      const lang = {
+        permissions: { owner: [config.testUser] },
+        ttl: 500,
+      };
+
+      const badDelete = lang => new Promise((resolve, reject) => {
+        client.emit(`delete`, lang.id, { ifMatch: `bad-etag` }, err => {
+          expect(err.status).toBe(412);
+          if (err) resolve();
+          else reject();
+        });
+      });
+
+      const badUpsert = lang => new Promise((resolve, reject) => {
+        client.emit(`upsert`, `Language`, lang, { ifMatch: `bad-etag` }, (err, res) => {
+          expect(err.status).toBe(412);
+          if (err) resolve(lang);
+          else reject(res);
+        });
+      });
+
+      upsertDocument(lang)
+      .then(badUpsert)
+      .then(badDelete)
+      .then(done)
+      .catch(fail);
+
     });
 
     it(`422: Malformed data`, function(done) {
-      pending(`Not yet implemented.`);
-      done();
+
+      const lang = {
+        name: true,
+        test,
+      };
+
+      client.emit(`add`, `Language`, lang, err => {
+        expect(err.status).toBe(422);
+        done();
+      });
+
     });
 
   });

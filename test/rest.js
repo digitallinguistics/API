@@ -14,8 +14,9 @@
   prefer-arrow-callback
 */
 
-const config   = require(`../lib/config`);
-const getToken = require(`./token`);
+const config         = require(`../lib/config`);
+const getToken       = require(`./token`);
+const upsertDocument = require(`./upsert`);
 const { client: db, coll } = require(`../lib/db`);
 
 const ttl  = 500; // 3 minutes
@@ -25,15 +26,6 @@ const deleteDocument = link => new Promise((resolve, reject) => {
   db.deleteDocument(link, (err, res) => {
     if (err) reject(err);
     else resolve(res);
-  });
-});
-
-const upsertDocument = data => new Promise((resolve, reject) => {
-  const hasId = data.id;
-  db.upsertDocument(coll, data, (err, res) => {
-    if (!hasId) Reflect.deleteProperty(data, `id`);
-    if (err) reject(err);
-    resolve(res);
   });
 });
 
@@ -91,7 +83,6 @@ module.exports = (req, v = ``) => {
         expect(res.body._attachments).toBeUndefined();
         expect(res.body._rid).toBeUndefined();
         expect(res.body._self).toBeUndefined();
-        expect(res.body._ts).toBeUndefined();
         expect(res.body.permissions).toBeUndefined();
       })
       .then(done)
@@ -251,7 +242,7 @@ module.exports = (req, v = ``) => {
         type,
       };
 
-      const filter = results => results.filter(item => item.tid === `some-other-user`);
+      const filter = results => results.filter(item => item.tid === lang1.tid);
 
       const test = () => req.get(`${v}/languages`)
       .set(`Authorization`, `Bearer ${this.token}`)
