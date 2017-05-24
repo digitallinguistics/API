@@ -2,18 +2,18 @@
 const config = require(`./lib/config`);
 
 // load modules
-const authenticate = require(`./lib/middleware/authenticate`);
+const authenticate = require(`./lib/rest/middleware/authenticate`);
 const bodyParser   = require(`body-parser`);
 const createServer = require(`./lib/server`);
 const createSocket = require(`./lib/socket`);
-const error        = require(`./lib/middleware/error`);
+const error        = require(`./lib/rest/middleware/error`);
 const errors       = require(`./lib/rest/errors`);
 const express      = require(`express`);
 const helmet       = require(`helmet`);
-const limiter      = require(`./lib/middleware/limit`);
-const logger       = require(`./lib/middleware/logger`);
+const limiter      = require(`./lib/rest/middleware/limit`);
+const logger       = require(`./lib/rest/middleware/logger`);
 const routes       = require(`./lib/rest/router`);
-const type         = require(`./lib/middleware/type`);
+const type         = require(`./lib/rest/middleware/type`);
 
 // initialize Express and routers
 const app = express();               // create the Express app
