@@ -12,11 +12,12 @@ const getToken       = require(`./token`);
 const io             = require(`socket.io-client`);
 const upsertDocument = require(`./upsert`);
 
-module.exports = (v = ``) => {
+module.exports = (req, v = ``) => {
 
   describe(`Socket API`, function() {
 
     let client;
+    let token;
     const test = true;
 
     const authenticate = token => new Promise((resolve, reject) => {
@@ -33,6 +34,10 @@ module.exports = (v = ``) => {
 
     beforeAll(function(done) {
       getToken()
+      .then(result => {
+        token = result;
+        return token;
+      })
       .then(authenticate)
       .then(result => { client = result; })
       .then(done)
@@ -40,7 +45,7 @@ module.exports = (v = ``) => {
     });
 
     // FEATURES
-    it(`supports pagination`, function(done) {
+    xit(`supports pagination`, function(done) {
 
       const getFirstPage = () => new Promise((resolve, reject) => {
         client.emit(`getAll`, `Language`, { maxItemCount: 10 }, (err, res, info) => {
@@ -73,7 +78,7 @@ module.exports = (v = ``) => {
 
     }, 10000);
 
-    it(`304: Not Modified`, function(done) {
+    xit(`304: Not Modified`, function(done) {
 
       const lang = {
         permissions: { public: true },
@@ -98,7 +103,7 @@ module.exports = (v = ``) => {
 
     // GENERIC CRUD METHODS
 
-    it(`add`, function(done) {
+    xit(`add`, function(done) {
 
       const lang = {
         test,
@@ -112,7 +117,7 @@ module.exports = (v = ``) => {
 
     });
 
-    it(`delete`, function(done) {
+    xit(`delete`, function(done) {
 
       const data = {
         permissions: { owner: [config.testUser] },
@@ -134,7 +139,7 @@ module.exports = (v = ``) => {
 
     });
 
-    it(`get`, function(done) {
+    xit(`get`, function(done) {
 
       const data = {
         permissions: { owner: [config.testUser] },
@@ -156,7 +161,7 @@ module.exports = (v = ``) => {
 
     });
 
-    it(`getAll`, function(done) {
+    xit(`getAll`, function(done) {
 
       const lang1 = {
         permissions: { owner: [`some-other-user`] },
@@ -188,7 +193,7 @@ module.exports = (v = ``) => {
 
     });
 
-    it(`update`, function(done) {
+    xit(`update`, function(done) {
 
       const lang = {
         notChanged: `This property should not be changed.`,
@@ -220,7 +225,7 @@ module.exports = (v = ``) => {
 
     });
 
-    it(`upsert`, function(done) {
+    xit(`upsert`, function(done) {
 
       const lang = {
         permissions: { owner: [config.testUser] },
@@ -233,6 +238,92 @@ module.exports = (v = ``) => {
         done();
       });
 
+    });
+
+    xit(`receives deleted data`, function(done) {
+
+      let id;
+
+      const deleteDocument = id => req.delete(`${v}/languages/${id}`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .expect(204);
+
+      client.on(`delete`, data => {
+        expect(data).toBe(id);
+        done();
+      });
+
+      const data = {
+        permissions: { owner: [config.testUser] },
+        test,
+        testName: `receive data`,
+      };
+
+      upsertDocument(data)
+      .then(lang => {
+        id = lang.id;
+        return deleteDocument(lang.id);
+      })
+      .catch(fail);
+
+    });
+
+    it(`does not receive deleted data`, function(done) {
+
+      // TODO
+      // - create a public token
+      // - create a new client
+      // - authenticate the new client with the public token (and save a reference to the client)
+      // - add listener: client.on(`delete`, fail);
+      // - upsert the test document, with testUser as owner
+      // - delete the document using the REST API, with the testUser's token
+      // - setTimeout to call `done()` after 2.5s
+
+      const data = {
+        permissions: { owner: [config.testUser] },
+        test,
+        testName: `receive data`,
+      };
+
+      const deleteDocument = id => req.delete(`${v}/languages/${id}`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .expect(204);
+
+      client.on(`delete`, data => {
+        fail(data);
+      });
+
+      authenticate(token)
+      .then(() => upsertDocument(data))
+      .then(lang => deleteDocument(lang.id))
+      .then(() => setTimeout(done, 2500))
+      .catch(fail);
+
+    }, 10000);
+
+    it(`receives updated data`, function(done) {
+
+      pending(`Functionality not yet added.`);
+
+      const data = {
+        test,
+        testName: `getUpdatedData`,
+      };
+
+    });
+
+    it(`does not receive updated data`, function(done) {
+      pending(`Functionality not yet added.`);
+      // TODO: check that it receives updates it should, and does not receive updates it shouldn't
+    });
+
+    it(`receives upserted data`, function() {
+      pending(`Functionality not yet added.`);
+    });
+
+    it(`does not receive upserted data`, function(done) {
+      pending(`Functionality not yet added.`);
+      // TODO: check that it receives updates it should, and does not receive updates it shouldn't
     });
 
   });

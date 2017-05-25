@@ -50,8 +50,9 @@ app.use(errors.serverError);
 const server = createServer(app);    // create the server
 const io     = createSocket(server); // create the socket
 
-// create a socket namespace for each API version
+// add routes to sockets
 routeSocket(io);
 routeSocket(io.of(`/v0`));
 
+app.io = io;                         // add IO to app (makes it available to request handlers)
 module.exports = app;                // export app for testing

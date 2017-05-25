@@ -22,13 +22,6 @@ const { client: db, coll } = require(`../lib/db`);
 const ttl  = 500; // 3 minutes
 const type = `Language`;
 
-const deleteDocument = link => new Promise((resolve, reject) => {
-  db.deleteDocument(link, (err, res) => {
-    if (err) reject(err);
-    else resolve(res);
-  });
-});
-
 module.exports = (req, v = ``) => {
 
   describe(`REST API`, function() {
@@ -44,10 +37,17 @@ module.exports = (req, v = ``) => {
         WHERE CONTAINS(d.id, "test") OR d.test = true
       `;
 
+      const destroy = link => new Promise((resolve, reject) => {
+        db.deleteDocument(link, (err, res) => {
+          if (err) reject(err);
+          else resolve(res);
+        });
+      });
+
       db.queryDocuments(coll, query).toArray((err, res) => {
         if (err) return fail(err);
         const links = res.map(doc => doc._self);
-        Promise.all(links.map(deleteDocument)).then(done).catch(fail);
+        Promise.all(links.map(destroy)).then(done).catch(fail);
       });
 
     }, 20000);
