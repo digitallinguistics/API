@@ -10,6 +10,7 @@
 const config         = require(`../lib/config`);
 const getToken       = require(`./token`);
 const io             = require(`socket.io-client`);
+const jwt            = require(`jsonwebtoken`);
 const upsertDocument = require(`./upsert`);
 
 module.exports = (req, v = ``) => {
@@ -270,33 +271,44 @@ module.exports = (req, v = ``) => {
 
     it(`does not receive deleted data`, function(done) {
 
-      // TODO
-      // - create a public token
-      // - create a new client
-      // - authenticate the new client with the public token (and save a reference to the client)
-      // - add listener: client.on(`delete`, fail);
-      // - upsert the test document, with testUser as owner
-      // - delete the document using the REST API, with the testUser's token
-      // - setTimeout to call `done()` after 2.5s
-
       const data = {
         permissions: { owner: [config.testUser] },
         test,
         testName: `receive data`,
       };
 
+      const createToken = () => new Promise((resolve, reject) => {
+
+        const payload = {
+          azp:   config.authClientId,
+          scope: `user`,
+        };
+
+        const opts = {
+          audience: [`https://api.digitallinguistics.io/`],
+          issuer:   `https://${config.authDomain}/`,
+        };
+
+        jwt.sign(payload, config.authSecret, opts, (err, token) => {
+          if (err) reject(err);
+          else resolve(token);
+        });
+
+      });
+
       const deleteDocument = id => req.delete(`${v}/languages/${id}`)
       .set(`Authorization`, `Bearer ${token}`)
       .expect(204);
 
-      client.on(`delete`, data => {
-        fail(data);
-      });
+      const wait = () => new Promise(resolve => setTimeout(resolve, 2500));
 
-      authenticate(token)
+      createToken()
+      .then(authenticate)
+      .then(client => client.on(`delete`, fail))
       .then(() => upsertDocument(data))
       .then(lang => deleteDocument(lang.id))
-      .then(() => setTimeout(done, 2500))
+      .then(wait)
+      .then(done)
       .catch(fail);
 
     }, 10000);
