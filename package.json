@@ -43,10 +43,14 @@
     "express-routemap": "^1.1.0",
     "helmet": "^3.5.0",
     "jsonwebtoken": "^7.3.0",
+    "socket.io": "^2.0.1",
+    "socket.io-redis": "^5.0.1",
+    "socketio-jwt": "^4.5.0",
     "uuid": "^3.0.1"
   },
   "devDependencies": {
     "jasmine": "^2.5.3",
+    "socket.io-client": "^2.0.1",
     "supertest": "^2.0.1"
   }
 }

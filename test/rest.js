@@ -14,28 +14,13 @@
   prefer-arrow-callback
 */
 
-const config   = require(`../lib/config`);
-const getToken = require(`./token`);
+const config         = require(`../lib/config`);
+const getToken       = require(`./token`);
+const upsertDocument = require(`./upsert`);
 const { client: db, coll } = require(`../lib/db`);
 
 const ttl  = 500; // 3 minutes
 const type = `Language`;
-
-const deleteDocument = link => new Promise((resolve, reject) => {
-  db.deleteDocument(link, (err, res) => {
-    if (err) reject(err);
-    else resolve(res);
-  });
-});
-
-const upsertDocument = data => new Promise((resolve, reject) => {
-  const hasId = data.id;
-  db.upsertDocument(coll, data, (err, res) => {
-    if (!hasId) Reflect.deleteProperty(data, `id`);
-    if (err) reject(err);
-    resolve(res);
-  });
-});
 
 module.exports = (req, v = ``) => {
 
@@ -52,10 +37,17 @@ module.exports = (req, v = ``) => {
         WHERE CONTAINS(d.id, "test") OR d.test = true
       `;
 
+      const destroy = link => new Promise((resolve, reject) => {
+        db.deleteDocument(link, (err, res) => {
+          if (err) reject(err);
+          else resolve(res);
+        });
+      });
+
       db.queryDocuments(coll, query).toArray((err, res) => {
         if (err) return fail(err);
         const links = res.map(doc => doc._self);
-        Promise.all(links.map(deleteDocument)).then(done).catch(fail);
+        Promise.all(links.map(destroy)).then(done).catch(fail);
       });
 
     }, 20000);
@@ -91,7 +83,6 @@ module.exports = (req, v = ``) => {
         expect(res.body._attachments).toBeUndefined();
         expect(res.body._rid).toBeUndefined();
         expect(res.body._self).toBeUndefined();
-        expect(res.body._ts).toBeUndefined();
         expect(res.body.permissions).toBeUndefined();
       })
       .then(done)
@@ -221,7 +212,7 @@ module.exports = (req, v = ``) => {
       };
 
       const test = doc => req.patch(`${v}/languages/${doc.id}`)
-      .send({ tid: `upsertOneAgain` })
+      .send({ tid: `upsertOneAgain`, type })
       .set(`Authorization`, `Bearer ${this.token}`)
       .expect(200)
       .expect(res => {
@@ -251,7 +242,7 @@ module.exports = (req, v = ``) => {
         type,
       };
 
-      const filter = results => results.filter(item => item.tid === `some-other-user`);
+      const filter = results => results.filter(item => item.tid === lang1.tid);
 
       const test = () => req.get(`${v}/languages`)
       .set(`Authorization`, `Bearer ${this.token}`)
