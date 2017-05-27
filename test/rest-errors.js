@@ -19,7 +19,7 @@ const test = true;
 // The "v" parameter is a version path, e.g. "/v0", "/v1", etc.
 module.exports = (req, v = ``) => {
 
-  describe(`API Errors`, function() {
+  describe(`REST API Errors`, function() {
 
     beforeAll(function(done) {
       getToken()
@@ -57,7 +57,10 @@ module.exports = (req, v = ``) => {
 
     it(`403: bad user permissions`, function(done) {
 
-      const lang = { test };
+      const lang = {
+        test,
+        type: `Language`,
+      };
 
       db.upsertDocument(coll, lang, (err, doc) => {
 
@@ -93,6 +96,7 @@ module.exports = (req, v = ``) => {
         const lang = {
           id: `test-403`,
           test,
+          type: `Language`,
         };
 
         const put = () => req.put(`${v}/languages`)
@@ -144,6 +148,7 @@ module.exports = (req, v = ``) => {
       const lang = {
         permissions: { owner: [config.testUser] },
         ttl: 500,
+        type: `Language`,
       };
 
       db.upsertDocument(coll, lang, (err, doc) => {
@@ -196,10 +201,7 @@ module.exports = (req, v = ``) => {
 
       Promise.all(arr.map(test))
       .then(fail)
-      .catch(err => {
-        console.error(err);
-        done();
-      });
+      .catch(done);
 
     });
 
