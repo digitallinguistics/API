@@ -73,7 +73,7 @@
       "put" : {
         "tags" : [ "Language" ],
         "summary" : "Upsert (create or replace) a Language",
-        "description" : "Creates a Language if it does not yet exist (i.e. if the resource does not have an `id` property yet), or replaces the existing Language resource if it does. Note that this replaces the *entire* Language object. It is not just a partial update.",
+        "description" : "Creates a Language if it does not yet exist (i.e. if the resource does not have an `id` property yet), or replaces the existing Language resource if it does. Note that this replaces the *entire* Language object. It is not just a partial update. The `id` and `type` attributes must be present on the data to upsert.",
         "operationId" : "upsertLanguage",
         "parameters" : [ {
           "in" : "body",
@@ -147,7 +147,7 @@
       "patch" : {
         "tags" : [ "Language" ],
         "summary" : "Perform a partial update on a Language",
-        "description" : "Performs a partial update the Language whose ID is specified in the URL. If the Language object has an `id` property, is ignore in favor of the ID in the URL.",
+        "description" : "Performs a partial update the Language whose ID is specified in the URL. If the Language object has an `id` property, is ignored in favor of the ID in the URL. Note that both the `id` and `type` properties must be present on the data to update.",
         "operationId" : "updateLanguage",
         "parameters" : [ {
           "name" : "languageId",
