@@ -8,3 +8,5 @@ notifications:
   email: false
 env:
   NODE_ENV=development
+cache:
+  yarn: true
