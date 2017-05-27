@@ -23,7 +23,7 @@
   "consumes" : [ "application/json" ],
   "produces" : [ "application/json" ],
   "security" : [ {
-    "Authorization" : [ ]
+    "authorization" : [ ]
   } ],
   "paths" : {
     "/languages" : {
