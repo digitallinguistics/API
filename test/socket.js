@@ -87,7 +87,7 @@ module.exports = (req, v = ``) => {
       };
 
       const testETag = data => new Promise((resolve, reject) => {
-        client.emit(`get`, `Language`, data.id, { ifNoneMatch: data._etag }, (err, res) => {
+        client.emit(`get`, data.id, { ifNoneMatch: data._etag }, (err, res) => {
           expect(err.status).toBe(304);
           if (err) resolve();
           else reject(res);
@@ -145,10 +145,11 @@ module.exports = (req, v = ``) => {
         permissions: { owner: [config.testUser] },
         test,
         testName: `delete`,
+        type: `Language`
       };
 
       const get = id => new Promise((resolve, reject) => {
-        client.emit(`get`, `Language`, id, (err, res) => {
+        client.emit(`get`, id, (err, res) => {
           if (err) reject(err);
           else resolve(res);
         });
@@ -200,6 +201,7 @@ module.exports = (req, v = ``) => {
         permissions: { owner: [config.testUser] },
         testName: `upsertOne`,
         ttl: 500,
+        type: `Language`,
       };
 
       const update = data => new Promise((resolve, reject) => {
@@ -207,12 +209,15 @@ module.exports = (req, v = ``) => {
         const newData = {
           id: data.id,
           testName: `upsertOneAgain`,
+          type: `Language`,
         };
 
-        client.emit(`update`, `Language`, newData, (err, res) => {
+        client.emit(`update`, newData, (err, res) => {
           if (err) reject(err);
-          expect(res.notChanged).toBe(lang.notChanged);
-          expect(res.testName).toBe(newData.testName);
+          if (res) {
+            expect(res.notChanged).toBe(lang.notChanged);
+            expect(res.testName).toBe(newData.testName);
+          }
           resolve(res);
         });
 
@@ -231,10 +236,12 @@ module.exports = (req, v = ``) => {
         permissions: { owner: [config.testUser] },
         testName: `upsert`,
         ttl: 500,
+        type: `Language`,
       };
 
-      client.emit(`upsert`, `Language`, lang, (err, res) => {
-        expect(res.testName).toBe(lang.testName);
+      client.emit(`upsert`, lang, (err, res) => {
+        if (err) fail(err);
+        if (res) expect(res.testName).toBe(lang.testName);
         done();
       });
 
@@ -334,6 +341,7 @@ module.exports = (req, v = ``) => {
         permissions: { owner: [config.testUser] },
         test,
         testName: `receive updated data (REST)`,
+        type: `Language`,
       };
 
       const update = () => req.patch(`${v}/languages/${data.id}`)
@@ -360,6 +368,7 @@ module.exports = (req, v = ``) => {
         permissions: { owner: [config.testUser] },
         test,
         testName: `receive updated data (Socket)`,
+        type: `Language`,
       };
 
       upsertDocument(data)
@@ -381,6 +390,7 @@ module.exports = (req, v = ``) => {
         permissions: { owner: [config.testUser] },
         test,
         testName: `receive upserted data (REST)`,
+        type: `Language`,
       };
 
       const upsert = () => req.put(`${v}/languages`)
@@ -407,6 +417,7 @@ module.exports = (req, v = ``) => {
         permissions: { owner: [config.testUser] },
         test,
         testName: `receive upserted data (Socket)`,
+        type: `Language`,
       };
 
       authenticate(token)

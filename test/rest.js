@@ -47,10 +47,7 @@ module.exports = (req, v = ``) => {
       db.queryDocuments(coll, query).toArray((err, res) => {
         if (err) return fail(err);
         const links = res.map(doc => doc._self);
-        Promise.all(links.map(destroy)).then(done).catch(err => {
-          console.error(err);
-          fail(err);
-        });
+        Promise.all(links.map(destroy)).then(done).catch(fail);
       });
 
     }, 20000);
@@ -215,7 +212,7 @@ module.exports = (req, v = ``) => {
       };
 
       const test = doc => req.patch(`${v}/languages/${doc.id}`)
-      .send({ tid: `upsertOneAgain` })
+      .send({ tid: `upsertOneAgain`, type })
       .set(`Authorization`, `Bearer ${this.token}`)
       .expect(200)
       .expect(res => {
