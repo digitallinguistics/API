@@ -23,7 +23,7 @@
   "consumes" : [ "application/json" ],
   "produces" : [ "application/json" ],
   "security" : [ {
-    "token" : [ ]
+    "Authorization" : [ ]
   } ],
   "paths" : {
     "/languages" : {
@@ -179,10 +179,10 @@
     }
   },
   "securityDefinitions" : {
-    "token" : {
-      "description" : "An access token (JSON Web Token) included in the `Authorization` header. Tokens may be retrieved programmatically from https://digitallinguistics.auth0.com. See the authorization documentation at http://developer.digitallinguistics.io/api/.",
+    "Authorization" : {
+      "description" : "An access token (JSON Web Token) included in the `Authorization` header in the format `Bearer {token}`. Tokens may be retrieved programmatically from https://digitallinguistics.auth0.com. See the authorization documentation at http://developer.digitallinguistics.io/api/.",
       "type" : "apiKey",
-      "name" : "token",
+      "name" : "Authorization",
       "in" : "header"
     }
   },
