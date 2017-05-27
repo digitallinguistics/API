@@ -289,8 +289,10 @@ You can also use a more generic syntax, using the following events:
 - `delete`
 - `get`
 - `getAll`
+- `update`
+- `upsert`
 
-When these more generic methods are used, you will need to specify the type of object as the first argument (which is indicated in the `type` property of every DLx object). For example:
+For the `add` event, you will need to specify the type of the object to add as the first argument. For example:
 
 ```js
 const data = { /* language data */ };
