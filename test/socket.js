@@ -10,7 +10,6 @@
 const config         = require(`../lib/config`);
 const getToken       = require(`./token`);
 const io             = require(`socket.io-client`);
-const jwt            = require(`jsonwebtoken`);
 const upsertDocument = require(`./upsert`);
 
 module.exports = (req, v = ``) => {
@@ -46,7 +45,7 @@ module.exports = (req, v = ``) => {
     });
 
     // FEATURES
-    xit(`supports pagination`, function(done) {
+    it(`supports pagination`, function(done) {
 
       const getFirstPage = () => new Promise((resolve, reject) => {
         client.emit(`getAll`, `Language`, { maxItemCount: 10 }, (err, res, info) => {
@@ -79,7 +78,7 @@ module.exports = (req, v = ``) => {
 
     }, 10000);
 
-    xit(`304: Not Modified`, function(done) {
+    it(`304: Not Modified`, function(done) {
 
       const lang = {
         permissions: { public: true },
@@ -104,7 +103,7 @@ module.exports = (req, v = ``) => {
 
     // GENERIC CRUD METHODS
 
-    xit(`add`, function(done) {
+    it(`add`, function(done) {
 
       const lang = {
         test,
@@ -118,7 +117,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`delete`, function(done) {
+    it(`delete`, function(done) {
 
       const data = {
         permissions: { owner: [config.testUser] },
@@ -140,7 +139,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`get`, function(done) {
+    it(`get`, function(done) {
 
       const data = {
         permissions: { owner: [config.testUser] },
@@ -162,7 +161,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`getAll`, function(done) {
+    it(`getAll`, function(done) {
 
       const lang1 = {
         permissions: { owner: [`some-other-user`] },
@@ -194,7 +193,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`update`, function(done) {
+    it(`update`, function(done) {
 
       const lang = {
         notChanged: `This property should not be changed.`,
@@ -226,7 +225,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`upsert`, function(done) {
+    it(`upsert`, function(done) {
 
       const lang = {
         permissions: { owner: [config.testUser] },
@@ -241,101 +240,184 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`receives deleted data`, function(done) {
+    it(`receives new data (REST)`, function(done) {
 
-      let id;
+      const data = {
+        test,
+        testName: `receives new data (REST)`,
+      };
+
+      const add = () => req.post(`${v}/languages`)
+      .send(data)
+      .set(`Authorization`, `Bearer ${token}`)
+      .expect(201);
+
+      authenticate(token)
+      .then(client => client.on(`add`, id => {
+        expect(typeof id).toBe(`string`);
+        client.close();
+        done();
+      }))
+      .then(add)
+      .catch(fail);
+
+    });
+
+    it(`receives new data (Socket)`, function(done) {
+
+      const data = {
+        test,
+        testName: `receives new data (Socket)`,
+      };
+
+      authenticate(token)
+      .then(client1 => client1.on(`add`, id => {
+        expect(typeof id).toBe(`string`);
+        client1.close();
+        done();
+      }))
+      .then(() => authenticate(token))
+      .then(client2 => client2.emit(`addLanguage`, data))
+      .catch(fail);
+
+    });
+
+    it(`receives deleted data (REST)`, function(done) {
 
       const deleteDocument = id => req.delete(`${v}/languages/${id}`)
       .set(`Authorization`, `Bearer ${token}`)
       .expect(204);
 
-      client.on(`delete`, data => {
-        expect(data).toBe(id);
-        done();
-      });
-
       const data = {
         permissions: { owner: [config.testUser] },
         test,
-        testName: `receive data`,
+        testName: `receive delete event (REST)`,
       };
 
       upsertDocument(data)
-      .then(lang => {
-        id = lang.id;
-        return deleteDocument(lang.id);
-      })
+      .then(lang => { data.id = lang.id; })
+      .then(() => authenticate(token))
+      .then(client => client.on(`delete`, id => {
+        expect(id).toBe(data.id);
+        client.close();
+        done();
+      }))
+      .then(() => deleteDocument(data.id))
       .catch(fail);
 
     });
 
-    it(`does not receive deleted data`, function(done) {
+    it(`receives deleted data (Socket)`, function(done) {
 
       const data = {
         permissions: { owner: [config.testUser] },
         test,
-        testName: `receive data`,
+        testName: `receive delete event (Socket)`,
       };
 
-      const createToken = () => new Promise((resolve, reject) => {
-
-        const payload = {
-          azp:   config.authClientId,
-          scope: `user`,
-        };
-
-        const opts = {
-          audience: [`https://api.digitallinguistics.io/`],
-          issuer:   `https://${config.authDomain}/`,
-        };
-
-        jwt.sign(payload, config.authSecret, opts, (err, token) => {
-          if (err) reject(err);
-          else resolve(token);
-        });
-
-      });
-
-      const deleteDocument = id => req.delete(`${v}/languages/${id}`)
-      .set(`Authorization`, `Bearer ${token}`)
-      .expect(204);
-
-      const wait = () => new Promise(resolve => setTimeout(resolve, 2500));
-
-      createToken()
-      .then(authenticate)
-      .then(client => client.on(`delete`, fail))
-      .then(() => upsertDocument(data))
-      .then(lang => deleteDocument(lang.id))
-      .then(wait)
-      .then(done)
+      upsertDocument(data)
+      .then(lang => { data.id = lang.id; })
+      .then(() => authenticate(token))
+      .then(client2 => client2.on(`delete`, id => {
+        expect(id).toBe(data.id);
+        client2.close();
+        done();
+      }))
+      .then(() => client.emit(`deleteLanguage`, data.id))
       .catch(fail);
 
-    }, 10000);
+    });
 
-    it(`receives updated data`, function(done) {
-
-      pending(`Functionality not yet added.`);
+    it(`receives updated data (REST)`, function(done) {
 
       const data = {
+        permissions: { owner: [config.testUser] },
         test,
-        testName: `getUpdatedData`,
+        testName: `receive updated data (REST)`,
       };
 
+      const update = () => req.patch(`${v}/languages/${data.id}`)
+      .send(data)
+      .set(`Authorization`, `Bearer ${token}`)
+      .expect(200);
+
+      upsertDocument(data)
+      .then(lang => { data.id = lang.id; })
+      .then(() => authenticate(token))
+      .then(client => client.on(`update`, result => {
+        expect(result).toBe(data.id);
+        client.close();
+        done();
+      }))
+      .then(update)
+      .catch(fail);
+
     });
 
-    it(`does not receive updated data`, function(done) {
-      pending(`Functionality not yet added.`);
-      // TODO: check that it receives updates it should, and does not receive updates it shouldn't
+    it(`receives updated data (Socket)`, function(done) {
+
+      const data = {
+        permissions: { owner: [config.testUser] },
+        test,
+        testName: `receive updated data (Socket)`,
+      };
+
+      upsertDocument(data)
+      .then(lang => { data.id = lang.id; })
+      .then(() => authenticate(token))
+      .then(client2 => client2.on(`update`, id => {
+        expect(id).toBe(data.id);
+        client2.close();
+        done();
+      }))
+      .then(() => client.emit(`updateLanguage`, data))
+      .catch(fail);
+
     });
 
-    it(`receives upserted data`, function() {
-      pending(`Functionality not yet added.`);
+    it(`receives upserted data (REST)`, function(done) {
+
+      const data = {
+        permissions: { owner: [config.testUser] },
+        test,
+        testName: `receive upserted data (REST)`,
+      };
+
+      const upsert = () => req.put(`${v}/languages`)
+      .send(data)
+      .set(`Authorization`, `Bearer ${token}`)
+      .expect(201);
+
+      upsertDocument(data)
+      .then(lang => { data.id = lang.id; })
+      .then(() => authenticate(token))
+      .then(client => client.on(`upsert`, result => {
+        expect(result).toBe(data.id);
+        client.close();
+        done();
+      }))
+      .then(upsert)
+      .catch(fail);
+
     });
 
-    it(`does not receive upserted data`, function(done) {
-      pending(`Functionality not yet added.`);
-      // TODO: check that it receives updates it should, and does not receive updates it shouldn't
+    it(`receives upserted data (Socket)`, function(done) {
+
+      const data = {
+        permissions: { owner: [config.testUser] },
+        test,
+        testName: `receive upserted data (Socket)`,
+      };
+
+      authenticate(token)
+      .then(client2 => client2.on(`upsert`, id => {
+        expect(typeof id).toBe(`string`);
+        client2.close();
+        done();
+      }))
+      .then(() => client.emit(`upsertLanguage`, data))
+      .catch(fail);
+
     });
 
   });

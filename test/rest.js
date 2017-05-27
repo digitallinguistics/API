@@ -47,7 +47,10 @@ module.exports = (req, v = ``) => {
       db.queryDocuments(coll, query).toArray((err, res) => {
         if (err) return fail(err);
         const links = res.map(doc => doc._self);
-        Promise.all(links.map(destroy)).then(done).catch(fail);
+        Promise.all(links.map(destroy)).then(done).catch(err => {
+          console.error(err);
+          fail(err);
+        });
       });
 
     }, 20000);

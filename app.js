@@ -51,7 +51,7 @@ const server = createServer(app);    // create the server
 const io     = createSocket(server); // create the socket
 
 // add routes to sockets
-routeSocket(io);
+routeSocket(io.of(`/`));
 routeSocket(io.of(`/v0`));
 
 app.io = io;                         // add IO to app (makes it available to request handlers)
