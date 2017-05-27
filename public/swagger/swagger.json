@@ -147,7 +147,7 @@
       "patch" : {
         "tags" : [ "Language" ],
         "summary" : "Perform a partial update on a Language",
-        "description" : "Performs a partial update the Language whose ID is specified in the URL. If the Language object has an `id` property, is ignore in favor of the ID in the URL.",
+        "description" : "Performs a partial update the Language whose ID is specified in the URL. If the Language object has an `id` property, is ignored in favor of the ID in the URL.",
         "operationId" : "updateLanguage",
         "parameters" : [ {
           "name" : "languageId",
