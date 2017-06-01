@@ -191,7 +191,9 @@ module.exports = (req, v = ``) => {
 
     });
 
-    xit(`429: rate limit`, function(done) {
+    it(`429: rate limit`, function(done) {
+
+      pending(`Only run this as needed.`);
 
       const arr = Array(600).fill({});
 
