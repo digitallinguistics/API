@@ -9,7 +9,7 @@ module.exports = () => new Promise((resolve, reject) => {
   };
 
   const opts = {
-    audience: [`https://api.digitallinguistics.io/`],
+    audience: `https://api.digitallinguistics.io/`,
     issuer:   `https://${config.authDomain}/`,
     subject:  config.testUser,
   };
