@@ -130,6 +130,7 @@ module.exports = (req, v = ``) => {
       req.get(`${v}/languages/does-not-exist`)
       .set(`Authorization`, `Bearer ${this.token}`)
       .expect(404)
+      .expect(res => expect(res.body.error_description.includes(`ID`)).toBe(true))
       .then(done)
       .catch(fail);
 
@@ -143,10 +144,39 @@ module.exports = (req, v = ``) => {
       .catch(fail);
     });
 
+    it(`409: Data Conflict`, function(done) {
+
+      const data = {
+        permissions: { owner: [config.testUser] },
+        test,
+        ttl: 500,
+        type: `Language`,
+      };
+
+      db.upsertDocument(coll, data, (err, doc) => {
+
+        if (err) return fail(err);
+
+        data.id = doc.id;
+
+        req.post(`${v}/languages`)
+        .set(`Authorization`, `Bearer ${this.token}`)
+        .send(data)
+        .expect(409)
+        .expect(res => console.log(res.body))
+        .expect(res => expect(res.body.error_description.includes(`ID`)).toBe(true))
+        .then(done)
+        .catch(fail);
+
+      });
+
+    });
+
     it(`412: Precondition Failed`, function(done) {
 
       const lang = {
         permissions: { owner: [config.testUser] },
+        test,
         ttl: 500,
         type: `Language`,
       };
