@@ -82,7 +82,7 @@ module.exports = (req, v = ``) => {
 
       const lang = {
         permissions: { public: true },
-        test: true,
+        test,
         // don't set a ttl here
       };
 
@@ -145,7 +145,7 @@ module.exports = (req, v = ``) => {
         permissions: { owner: [config.testUser] },
         test,
         testName: `delete`,
-        type: `Language`
+        type: `Language`,
       };
 
       const get = id => new Promise((resolve, reject) => {
@@ -166,13 +166,13 @@ module.exports = (req, v = ``) => {
 
       const lang1 = {
         permissions: { owner: [`some-other-user`] },
-        test: true,
+        test,
         testName: `GET languages test`,
       };
 
       const lang2 = {
         permissions: { public: true },
-        test: true,
+        test,
       };
 
       const filter = results => results.filter(item => item.testName === lang1.testName);
@@ -208,6 +208,7 @@ module.exports = (req, v = ``) => {
 
         const newData = {
           id: data.id,
+          test,
           testName: `upsertOneAgain`,
           type: `Language`,
         };

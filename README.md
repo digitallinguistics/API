@@ -18,10 +18,11 @@ If you are writing your application using JavaScript or Node, consider using the
 **NB:** The API always returns JSON data. If you would like to see HTML representations of the data instead, use the [Data Explorer][11].
 
 ## Contents
-* [I. About the Database](i-about-the-database)
-* [II. App Registration](ii-app-registration)
-* [III. Using the REST API](iii-using-the-rest-api)
-* [IV. Using the Socket API](iv-using-the-socket-api)
+* I. About the Database
+* II. App Registration
+* III. Getting an Access Token
+* III. Using the REST API
+* IV. Using the Socket API
 
 ## I. About the Database
 
@@ -74,8 +75,7 @@ Before your app can interact programmatically with the DLx database API, you mus
 
 DLx manages application registration through [Auth0][5]. In order to register your application, you will need to send a request to `https://digitallinguistics.auth0.com/oidc/register`, following the steps in [this documentation][6]. Be sure to save your client ID and client secret when you receive a the response from Auth0. You do not need to follow the instructions in the "Configure Your Client" section of Auth0's documentation at this time (though you will need to do so later in order to access the DLx API).
 
-## III. Using the REST API
-
+## III. Getting an Access Token
 ### Authentication
 Once you've registered your application, you can use your client ID and secret to request access tokens that allow your application to access the DLx database. The type of access token you request determines which databases resources your application is allowed to access.
 
@@ -105,6 +105,11 @@ Scope            | Description
 `offline_access` | (*requires user permission*) Access to a user's resources even when the user is offline.
 `public`         | Access to any public resources in the database. Data cannot be added, deleted, or modified using the `public` scope, only retrieved.
 `user`           | (*requires user permission*) Access to all the resources that the authenticated user has permissions to view, including public resources. This scope subsumes the `public` scope, so it is not necessary to include both.
+
+
+## IV. Using the REST API
+
+### Authenticating with the API
 
 #### Using Access Tokens
 Once your application receives an access token, it can begin making requests to the DLx API. There are two ways to interact with the database: via the REST API or via web sockets. If your application is using the REST API, it should include the access token in the `Authorization` header of the request, in the format `Bearer YOUR_ACCESS_TOKEN`. To use the token via web sockets, simply emit an `authenticate` event, and include a `token` attribute in the payload, like so: `{ token: YOUR_ACCESS_TOKEN }`
@@ -304,6 +309,22 @@ socket.emit(`add`, `Language`, data, (err, language) => {
   else /* do something with the new language object */
 });
 ```
+
+Each event may also be passed an optional options Object immediately before the callback, like so:
+
+```js
+socket.emit('getLanguage', '12345', { ifNoneMatch }, (err, language) => { /* handle response */ });
+```
+
+The following options are available:
+
+Option            | Description
+----------------- | -----------
+`continuation`    | (`getAll`) Used to retrieve the next set of results when using the `maxItemCount` option. The value of this option should be the value of the `continuation` property you received in the last response from the database.
+`ifMatch`         | (`delete` | `update` | `upsert`) The ETag (`_etag`) of the document to delete/update/upsert. If this option is provided, the item will only be deleted/updated/upserted if you have the most recent version of the data. Otherwise, an error will be returned, indicating that your application should request the most recent version of the data from the database, and then try the operation again.
+`ifModifiedSince` | (`getAll`) A Date Object or valid UTC date string. If provided, the API will only return resources that have been updated after the specified datetime.
+`ifNoneMatch`     | (`get`) The ETag (`_etag`) of the document to get. If this option is provided, the database will return a 304 response with no data if you already have the most recent version of the item. This saves bandwidth, since the entire object does not have to be sent to your application again.
+`maxItemCount`    | (`getAll`) An Integer specifying the maximum number of items for the API to return. If there are more items to retrieve, the API will also return a token in the `continuation` property of the `info` Object in the callback function. You can then provide this token in the `continuation` option of your next request, to retrieve the next set of results.
 
 ### Events Emitted by the Socket API
 Each time data in the database is modified, the Socket API emits an event indicating the type of operation that was performed on the database, and the ID of the affected data. Your application can then decide whether it needs to make a request for the updated data. This is useful for ensuring that the data in your application stays in sync with the data on the server.

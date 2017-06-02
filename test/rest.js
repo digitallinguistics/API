@@ -19,6 +19,7 @@ const getToken       = require(`./token`);
 const upsertDocument = require(`./upsert`);
 const { client: db, coll } = require(`../lib/db`);
 
+const test = true;
 const ttl  = 500; // 3 minutes
 const type = `Language`;
 
@@ -132,7 +133,7 @@ module.exports = (req, v = ``) => {
       .fill({})
       .reduce(p => p.then(() => upsertDocument({
         permissions: { public: true },
-        test: true,
+        test,
         type,
       })), Promise.resolve())
       .then(test1)
@@ -146,18 +147,18 @@ module.exports = (req, v = ``) => {
 
       const lang = {
         permissions: { public: true },
-        test: true,
+        test,
         type,
         // don't set a ttl here
       };
 
-      const test = doc => req.get(`${v}/languages/${doc.id}`)
+      const getLanguage = doc => req.get(`${v}/languages/${doc.id}`)
       .set(`Authorization`, `Bearer ${this.token}`)
       .set(`If-None-Match`, doc._etag)
       .expect(304);
 
       upsertDocument(lang)
-      .then(test)
+      .then(getLanguage)
       .then(done)
       .catch(fail);
 
@@ -231,20 +232,20 @@ module.exports = (req, v = ``) => {
 
       const lang1 = {
         permissions: { owner: [`some-other-user`] },
-        test: true,
+        test,
         tid: `GET languages test`,
         type,
       };
 
       const lang2 = {
         permissions: { public: true },
-        test: true,
+        test,
         type,
       };
 
       const filter = results => results.filter(item => item.tid === lang1.tid);
 
-      const test = () => req.get(`${v}/languages`)
+      const getLanguage = () => req.get(`${v}/languages`)
       .set(`Authorization`, `Bearer ${this.token}`)
       .expect(200)
       .expect(res => expect(res.body.length).toBeGreaterThan(0))
@@ -252,7 +253,7 @@ module.exports = (req, v = ``) => {
 
       upsertDocument(lang1)
       .then(() => upsertDocument(lang2))
-      .then(test)
+      .then(getLanguage)
       .then(done)
       .catch(fail);
 
@@ -262,7 +263,7 @@ module.exports = (req, v = ``) => {
 
       const lang = {
         permissions: { public: true },
-        test: true,
+        test,
         type,
       };
 
@@ -274,14 +275,14 @@ module.exports = (req, v = ``) => {
 
       const wait = () => new Promise(resolve => setTimeout(resolve, 1000));
 
-      const test = async () => {
+      const runTest = async () => {
         await upsertDocument(lang);
         await wait();
         const doc2 = await upsertDocument(lang);
         await request(new Date(doc2._ts * 1000).toUTCString());
       };
 
-      test().then(done).catch(fail);
+      runTest().then(done).catch(fail);
 
     });
 
@@ -290,16 +291,17 @@ module.exports = (req, v = ``) => {
       const lang = {
         id: `test-getLanguage`,
         permissions: { public: true },
+        test,
         type,
       };
 
-      const test = () => req.get(`${v}/languages/${lang.id}`)
+      const getLanguage = () => req.get(`${v}/languages/${lang.id}`)
       .set(`Authorization`, `Bearer ${this.token}`)
       .expect(200)
       .expect(res => expect(res.headers[`last-modified`]).toBeDefined());
 
       upsertDocument(lang)
-      .then(test)
+      .then(getLanguage)
       .then(done)
       .catch(fail);
 
