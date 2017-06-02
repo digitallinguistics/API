@@ -18,10 +18,11 @@ If you are writing your application using JavaScript or Node, consider using the
 **NB:** The API always returns JSON data. If you would like to see HTML representations of the data instead, use the [Data Explorer][11].
 
 ## Contents
-* [I. About the Database](i-about-the-database)
-* [II. App Registration](ii-app-registration)
-* [III. Using the REST API](iii-using-the-rest-api)
-* [IV. Using the Socket API](iv-using-the-socket-api)
+* I. About the Database
+* II. App Registration
+* III. Getting an Access Token
+* III. Using the REST API
+* IV. Using the Socket API
 
 ## I. About the Database
 
@@ -74,8 +75,7 @@ Before your app can interact programmatically with the DLx database API, you mus
 
 DLx manages application registration through [Auth0][5]. In order to register your application, you will need to send a request to `https://digitallinguistics.auth0.com/oidc/register`, following the steps in [this documentation][6]. Be sure to save your client ID and client secret when you receive a the response from Auth0. You do not need to follow the instructions in the "Configure Your Client" section of Auth0's documentation at this time (though you will need to do so later in order to access the DLx API).
 
-## III. Using the REST API
-
+## III. Getting an Access Token
 ### Authentication
 Once you've registered your application, you can use your client ID and secret to request access tokens that allow your application to access the DLx database. The type of access token you request determines which databases resources your application is allowed to access.
 
@@ -105,6 +105,11 @@ Scope            | Description
 `offline_access` | (*requires user permission*) Access to a user's resources even when the user is offline.
 `public`         | Access to any public resources in the database. Data cannot be added, deleted, or modified using the `public` scope, only retrieved.
 `user`           | (*requires user permission*) Access to all the resources that the authenticated user has permissions to view, including public resources. This scope subsumes the `public` scope, so it is not necessary to include both.
+
+
+## IV. Using the REST API
+
+### Authenticating with the API
 
 #### Using Access Tokens
 Once your application receives an access token, it can begin making requests to the DLx API. There are two ways to interact with the database: via the REST API or via web sockets. If your application is using the REST API, it should include the access token in the `Authorization` header of the request, in the format `Bearer YOUR_ACCESS_TOKEN`. To use the token via web sockets, simply emit an `authenticate` event, and include a `token` attribute in the payload, like so: `{ token: YOUR_ACCESS_TOKEN }`
