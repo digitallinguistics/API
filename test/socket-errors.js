@@ -153,7 +153,7 @@ module.exports = (v = ``) => {
 
       upsertDocument(lang)
       .then(badUpsert)
-      // .then(badDelete)
+      .then(badDelete)
       .then(done)
       .catch(fail);
 
