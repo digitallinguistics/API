@@ -110,7 +110,7 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`supports pagination`, function(done) {
+    it(`dlx-max-item-count`, function(done) {
 
       const continuationHeader = `dlx-continuation`;
       const maxItemHeader      = `dlx-max-item-count`;
@@ -142,6 +142,28 @@ module.exports = (req, v = ``) => {
       .catch(fail);
 
     }, 10000);
+
+    it(`public={Boolean}`, function(done) {
+
+      const data = {
+        permissions: { public: true },
+        test,
+        type,
+      };
+
+      const getLanguages = () => req.get(`${v}/languages`)
+      .set(`Authorization`, `Bearer ${this.token}`)
+      .query({ public: true })
+      .expect(200)
+      .expect(res => expect(res.body.some(item => item.id === data.id)).toBe(true));
+
+      upsertDocument(data)
+      .then(lang => { data.id = lang.id; })
+      .then(getLanguages)
+      .then(done)
+      .catch(fail);
+
+    });
 
     it(`304: Not Modified`, function(done) {
 
@@ -262,7 +284,7 @@ module.exports = (req, v = ``) => {
     it(`GET /languages - If-Modified-Since`, function(done) {
 
       const lang = {
-        permissions: { public: true },
+        permissions: { owner: [config.testUser] },
         test,
         type,
       };

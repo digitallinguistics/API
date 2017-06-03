@@ -76,7 +76,6 @@ Before your app can interact programmatically with the DLx database API, you mus
 DLx manages application registration through [Auth0][5]. In order to register your application, you will need to send a request to `https://digitallinguistics.auth0.com/oidc/register`, following the steps in [this documentation][6]. Be sure to save your client ID and client secret when you receive a the response from Auth0. You do not need to follow the instructions in the "Configure Your Client" section of Auth0's documentation at this time (though you will need to do so later in order to access the DLx API).
 
 ## III. Getting an Access Token
-### Authentication
 Once you've registered your application, you can use your client ID and secret to request access tokens that allow your application to access the DLx database. The type of access token you request determines which databases resources your application is allowed to access.
 
 Most of the time your application will request a token that provides access to a specific user's data. To do this, your application will direct the user to the DLx login page, where the user logs in and grants your application permission to access their data. The login page then sends your application an access token keyed to that specific user. Your application must include that access token with any future requests to the DLx API. The token allows your application to access to that user's resources (and only that user's resources - separate access tokens must be requested for each user). Follow the steps in either the [Authorization Code Grant](a-authorization-code-grant) or [Implicit Grant](b-implicit-grant) sections to receive this type of token.
@@ -183,8 +182,8 @@ The REST API also supports the following headers:
 * ##### Path
 Requests to the DLx API may optionally include the API version number immediately after the hostname, like so: `https://api.digitallinguistics.io/v1/`. The rest of the path should follow the URL syntax outlined above. If the version number is omitted, the service defaults to the latest version of the API.
 
-* ##### Querystring **NOT YET SUPPORTED**
-Many requests to the API take optional or required querystring parameters. These are added to the end of the URL following a `?`, in the format `{parameter}={value}`. For example, the URL `https://api.digitallinguistics.io/texts?fields=id,title,` will retrieve all the user's texts, but only return the ID and title fields for each text. Be sure to encode the querystring as a URI component (using a method such as JavaScript's `encodeURIComponent`) to avoid errors due to spaces or special characters. For a complete list of which query parameters are accepted for which types of requests, visit the [API documentation][3].
+* ##### Querystring
+Many requests to the API take optional or required querystring parameters. These are added to the end of the URL following a `?`, in the format `{parameter}={value}`. For example, the URL `https://api.digitallinguistics.io/texts?public=true,` will retrieve all texts that are publicly available, rather than just the user's texts. Be sure to encode the querystring as a URI component (using a method such as JavaScript's `encodeURIComponent`) to avoid errors due to spaces or special characters. For a complete list of which query parameters are accepted for which types of requests, visit the [API documentation][3].
 
 * ##### Body
 The body of the request should contain any resources to be uploaded to the database, in [DLx data format][4] (JSON).
@@ -325,6 +324,7 @@ Option            | Description
 `ifModifiedSince` | (`getAll`) A Date Object or valid UTC date string. If provided, the API will only return resources that have been updated after the specified datetime.
 `ifNoneMatch`     | (`get`) The ETag (`_etag`) of the document to get. If this option is provided, the database will return a 304 response with no data if you already have the most recent version of the item. This saves bandwidth, since the entire object does not have to be sent to your application again.
 `maxItemCount`    | (`getAll`) An Integer specifying the maximum number of items for the API to return. If there are more items to retrieve, the API will also return a token in the `continuation` property of the `info` Object in the callback function. You can then provide this token in the `continuation` option of your next request, to retrieve the next set of results.
+`public`          | (`getAll`) If set to `true`, the `getAll` event retrieves all publicly-accessible items, not just the items that the user is listed as an Owner, Contributor, or Viewer for. Defaults to `false`.
 
 ### Events Emitted by the Socket API
 Each time data in the database is modified, the Socket API emits an event indicating the type of operation that was performed on the database, and the ID of the affected data. Your application can then decide whether it needs to make a request for the updated data. This is useful for ensuring that the data in your application stays in sync with the data on the server.
