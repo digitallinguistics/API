@@ -163,7 +163,6 @@ module.exports = (req, v = ``) => {
         .set(`Authorization`, `Bearer ${this.token}`)
         .send(data)
         .expect(409)
-        .expect(res => console.log(res.body))
         .expect(res => expect(res.body.error_description.includes(`ID`)).toBe(true))
         .then(done)
         .catch(fail);
