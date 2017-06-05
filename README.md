@@ -40,6 +40,8 @@ Some types of resources contain subitems that may also be accessed with the API.
 
 - **ETag (`_etag`):** Each resource in the database has an `_etag` property. This property can be used along with the `If-Match` or `If-None-Match` headers to ensure that you have the most up-to-date version of the resource before making any changes to it.
 
+- **Timestap (`_ts`):** The `_ts` property of a resource indicates the time that the resource was last modified, in epoch time (number seconds since Jan 1, 1970).
+
 - **Empty Properties:** If a property of a resource is empty (i.e. an empty string, array, or object), it will often be removed when it is added to the database. This helps keep the size of the files in the database relatively small. So if you save a resource with a `"myProperty": ""` attribute to the database, and then retrieve that resource from the database, the `myProperty` attribute will be undefined rather than an empty string.
 
 ### Permissions

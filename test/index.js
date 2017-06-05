@@ -1,4 +1,4 @@
-const app          = require(`../app`);
+const app          = require(`../app`)();
 const rest         = require(`./rest`);
 const restErrors   = require(`./rest-errors`);
 const req          = require(`supertest`).agent(app);
