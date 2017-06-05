@@ -14,6 +14,13 @@ const http     = require(`http`);
 const jwt      = require(`jsonwebtoken`);
 const { client: db, coll } = require(`../lib/db`);
 
+const permissions = {
+  contributor: [],
+  owner:       [],
+  public:      false,
+  viewer:      [],
+};
+
 const test = true;
 
 // The "v" parameter is a version path, e.g. "/v0", "/v1", etc.
@@ -58,6 +65,7 @@ module.exports = (req, v = ``) => {
     it(`403: bad user permissions`, function(done) {
 
       const lang = {
+        permissions,
         test,
         type: `Language`,
       };

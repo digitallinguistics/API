@@ -18,6 +18,12 @@ module.exports = (req, v = ``) => {
 
     let client;
     let token;
+    const permissions = {
+      contributor: [],
+      owner:       [config.testUser],
+      public:      false,
+      viewer:      [],
+    };
     const test = true;
 
     const authenticate = token => new Promise((resolve, reject) => {
@@ -142,7 +148,7 @@ module.exports = (req, v = ``) => {
     it(`get`, function(done) {
 
       const data = {
-        permissions: { owner: [config.testUser] },
+        permissions,
         test,
         testName: `delete`,
         type: `Language`,
