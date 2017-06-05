@@ -44,10 +44,20 @@
           "description" : "The `dlx-max-item-count` header is used to limit the number of results to a certain amount at a time (by default all results will be returned). If there are more results to be returned, a continuation token will also be sent in the `dlx-continuation` header.",
           "required" : false,
           "type" : "string"
+        }, {
+          "name" : "public",
+          "in" : "query",
+          "description" : "Set this parameter to `true` to include all publicly-accessible resources, not just those that the user is listed as an Owner, Contributor, or Viewer for.",
+          "required" : false,
+          "type" : "string",
+          "default" : "false"
         } ],
         "responses" : {
           "200" : {
             "description" : "Operation successful."
+          },
+          "408" : {
+            "description" : "The request timed out."
           }
         }
       },
@@ -67,6 +77,15 @@
         "responses" : {
           "201" : {
             "description" : "The resource was created successfully."
+          },
+          "409" : {
+            "description" : "There was a data conflict in the database."
+          },
+          "413" : {
+            "description" : "Request payload is too large."
+          },
+          "422" : {
+            "description" : "The data is not properly formatted."
           }
         }
       },
@@ -93,6 +112,21 @@
         "responses" : {
           "201" : {
             "description" : "Upsert successful."
+          },
+          "403" : {
+            "description" : "Unauthorized."
+          },
+          "409" : {
+            "description" : "There was a data conflict in the database."
+          },
+          "412" : {
+            "description" : "A precondition for the operation was not met."
+          },
+          "413" : {
+            "description" : "Request payload is too large."
+          },
+          "422" : {
+            "description" : "The data is not properly formatted."
           }
         }
       }
@@ -118,6 +152,15 @@
         "responses" : {
           "200" : {
             "description" : "Operation successful."
+          },
+          "304" : {
+            "description" : "Not modified."
+          },
+          "403" : {
+            "description" : "Unauthorized."
+          },
+          "404" : {
+            "description" : "Database resource not found."
           }
         }
       },
@@ -141,6 +184,15 @@
         "responses" : {
           "204" : {
             "description" : "Delete operation successful."
+          },
+          "403" : {
+            "description" : "Unauthorized."
+          },
+          "404" : {
+            "description" : "Database resource not found."
+          },
+          "412" : {
+            "description" : "A precondition for the operation was not met."
           }
         }
       },
@@ -173,6 +225,18 @@
         "responses" : {
           "200" : {
             "description" : "Update successful."
+          },
+          "403" : {
+            "description" : "Unauthorized."
+          },
+          "404" : {
+            "description" : "Database resource not found."
+          },
+          "412" : {
+            "description" : "A precondition for the operation was not met."
+          },
+          "422" : {
+            "description" : "The data is not properly formatted."
           }
         }
       }
@@ -239,6 +303,14 @@
       "description" : "The `dlx-max-item-count` header is used to limit the number of results to a certain amount at a time (by default all results will be returned). If there are more results to be returned, a continuation token will also be sent in the `dlx-continuation` header.",
       "required" : false,
       "type" : "string"
+    },
+    "public" : {
+      "name" : "public",
+      "in" : "query",
+      "description" : "Set this parameter to `true` to include all publicly-accessible resources, not just those that the user is listed as an Owner, Contributor, or Viewer for.",
+      "required" : false,
+      "type" : "string",
+      "default" : "false"
     }
   },
   "responses" : {
@@ -266,14 +338,26 @@
     "NotAcceptable" : {
       "description" : "Cannot return data in requested format."
     },
+    "NotModified" : {
+      "description" : "Not modified."
+    },
     "NotFound" : {
       "description" : "Database resource not found."
+    },
+    "NotImplemented" : {
+      "description" : "This feature is not yet implemented."
+    },
+    "PreconditionFailed" : {
+      "description" : "A precondition for the operation was not met."
     },
     "ServerError" : {
       "description" : "An error occurred on the server."
     },
     "Success" : {
       "description" : "Operation successful."
+    },
+    "Timeout" : {
+      "description" : "The request timed out."
     },
     "TokenExpired" : {
       "description" : "Access token expired."
@@ -283,6 +367,9 @@
     },
     "Unauthorized" : {
       "description" : "Authorization missing or invalid."
+    },
+    "Unprocessable" : {
+      "description" : "The data is not properly formatted."
     },
     "UpdateSuccessful" : {
       "description" : "Update successful."
