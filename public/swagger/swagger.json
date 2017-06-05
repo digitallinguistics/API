@@ -54,7 +54,17 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "Operation successful."
+            "description" : "Operation successful.",
+            "headers" : {
+              "dlx-continuation" : {
+                "type" : "string",
+                "description" : "A continuation token for retrieving more results"
+              },
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified."
+              }
+            }
           },
           "408" : {
             "description" : "The request timed out."
@@ -76,7 +86,13 @@
         } ],
         "responses" : {
           "201" : {
-            "description" : "The resource was created successfully."
+            "description" : "The resource was created successfully.",
+            "headers" : {
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified."
+              }
+            }
           },
           "409" : {
             "description" : "There was a data conflict in the database."
@@ -111,7 +127,13 @@
         } ],
         "responses" : {
           "201" : {
-            "description" : "Upsert successful."
+            "description" : "Upsert successful.",
+            "headers" : {
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified."
+              }
+            }
           },
           "403" : {
             "description" : "Unauthorized."
@@ -151,7 +173,17 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "Operation successful."
+            "description" : "Operation successful.",
+            "headers" : {
+              "dlx-continuation" : {
+                "type" : "string",
+                "description" : "A continuation token for retrieving more results"
+              },
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified."
+              }
+            }
           },
           "304" : {
             "description" : "Not modified."
@@ -224,7 +256,13 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "Update successful."
+            "description" : "Update successful.",
+            "headers" : {
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified."
+              }
+            }
           },
           "403" : {
             "description" : "Unauthorized."
@@ -321,7 +359,13 @@
       "description" : "There was a data conflict in the database."
     },
     "Created" : {
-      "description" : "The resource was created successfully."
+      "description" : "The resource was created successfully.",
+      "headers" : {
+        "Last-Modified" : {
+          "type" : "string",
+          "description" : "The time that the item was last modified."
+        }
+      }
     },
     "DeleteSuccessful" : {
       "description" : "Delete operation successful."
@@ -354,7 +398,17 @@
       "description" : "An error occurred on the server."
     },
     "Success" : {
-      "description" : "Operation successful."
+      "description" : "Operation successful.",
+      "headers" : {
+        "dlx-continuation" : {
+          "type" : "string",
+          "description" : "A continuation token for retrieving more results"
+        },
+        "Last-Modified" : {
+          "type" : "string",
+          "description" : "The time that the item was last modified."
+        }
+      }
     },
     "Timeout" : {
       "description" : "The request timed out."
@@ -366,16 +420,34 @@
       "description" : "Too many requests."
     },
     "Unauthorized" : {
-      "description" : "Authorization missing or invalid."
+      "description" : "Authorization missing or invalid.",
+      "headers" : {
+        "WWW-Authenticate" : {
+          "type" : "string",
+          "description" : "An access token is required."
+        }
+      }
     },
     "Unprocessable" : {
       "description" : "The data is not properly formatted."
     },
     "UpdateSuccessful" : {
-      "description" : "Update successful."
+      "description" : "Update successful.",
+      "headers" : {
+        "Last-Modified" : {
+          "type" : "string",
+          "description" : "The time that the item was last modified."
+        }
+      }
     },
     "UpsertSuccessful" : {
-      "description" : "Upsert successful."
+      "description" : "Upsert successful.",
+      "headers" : {
+        "Last-Modified" : {
+          "type" : "string",
+          "description" : "The time that the item was last modified."
+        }
+      }
     }
   },
   "externalDocs" : {
