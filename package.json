@@ -26,7 +26,7 @@
   "bugs": {
     "url": "https://github.com/digitallinguistics/dlx-api/issues"
   },
-  "main": "cluster.js",
+  "main": "app.js",
   "engines": {
     "node": ">=7.x"
   },
