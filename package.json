@@ -28,7 +28,7 @@
   },
   "main": "app.js",
   "engines": {
-    "node": ">=7.x"
+    "node": ">=8.x"
   },
   "scripts": {
     "test": "jasmine JASMINE_CONFIG_PATH=test/jasmine.json"
