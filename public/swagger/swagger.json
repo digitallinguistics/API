@@ -113,6 +113,9 @@
           "201" : {
             "description" : "Upsert successful."
           },
+          "403" : {
+            "description" : "Unauthorized."
+          },
           "409" : {
             "description" : "There was a data conflict in the database."
           },
@@ -152,6 +155,12 @@
           },
           "304" : {
             "description" : "Not modified."
+          },
+          "403" : {
+            "description" : "Unauthorized."
+          },
+          "404" : {
+            "description" : "Database resource not found."
           }
         }
       },
@@ -175,6 +184,15 @@
         "responses" : {
           "204" : {
             "description" : "Delete operation successful."
+          },
+          "403" : {
+            "description" : "Unauthorized."
+          },
+          "404" : {
+            "description" : "Database resource not found."
+          },
+          "412" : {
+            "description" : "A precondition for the operation was not met."
           }
         }
       },
@@ -207,6 +225,18 @@
         "responses" : {
           "200" : {
             "description" : "Update successful."
+          },
+          "403" : {
+            "description" : "Unauthorized."
+          },
+          "404" : {
+            "description" : "Database resource not found."
+          },
+          "412" : {
+            "description" : "A precondition for the operation was not met."
+          },
+          "422" : {
+            "description" : "The data is not properly formatted."
           }
         }
       }
