@@ -66,7 +66,11 @@ module.exports = (req, v = ``) => {
       .send(lang)
       .set(`Authorization`, `Bearer ${this.token}`)
       .expect(201)
-      .expect(res => expect(res.body.emptyProp).toBeUndefined())
+      .expect(res => {
+        expect(typeof res.headers[`last-modified`]).toBe(`string`);
+        expect(res.headers[`last-modified`]).not.toBe(`Invalid Date`);
+        expect(res.body.emptyProp).toBeUndefined();
+      })
       .then(done)
       .catch(fail);
 
@@ -214,11 +218,19 @@ module.exports = (req, v = ``) => {
         type,
       };
 
-      req.put(`${v}/languages`)
+      const put = () => req.put(`${v}/languages`)
       .send(lang)
       .set(`Authorization`, `Bearer ${this.token}`)
       .expect(201)
-      .expect(res => expect(res.body.tid).toBe(lang.tid))
+      .expect(res => {
+        expect(typeof res.headers[`last-modified`]).toBe(`string`);
+        expect(res.headers[`last-modified`]).not.toBe(`Invalid Date`);
+        expect(res.body.tid).toBe(lang.tid);
+      });
+
+      upsertDocument(lang)
+      .then(res => { lang.id = res.id; })
+      .then(put)
       .then(done)
       .catch(fail);
 
@@ -239,6 +251,8 @@ module.exports = (req, v = ``) => {
       .set(`Authorization`, `Bearer ${this.token}`)
       .expect(200)
       .expect(res => {
+        expect(typeof res.headers[`last-modified`]).toBe(`string`);
+        expect(res.headers[`last-modified`]).not.toBe(`Invalid Date`);
         expect(res.body.notChanged).toBe(lang.notChanged);
         expect(res.body.tid).toBe(`upsertOneAgain`);
       });
