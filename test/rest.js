@@ -163,7 +163,7 @@ module.exports = (req, v = ``) => {
       .then(done)
       .catch(fail);
 
-    });
+    }, 10000);
 
     it(`304: Not Modified`, function(done) {
 

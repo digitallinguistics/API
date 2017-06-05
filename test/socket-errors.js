@@ -19,6 +19,12 @@ module.exports = (v = ``) => {
   describe(`Socket Errors`, function() {
 
     let client;
+    const permissions = {
+      contributor: [],
+      owner: [config.testUser],
+      public: false,
+      viewer: [],
+    };
     const test     = true;
     const testData = `test data`;
 
@@ -59,15 +65,19 @@ module.exports = (v = ``) => {
     it(`403: Bad user permissions`, function(done) {
 
       const lang = {
+        permissions,
         test,
         type: `Language`,
       };
+
+      lang.permissions.owner = [];
 
       db.upsertDocument(coll, lang, (err, doc) => {
 
         if (err) fail(err);
 
-        client.emit(`get`, doc.id, err => {
+        client.emit(`get`, doc.id, (err, res) => {
+          expect(res).toBeUndefined();
           expect(err.status).toBe(403);
           done();
         });
