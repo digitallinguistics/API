@@ -47,12 +47,22 @@ app.use(`/v0`, v0);
 app.use(errors.notFound);
 app.use(errors.serverError);
 
-const server = createServer(app);    // create the server
-const io     = createSocket(server); // create the socket
+const startServer = () => {
 
-// add routes to sockets
-routeSocket(io.of(`/`));
-routeSocket(io.of(`/v0`));
+  const server = createServer(app);    // create the server
+  const io     = createSocket(server); // create the socket
 
-app.io = io;                         // add IO to app (makes it available to request handlers)
-module.exports = app;                // export app for testing
+  // add routes to sockets
+  routeSocket(io.of(`/`));
+  routeSocket(io.of(`/v0`));
+
+  app.io = io;                         // add IO to app (makes it available to request handlers)
+  return app;                          // export app for testing
+
+};
+
+if (require.main === module) {
+  startServer();
+} else {
+  module.exports = startServer;
+}
