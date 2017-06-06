@@ -224,10 +224,15 @@ Status | Description
 403    | Unauthorized (Insufficient permissions)
 404    | Not found
 405    | Method not allowed
+408    | Request timeout
 409    | Data conflict
 412    | Precondition Failed
+413    | Payload too large
 419    | Authorization token expired
+422    | Unprocessable entity
+429    | Too many requests
 500    | Internal server error [Open an issue][12]
+501    | Not implemented
 
 ## IV. Using the Socket API
 
