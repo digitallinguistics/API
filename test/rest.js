@@ -34,8 +34,9 @@ module.exports = (req, v = ``) => {
     afterAll(function(done) {
 
       const query = `
-        SELECT * FROM items d
-        WHERE CONTAINS(d.id, "test") OR d.test = true
+        SELECT * FROM items c
+        WHERE c.test = true
+        AND NOT IS_DEFINED(c.ttl)
       `;
 
       const destroy = link => new Promise((resolve, reject) => {
