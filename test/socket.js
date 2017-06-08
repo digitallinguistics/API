@@ -3,66 +3,79 @@
   func-names,
   handle-callback-err,
   max-nested-callbacks,
+  max-statements,
   max-statements-per-line,
+  newline-per-chained-call,
+  no-magic-numbers,
+  no-shadow,
   prefer-arrow-callback,
 */
 
-const config         = require(`../lib/config`);
-const getToken       = require(`./token`);
-const io             = require(`socket.io-client`);
-const upsertDocument = require(`./upsert`);
+const authenticate  = require('./authenticate');
+const config        = require('../lib/config');
+const getToken      = require('./token');
+const { promisify } = require('util');
+const testAsync     = require('./async');
+
+const {
+  coll,
+  upsert,
+} = require('./db');
 
 module.exports = (req, v = ``) => {
 
   describe(`Socket API`, function() {
 
     let client;
+    let emit;
     let token;
-    const permissions = {
-      contributor: [],
-      owner:       [config.testUser],
-      public:      false,
-      viewer:      [],
-    };
+
     const test = true;
+    const ttl  = 500;
+    const type = `Language`;
 
-    const authenticate = token => new Promise((resolve, reject) => {
+    const defaultData = {
+      permissions: {
+        contributor: [],
+        owner:       [config.testUser],
+        public:      false,
+        viewer:      [],
+      },
+      test,
+      ttl,
+      type,
+    };
 
-      const socketOpts = { transports: [`websocket`, `xhr-polling`] };
-      const client     = io(`${config.baseUrl}${v}`, socketOpts);
+    beforeAll(testAsync(async function() {
+      token  = await getToken();
+      client = await authenticate(v, token);
+      emit   = promisify(client.emit).bind(client);
+    }));
 
-      client.on(`authenticated`, () => resolve(client));
-      client.on(`connect`, () => client.emit(`authenticate`, { token }));
-      client.on(`error`, reject);
-      client.on(`unauthorized`, reject);
-
+    beforeEach(function() {
+      Reflect.deleteProperty(defaultData, `id`);
     });
 
-    beforeAll(function(done) {
-      getToken()
-      .then(result => {
-        token = result;
-        return token;
-      })
-      .then(authenticate)
-      .then(result => { client = result; })
-      .then(done)
-      .catch(fail);
-    });
 
     // FEATURES
-    it(`supports pagination`, function(done) {
 
-      const getFirstPage = () => new Promise((resolve, reject) => {
-        client.emit(`getAll`, `Language`, { maxItemCount: 10 }, (err, res, info) => {
+    it(`option: maxItemCount`, testAsync(async function() {
+
+      const data = Object.assign({}, defaultData);
+      Reflect.deleteProperty(data, `ttl`);
+
+      await Promise.all(Array(3).fill({}).map(() => upsert(coll, Object.assign({}, data))));
+
+      const continuation = await new Promise((resolve, reject) => {
+        client.emit(`getAll`, `Language`, { maxItemCount: 2 }, (err, res, info) => {
           if (err) return reject(err);
-          expect(res.length).toBe(10);
+          expect(res.length).toBe(2);
           expect(info.continuation).toBeDefined();
           resolve(info.continuation);
         });
       });
 
-      const getSecondPage = continuation => new Promise((resolve, reject) => {
+      await new Promise((resolve, reject) => {
         client.emit(`getAll`, `Language`, { continuation }, (err, res) => {
           expect(res.length).toBeGreaterThan(0);
           if (err) reject(err);
@@ -70,373 +83,278 @@ module.exports = (req, v = ``) => {
         });
       });
 
-      Array(15)
-      .fill({})
-      .reduce(p => p.then(() => upsertDocument({
-        permissions: { public: true },
-        test: true,
-        type: `Language`,
-      })), Promise.resolve())
-      .then(getFirstPage)
-      .then(getSecondPage)
-      .then(done)
-      .catch(fail);
+    }), 10000);
 
-    }, 10000);
+    it(`304: Not Modified`, testAsync(async function() {
 
-    it(`304: Not Modified`, function(done) {
+      const data = Object.assign({}, defaultData);
+      Reflect.deleteProperty(data, `ttl`);
 
-      const lang = {
-        permissions: { public: true },
-        test,
-        // don't set a ttl here
-      };
+      const doc = await upsert(coll, data);
 
-      const testETag = data => new Promise((resolve, reject) => {
-        client.emit(`get`, data.id, { ifNoneMatch: data._etag }, (err, res) => {
-          expect(err.status).toBe(304);
-          if (err) resolve();
-          else reject(res);
-        });
-      });
+      try {
+        await emit(`get`, doc.id, { ifNoneMatch: doc._etag });
+      } catch (e) {
+        expect(e.status).toBe(304);
+      }
 
-      upsertDocument(lang)
-      .then(testETag)
-      .then(done)
-      .catch(fail);
+    }));
 
-    });
 
     // GENERIC CRUD METHODS
 
-    it(`add`, function(done) {
+    it(`add`, testAsync(async function() {
+      const data = Object.assign({ tid: `add` }, defaultData);
+      const res  = await emit(`add`, `Language`, data);
+      expect(res.tid).toBe(data.tid);
+    }));
 
-      const lang = {
-        test,
-        testName: `add`,
-      };
+    it(`delete`, testAsync(async function() {
+      const doc = await upsert(coll, defaultData);
+      const res = await emit(`delete`, doc.id);
+      expect(res.status).toBe(204);
+    }));
 
-      client.emit(`add`, `Language`, lang, (err, res) => {
-        expect(res.testName).toBe(lang.testName);
-        done();
-      });
-
-    });
-
-    it(`delete`, function(done) {
+    it(`get`, testAsync(async function() {
 
       const data = {
-        permissions: { owner: [config.testUser] },
+        permissions: defaultData.permissions,
         test,
-        testName: `delete`,
+        tid: `get`,
+        type,
       };
 
-      const destroy = id => new Promise((resolve, reject) => {
-        client.emit(`delete`, id, (err, res) => {
-          if (err) reject(err);
-          else resolve(res);
-        });
-      });
+      const doc  = await upsert(coll, data);
+      const lang = await emit(`get`, doc.id);
 
-      upsertDocument(data)
-      .then(lang => destroy(lang.id))
-      .then(done)
-      .catch(fail);
+      expect(lang.tid).toBe(data.tid);
 
-    });
+    }));
 
-    it(`get`, function(done) {
+    it(`getAll`, testAsync(async function() {
 
       const data = {
-        permissions,
+        permissions: Object.assign({}, defaultData.permissions),
         test,
-        testName: `delete`,
-        type: `Language`,
+        tid: `getAll`,
+        type,
       };
 
-      const get = id => new Promise((resolve, reject) => {
-        client.emit(`get`, id, (err, res) => {
-          if (err) reject(err);
-          else resolve(res);
-        });
-      });
+      data.permissions.owner = [`some-other-user`];
 
-      upsertDocument(data)
-      .then(lang => get(lang.id))
-      .then(done)
-      .catch(fail);
+      const doc = await upsert(coll, data);
+      await upsert(coll, defaultData);
+      const res = await emit(`getAll`, `Language`);
 
-    });
+      expect(res.length).toBeGreaterThan(0);
+      expect(res.some(item => item.tid === doc.tid)).toBe(false);
 
-    it(`getAll`, function(done) {
+    }));
 
-      const lang1 = {
-        permissions: { owner: [`some-other-user`] },
-        test,
-        testName: `GET languages test`,
-      };
+    it(`update`, testAsync(async function() {
 
-      const lang2 = {
-        permissions: { public: true },
-        test,
-      };
-
-      const filter = results => results.filter(item => item.testName === lang1.testName);
-
-      const getAll = () => new Promise((resolve, reject) => {
-        client.emit(`getAll`, `Language`, (err, res) => {
-          if (err) return reject(err);
-          expect(res.length).toBeGreaterThan(0);
-          expect(filter(res).length).toBe(0);
-          resolve();
-        });
-      });
-
-      upsertDocument(lang1)
-      .then(() => upsertDocument(lang2))
-      .then(getAll)
-      .then(done)
-      .catch(fail);
-
-    });
-
-    it(`update`, function(done) {
-
-      const lang = {
+      const data = Object.assign({
         notChanged: `This property should not be changed.`,
-        permissions: { owner: [config.testUser] },
-        testName: `upsertOne`,
-        ttl: 500,
-        type: `Language`,
-      };
+        tid:        `upsertOne`,
+      }, defaultData);
 
-      const update = data => new Promise((resolve, reject) => {
+      const doc = await upsert(coll, data);
 
-        const newData = {
-          id: data.id,
-          test,
-          testName: `upsertOneAgain`,
-          type: `Language`,
-        };
-
-        client.emit(`update`, newData, (err, res) => {
-          if (err) reject(err);
-          if (res) {
-            expect(res.notChanged).toBe(lang.notChanged);
-            expect(res.testName).toBe(newData.testName);
-          }
-          resolve(res);
-        });
-
-      });
-
-      upsertDocument(lang)
-      .then(update)
-      .then(done)
-      .catch(fail);
-
-    });
-
-    it(`upsert`, function(done) {
-
-      const lang = {
-        permissions: { owner: [config.testUser] },
-        testName: `upsert`,
-        ttl: 500,
-        type: `Language`,
-      };
-
-      client.emit(`upsert`, lang, (err, res) => {
-        if (err) fail(err);
-        if (res) expect(res.testName).toBe(lang.testName);
-        done();
-      });
-
-    });
-
-    it(`receives new data (REST)`, function(done) {
-
-      const data = {
+      const newData = {
+        id: doc.id,
         test,
-        testName: `receives new data (REST)`,
+        tid: `upsertOneAgain`,
+        ttl,
+        type,
       };
 
-      const add = () => req.post(`${v}/languages`)
-      .send(data)
-      .set(`Authorization`, `Bearer ${token}`)
-      .expect(201);
+      const res = await emit(`update`, newData);
 
-      authenticate(token)
-      .then(client => client.on(`add`, id => {
-        expect(typeof id).toBe(`string`);
-        client.close();
-        done();
-      }))
-      .then(add)
-      .catch(fail);
+      expect(res.notChanged).toBe(doc.notChanged);
+      expect(res.tid).toBe(newData.tid);
 
-    });
+    }));
 
-    it(`receives new data (Socket)`, function(done) {
+    it(`upsert`, testAsync(async function() {
+      const data = Object.assign({ tid: `upsert` }, defaultData);
+      const res = await emit(`upsert`, data);
+      expect(res.tid).toBe(data.tid);
+    }));
 
-      const data = {
-        test,
-        testName: `receives new data (Socket)`,
-      };
+    it(`receives new data (REST)`, testAsync(async function() {
 
-      authenticate(token)
-      .then(client1 => client1.on(`add`, id => {
-        expect(typeof id).toBe(`string`);
-        client1.close();
-        done();
-      }))
-      .then(() => authenticate(token))
-      .then(client2 => client2.emit(`addLanguage`, data))
-      .catch(fail);
+      const data = Object.assign({}, defaultData);
+      Reflect.deleteProperty(data, `ttl`);
 
-    });
+      const client = await authenticate(v, token);
 
-    it(`receives deleted data (REST)`, function(done) {
+      await Promise.all([
 
-      const deleteDocument = id => req.delete(`${v}/languages/${id}`)
-      .set(`Authorization`, `Bearer ${token}`)
-      .expect(204);
+        req.post(`${v}/languages`)
+        .send(data)
+        .set(`Authorization`, `Bearer ${token}`)
+        .expect(201),
 
-      const data = {
-        permissions: { owner: [config.testUser] },
-        test,
-        testName: `receive delete event (REST)`,
-      };
+        new Promise(resolve => client.on(`add`, () => {
+          client.close();
+          resolve();
+        })),
 
-      upsertDocument(data)
-      .then(lang => { data.id = lang.id; })
-      .then(() => authenticate(token))
-      .then(client => client.on(`delete`, id => {
-        expect(id).toBe(data.id);
-        client.close();
-        done();
-      }))
-      .then(() => deleteDocument(data.id))
-      .catch(fail);
+      ]);
 
-    });
+    }));
 
-    it(`receives deleted data (Socket)`, function(done) {
+    it(`receives new data (Socket)`, testAsync(async function() {
 
-      const data = {
-        permissions: { owner: [config.testUser] },
-        test,
-        testName: `receive delete event (Socket)`,
-      };
+      const data = Object.assign({}, defaultData);
+      Reflect.deleteProperty(data, `ttl`);
 
-      upsertDocument(data)
-      .then(lang => { data.id = lang.id; })
-      .then(() => authenticate(token))
-      .then(client2 => client2.on(`delete`, id => {
-        expect(id).toBe(data.id);
-        client2.close();
-        done();
-      }))
-      .then(() => client.emit(`deleteLanguage`, data.id))
-      .catch(fail);
+      const firstClient  = await authenticate(v, token);
+      const secondClient = await authenticate(v, token);
+      const emit         = promisify(secondClient.emit).bind(secondClient);
 
-    });
+      await Promise.all([
+        new Promise(resolve => firstClient.on(`add`, () => {
+          firstClient.close();
+          secondClient.close();
+          resolve();
+        })),
+        emit(`addLanguage`, data),
+      ]);
 
-    it(`receives updated data (REST)`, function(done) {
+    }));
 
-      const data = {
-        permissions: { owner: [config.testUser] },
-        test,
-        testName: `receive updated data (REST)`,
-        type: `Language`,
-      };
+    it(`receives deleted data (REST)`, testAsync(async function() {
 
-      const update = () => req.patch(`${v}/languages/${data.id}`)
-      .send(data)
-      .set(`Authorization`, `Bearer ${token}`)
-      .expect(200);
+      const client = await authenticate(v, token);
+      const doc    = await upsert(coll, defaultData);
 
-      upsertDocument(data)
-      .then(lang => { data.id = lang.id; })
-      .then(() => authenticate(token))
-      .then(client => client.on(`update`, result => {
-        expect(result).toBe(data.id);
-        client.close();
-        done();
-      }))
-      .then(update)
-      .catch(fail);
+      await Promise.all([
 
-    });
+        req.delete(`${v}/languages/${doc.id}`)
+        .set(`Authorization`, `Bearer ${token}`)
+        .expect(204),
 
-    it(`receives updated data (Socket)`, function(done) {
+        new Promise(resolve => client.on(`delete`, id => {
+          expect(id).toBe(doc.id);
+          client.close();
+          resolve();
+        })),
 
-      const data = {
-        permissions: { owner: [config.testUser] },
-        test,
-        testName: `receive updated data (Socket)`,
-        type: `Language`,
-      };
+      ]);
 
-      upsertDocument(data)
-      .then(lang => { data.id = lang.id; })
-      .then(() => authenticate(token))
-      .then(client2 => client2.on(`update`, id => {
-        expect(id).toBe(data.id);
-        client2.close();
-        done();
-      }))
-      .then(() => client.emit(`updateLanguage`, data))
-      .catch(fail);
+    }));
 
-    });
+    it(`receives deleted data (Socket)`, testAsync(async function() {
 
-    it(`receives upserted data (REST)`, function(done) {
+      const doc          = await upsert(coll, defaultData);
+      const secondClient = await authenticate(v, token);
 
-      const data = {
-        permissions: { owner: [config.testUser] },
-        test,
-        testName: `receive upserted data (REST)`,
-        type: `Language`,
-      };
+      await Promise.all([
 
-      const upsert = () => req.put(`${v}/languages`)
-      .send(data)
-      .set(`Authorization`, `Bearer ${token}`)
-      .expect(201);
+        new Promise(resolve => secondClient.on(`delete`, id => {
+          expect(id).toBe(doc.id);
+          secondClient.close();
+          resolve();
+        })),
 
-      upsertDocument(data)
-      .then(lang => { data.id = lang.id; })
-      .then(() => authenticate(token))
-      .then(client => client.on(`upsert`, result => {
-        expect(result).toBe(data.id);
-        client.close();
-        done();
-      }))
-      .then(upsert)
-      .catch(fail);
+        emit(`deleteLanguage`, doc.id),
 
-    });
+      ]);
 
-    it(`receives upserted data (Socket)`, function(done) {
+    }));
 
-      const data = {
-        permissions: { owner: [config.testUser] },
-        test,
-        testName: `receive upserted data (Socket)`,
-        type: `Language`,
-      };
+    it(`receives updated data (REST)`, testAsync(async function() {
 
-      authenticate(token)
-      .then(client2 => client2.on(`upsert`, id => {
-        expect(typeof id).toBe(`string`);
-        client2.close();
-        done();
-      }))
-      .then(() => client.emit(`upsertLanguage`, data))
-      .catch(fail);
+      const data = Object.assign({}, defaultData);
+      Reflect.deleteProperty(data, `ttl`);
 
-    });
+      const doc    = await upsert(coll, data);
+      const client = await authenticate(v, token);
+
+      await Promise.all([
+
+        new Promise(resolve => client.on(`update`, id => {
+          expect(id).toBe(doc.id);
+          client.close();
+          resolve();
+        })),
+
+        req.patch(`${v}/languages/${data.id}`)
+        .send(data)
+        .set(`Authorization`, `Bearer ${token}`)
+        .expect(200),
+
+      ]);
+
+    }));
+
+    it(`receives updated data (Socket)`, testAsync(async function() {
+
+      const data = Object.assign({}, defaultData);
+      Reflect.deleteProperty(data, `ttl`);
+
+      const doc          = await upsert(coll, data);
+      const secondClient = await authenticate(v, token);
+
+      await Promise.all([
+
+        new Promise(resolve => secondClient.on(`update`, id => {
+          expect(id).toBe(doc.id);
+          secondClient.close();
+          resolve();
+        })),
+
+        emit(`updateLanguage`, data),
+
+      ]);
+
+    }));
+
+    it(`receives upserted data (REST)`, testAsync(async function() {
+
+      const data = Object.assign({}, defaultData);
+      Reflect.deleteProperty(data, `ttl`);
+
+      const doc    = await upsert(coll, data);
+      const client = await authenticate(v, token);
+
+      await Promise.all([
+
+        new Promise(resolve => client.on(`upsert`, id => {
+          expect(id).toBe(doc.id);
+          client.close();
+          resolve();
+        })),
+
+        req.put(`${v}/languages`)
+        .send(data)
+        .set(`Authorization`, `Bearer ${token}`)
+        .expect(201),
+
+      ]);
+
+    }));
+
+    it(`receives upserted data (Socket)`, testAsync(async function() {
+
+      const data = Object.assign({}, defaultData);
+      Reflect.deleteProperty(data, `ttl`);
+
+      const secondClient = await authenticate(v, token);
+
+      await Promise.all([
+
+        new Promise(resolve => secondClient.on(`upsert`, () => {
+          secondClient.close();
+          resolve();
+        })),
+
+        emit(`upsertLanguage`, data),
+
+      ]);
+
+    }));
 
   });
 

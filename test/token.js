@@ -1,22 +1,15 @@
-const config = require(`../lib/config`);
-const jwt    = require(`jsonwebtoken`);
+const config      = require('../lib/config');
+const { signJwt } = require('./jwt');
 
-module.exports = () => new Promise((resolve, reject) => {
+const payload = {
+  azp:   config.authClientId,
+  scope: `user`,
+};
 
-  const payload = {
-    azp:   config.authClientId,
-    scope: `user`,
-  };
+const opts = {
+  audience: `https://api.digitallinguistics.io/`,
+  issuer:   `https://${config.authDomain}/`,
+  subject:  config.testUser,
+};
 
-  const opts = {
-    audience: `https://api.digitallinguistics.io/`,
-    issuer:   `https://${config.authDomain}/`,
-    subject:  config.testUser,
-  };
-
-  jwt.sign(payload, config.authSecret, opts, (err, token) => {
-    if (err) reject(err);
-    else resolve(token);
-  });
-
-});
+module.exports = () => signJwt(payload, config.authSecret, opts);

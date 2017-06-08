@@ -8,16 +8,17 @@
   prefer-arrow-callback
 */
 
-const config = require('../lib/config');
-const https  = require('https');
-const jwt    = require('jsonwebtoken');
+const config        = require('../lib/config');
+const req           = require('superagent');
+const testAsync     = require('./async');
+const { verifyJwt } = require('./jwt');
 
 const audience = `https://api.digitallinguistics.io/`;
 const scope    = `public user admin openid offline_access`;
 
 describe('Authentication', function() {
 
-  it('Client Credentials', function(done) {
+  it('Client Credentials', testAsync(async function() {
 
     const body = {
       audience,
@@ -26,47 +27,28 @@ describe('Authentication', function() {
       grant_type:    `client_credentials`,
     };
 
+    const url = `https://${config.authDomain}/oauth/token`;
+
+    const res = await req.post(url)
+    .type(`application/json`)
+    .send(body);
+
+    const token = res.body.access_token;
+
+    expect(res.body.scope).toBe(scope);
+    expect(res.body.token_type).toBe(`Bearer`);
+
     const opts = {
-      headers:  { 'Content-Type': `application/json` },
-      hostname: config.authDomain,
-      method:   `POST`,
-      path:     `/oauth/token`,
+      algorithms: [`HS256`],
+      audience,
+      issuer:     `https://${config.authDomain}/`,
+      subject:    `${config.authClientId}@clients`,
     };
 
-    const request = https.request(opts, response => {
+    const payload = await verifyJwt(token, config.authSecret, opts);
 
-      let data = ``;
+    expect(payload.scope).toBe(scope);
 
-      response.on(`data`, chunk => { data += chunk; });
-      response.on(`error`, fail);
-      response.on(`end`, () => {
-
-        const tokenData = JSON.parse(data);
-        const token     = tokenData.access_token;
-
-        expect(tokenData.scope).toBe(scope);
-        expect(tokenData.token_type).toBe(`Bearer`);
-
-        const opts = {
-          algorithms: [`HS256`],
-          audience,
-          issuer:     `https://${config.authDomain}/`,
-          subject:    `${config.authClientId}@clients`,
-        };
-
-        jwt.verify(token, config.authSecret, opts, (err, payload) => {
-          if (err) fail(err);
-          expect(payload.scope).toBe(scope);
-          done();
-        });
-
-      });
-
-    });
-
-    request.on(`error`, fail);
-    request.end(JSON.stringify(body), `utf8`);
-
-  });
+  }));
 
 });
