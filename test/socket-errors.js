@@ -34,10 +34,10 @@ module.exports = (v = ``) => {
 
     const defaultData = {
       permissions: {
-        contributor: [],
-        owner:       [config.testUser],
-        public:      false,
-        viewer:      [],
+        contributors: [],
+        owners:       [config.testUser],
+        public:       false,
+        viewers:      [],
       },
       test,
       ttl,
@@ -72,10 +72,10 @@ module.exports = (v = ``) => {
 
       const data = {
         permissions: {
-          contributor: [],
-          owner:       [],
-          public:      false,
-          viewer:      [],
+          contributors: [],
+          owners:       [],
+          public:       false,
+          viewers:      [],
         },
         test,
         type,

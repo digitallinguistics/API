@@ -20,10 +20,10 @@ const {
 } = require(`./db`);
 
 const permissions = {
-  contributor: [],
-  owner:       [],
-  public:      false,
-  viewer:      [],
+  contributors: [],
+  owners:       [],
+  public:       false,
+  viewers:      [],
 };
 
 const test = true;
@@ -125,7 +125,7 @@ module.exports = (req, v = ``) => {
     it(`409: Data Conflict`, testAsync(async function() {
 
       const data = {
-        permissions: { owner: [config.testUser] },
+        permissions: { owners: [config.testUser] },
         test,
         ttl,
         type: `Language`,
@@ -145,7 +145,7 @@ module.exports = (req, v = ``) => {
     it(`412: Precondition Failed`, testAsync(async function() {
 
       const data = {
-        permissions: { owner: [config.testUser] },
+        permissions: { owners: [config.testUser] },
         test,
         ttl,
         type: `Language`,

@@ -31,7 +31,8 @@
     "node": ">=8.x"
   },
   "scripts": {
-    "test": "jasmine JASMINE_CONFIG_PATH=test/jasmine.json"
+    "clear": "node test/clear.js",
+    "test": "yarn run clear & jasmine JASMINE_CONFIG_PATH=test/jasmine.json & yarn run clear"
   },
   "dependencies": {
     "@digitallinguistics/dlx-js": "^0.12.3",

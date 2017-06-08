@@ -36,10 +36,10 @@ module.exports = (req, v = ``) => {
 
     const defaultData = {
       permissions: {
-        contributor: [],
-        owner:       [config.testUser],
-        public:      false,
-        viewer:      [],
+        contributors: [],
+        owners:       [config.testUser],
+        public:       false,
+        viewers:      [],
       },
       test,
       ttl,
@@ -140,7 +140,7 @@ module.exports = (req, v = ``) => {
         type,
       };
 
-      data.permissions.owner = [`some-other-user`];
+      data.permissions.owners = [`some-other-user`];
 
       const doc = await upsert(coll, data);
       await upsert(coll, defaultData);
