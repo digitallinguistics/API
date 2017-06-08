@@ -14,141 +14,118 @@
   prefer-arrow-callback
 */
 
-const config         = require(`../lib/config`);
-const getToken       = require(`./token`);
-const upsertDocument = require(`./upsert`);
-const { client: db, coll } = require(`../lib/db`);
+const config    = require('../lib/config');
+const getToken  = require('./token');
+const testAsync = require('./async');
+
+const {
+  coll,
+  deleteTestDocs,
+  upsert,
+} = require('./db');
 
 const test = true;
-const ttl  = 500; // 3 minutes
+const ttl  = 500;
 const type = `Language`;
 
 module.exports = (req, v = ``) => {
 
   describe(`REST API`, function() {
 
-    beforeAll(function(done) {
-      getToken().then(token => { this.token = token; }).then(done).catch(fail);
+    let token;
+
+    const defaultData = {
+      permissions: { owner: [config.testUser] },
+      test,
+      ttl,
+      type,
+    };
+
+    beforeAll(testAsync(async function() {
+      token = await getToken();
+    }));
+
+    beforeEach(function() {
+      Reflect.deleteProperty(defaultData, `id`);
     });
 
-    afterAll(function(done) {
+    afterAll(testAsync(async function() {
+      await deleteTestDocs();
+    }), 10000);
 
-      const query = `
-        SELECT * FROM items c
-        WHERE c.test = true
-        AND NOT IS_DEFINED(c.ttl)
-      `;
-
-      const destroy = link => new Promise((resolve, reject) => {
-        db.deleteDocument(link, (err, res) => {
-          if (err) reject(err);
-          else resolve(res);
-        });
-      });
-
-      db.queryDocuments(coll, query).toArray((err, res) => {
-        if (err) return fail(err);
-        const links = res.map(doc => doc._self);
-        Promise.all(links.map(destroy)).then(done).catch(fail);
-      });
-
-    }, 20000);
-
-    it(`anonymizes data`, function(done) {
+    it(`anonymizes data`, function() {
       pending(`Need to add Person or Media routes to test this.`);
-      done();
     });
 
-    it(`returns simplified data objects`, function(done) {
+    it(`returns simplified data objects`, testAsync(async function() {
 
-      const lang = { emptyProp: '', ttl, type };
+      const data = Object.assign({ emptyProp: '' }, defaultData);
 
-      req.put(`${v}/languages`)
-      .send(lang)
-      .set(`Authorization`, `Bearer ${this.token}`)
-      .expect(201)
-      .expect(res => {
-        expect(typeof res.headers[`last-modified`]).toBe(`string`);
-        expect(res.headers[`last-modified`]).not.toBe(`Invalid Date`);
-        expect(res.body.emptyProp).toBeUndefined();
-      })
-      .then(done)
-      .catch(fail);
+      const res = await req.put(`${v}/languages`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .send(data)
+      .expect(201);
 
-    });
+      expect(typeof res.headers[`last-modified`]).toBe(`string`);
+      expect(res.headers[`last-modified`]).not.toBe(`Invalid Date`);
+      expect(res.body.emptyProp).toBeUndefined();
 
-    it(`returns objects without database properties`, function(done) {
+    }));
 
-      const lang = { ttl, type };
+    it(`returns objects without database properties`, testAsync(async function() {
 
-      req.put(`${v}/languages`)
-      .send(lang)
-      .set(`Authorization`, `Bearer ${this.token}`)
-      .expect(201)
-      .expect(res => {
-        expect(res.body._attachments).toBeUndefined();
-        expect(res.body._rid).toBeUndefined();
-        expect(res.body._self).toBeUndefined();
-        expect(res.body.permissions).toBeUndefined();
-      })
-      .then(done)
-      .catch(fail);
+      const res = await req.put(`${v}/languages`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .send(defaultData)
+      .expect(201);
 
-    });
+      expect(res.body._attachments).toBeUndefined();
+      expect(res.body._rid).toBeUndefined();
+      expect(res.body._self).toBeUndefined();
+      expect(res.body.permissions).toBeUndefined();
 
-    it(`does not return resources that have a TTL`, function(done) {
+    }));
 
-      const lang = {
-        permissions: { public: true },
-        ttl,
-        type,
-      };
+    it(`does not return resources that have a TTL`, testAsync(async function() {
 
-      const test = doc => req.get(`${v}/languages/${doc.id}`)
-      .set(`Authorization`, `Bearer ${this.token}`)
+      const doc = await upsert(coll, defaultData);
+
+      await req.get(`${v}/languages/${doc.id}`)
+      .set(`Authorization`, `Bearer ${token}`)
       .expect(404);
 
-      upsertDocument(lang)
-      .then(test)
-      .then(done)
-      .catch(fail);
+    }));
 
-    });
+    it(`dlx-max-item-count`, testAsync(async function() {
 
-    it(`dlx-max-item-count`, function(done) {
+      const data = {
+        permissions: { owner: [config.testUser] },
+        test,
+        type,
+      };
 
       const continuationHeader = `dlx-continuation`;
       const maxItemHeader      = `dlx-max-item-count`;
 
-      const test1 = () => req.get(`${v}/languages`)
-      .set(`Authorization`, `Bearer ${this.token}`)
-      .set(maxItemHeader, 10)
-      .expect(200)
-      .expect(res => expect(res.body.length).toBe(10))
-      .expect(res => expect(res.headers[continuationHeader]).toBeDefined())
-      .then(res => res.headers[continuationHeader]);
+      await Promise.all(Array(3).fill({}).map(() => upsert(coll, Object.assign({}, data))));
 
-      const test2 = continuation => req.get(`${v}/languages`)
-      .set(maxItemHeader, 10)
-      .set(`Authorization`, `Bearer ${this.token}`)
-      .set(continuationHeader, continuation)
+      const res = await req.get(`${v}/languages`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .set(maxItemHeader, 2)
       .expect(200);
 
-      Array(15)
-      .fill({})
-      .reduce(p => p.then(() => upsertDocument({
-        permissions: { public: true },
-        test,
-        type,
-      })), Promise.resolve())
-      .then(test1)
-      .then(test2)
-      .then(done)
-      .catch(fail);
+      expect(res.body.length).toBe(2);
+      expect(res.headers[continuationHeader]).toBeDefined();
 
-    }, 10000);
+      await req.get(`${v}/languages`)
+      .set(maxItemHeader, 2)
+      .set(`Authorization`, `Bearer ${token}`)
+      .set(continuationHeader, res.headers[continuationHeader])
+      .expect(200);
 
-    it(`public={Boolean}`, function(done) {
+    }), 10000);
+
+    it(`public={Boolean}`, testAsync(async function() {
 
       const data = {
         permissions: { public: true },
@@ -156,211 +133,164 @@ module.exports = (req, v = ``) => {
         type,
       };
 
-      const getLanguages = () => req.get(`${v}/languages`)
-      .set(`Authorization`, `Bearer ${this.token}`)
+      const doc = await upsert(coll, data);
+
+      const res = await req.get(`${v}/languages`)
+      .set(`Authorization`, `Bearer ${token}`)
       .query({ public: true })
-      .expect(200)
-      .expect(res => expect(res.body.some(item => item.id === data.id)).toBe(true));
+      .expect(200);
 
-      upsertDocument(data)
-      .then(lang => { data.id = lang.id; })
-      .then(getLanguages)
-      .then(done)
-      .catch(fail);
+      expect(res.body.some(item => item.id === doc.id)).toBe(true);
 
-    }, 10000);
+    }), 10000);
 
-    it(`304: Not Modified`, function(done) {
+    it(`304: Not Modified`, testAsync(async function() {
 
-      const lang = {
-        permissions: { public: true },
+      const data = {
+        permissions: { owner: [config.testUser] },
         test,
         type,
-        // don't set a ttl here
       };
 
-      const getLanguage = doc => req.get(`${v}/languages/${doc.id}`)
-      .set(`Authorization`, `Bearer ${this.token}`)
+      const doc = await upsert(coll, data);
+
+      await req.get(`${v}/languages/${doc.id}`)
+      .set(`Authorization`, `Bearer ${token}`)
       .set(`If-None-Match`, doc._etag)
       .expect(304);
 
-      upsertDocument(lang)
-      .then(getLanguage)
-      .then(done)
-      .catch(fail);
+    }));
 
-    });
+    it(`POST /languages`, testAsync(async function() {
 
-    it(`POST /languages`, function(done) {
+      const res = await req.post(`${v}/languages`)
+      .send(Object.assign({ tid: `post` }, defaultData))
+      .set(`Authorization`, `Bearer ${token}`)
+      .expect(201);
 
-      const lang = {
-        permissions: { owner: [config.testUser] },
-        tid: `post`,
-        ttl,
-        type,
-      };
+      expect(res.body.tid).toBe(`post`);
 
-      req.post(`${v}/languages`)
-      .send(lang)
-      .set(`Authorization`, `Bearer ${this.token}`)
-      .expect(201)
-      .expect(res => expect(res.body.tid).toBe(lang.tid))
-      .then(done)
-      .catch(fail);
+    }));
 
-    });
+    it(`PUT /languages`, testAsync(async function() {
 
-    it(`PUT /languages`, function(done) {
+      const data = Object.assign({ tid: `put` }, defaultData);
+      const doc  = await upsert(coll, data);
 
-      const lang = {
-        permissions: { owner: [config.testUser] },
-        tid: `put`,
-        ttl,
-        type,
-      };
+      const res = await req.put(`${v}/languages`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .send(doc)
+      .expect(201);
 
-      const put = () => req.put(`${v}/languages`)
-      .send(lang)
-      .set(`Authorization`, `Bearer ${this.token}`)
-      .expect(201)
-      .expect(res => {
-        expect(typeof res.headers[`last-modified`]).toBe(`string`);
-        expect(res.headers[`last-modified`]).not.toBe(`Invalid Date`);
-        expect(res.body.tid).toBe(lang.tid);
-      });
+      expect(typeof res.headers[`last-modified`]).toBe(`string`);
+      expect(res.headers[`last-modified`]).not.toBe(`Invalid Date`);
+      expect(res.body.tid).toBe(data.tid);
 
-      upsertDocument(lang)
-      .then(res => { lang.id = res.id; })
-      .then(put)
-      .then(done)
-      .catch(fail);
+    }));
 
-    });
+    it(`PATCH /languages/{language}`, testAsync(async function() {
 
-    it(`PATCH /languages/{language}`, function(done) {
+      const data = Object.assign({
+        notChnaged: `This property should not be changed.`,
+        tid:        `upsertOne`,
+      }, defaultData);
 
-      const lang = {
-        notChanged: `This property should not be changed.`,
-        permissions: { owner: [config.testUser] },
-        tid: `upsertOne`,
-        ttl,
-        type,
-      };
+      const doc = await upsert(coll, data);
 
-      const test = doc => req.patch(`${v}/languages/${doc.id}`)
+      const res = await req.patch(`${v}/languages/${doc.id}`)
       .send({ tid: `upsertOneAgain`, type })
-      .set(`Authorization`, `Bearer ${this.token}`)
-      .expect(200)
-      .expect(res => {
-        expect(typeof res.headers[`last-modified`]).toBe(`string`);
-        expect(res.headers[`last-modified`]).not.toBe(`Invalid Date`);
-        expect(res.body.notChanged).toBe(lang.notChanged);
-        expect(res.body.tid).toBe(`upsertOneAgain`);
-      });
+      .set(`Authorization`, `Bearer ${token}`)
+      .expect(200);
 
-      upsertDocument(lang)
-      .then(test)
-      .then(done)
-      .catch(fail);
+      expect(typeof res.headers[`last-modified`]).toBe(`string`);
+      expect(res.headers[`last-modified`]).not.toBe(`Invalid Date`);
+      expect(res.body.notChanged).toBe(data.notChanged);
+      expect(res.body.tid).toBe(`upsertOneAgain`);
 
-    });
+    }));
 
-    it(`GET /languages`, function(done) {
+    it(`GET /languages`, testAsync(async function() {
 
-      const lang1 = {
+      const firstItem = {
         permissions: { owner: [`some-other-user`] },
         test,
-        tid: `GET languages test`,
+        tid: `GET /languages`,
         type,
       };
 
-      const lang2 = {
-        permissions: { public: true },
-        test,
-        type,
-      };
-
-      const filter = results => results.filter(item => item.tid === lang1.tid);
-
-      const getLanguage = () => req.get(`${v}/languages`)
-      .set(`Authorization`, `Bearer ${this.token}`)
-      .expect(200)
-      .expect(res => expect(res.body.length).toBeGreaterThan(0))
-      .expect(res => expect(filter(res.body).length).toBe(0));
-
-      upsertDocument(lang1)
-      .then(() => upsertDocument(lang2))
-      .then(getLanguage)
-      .then(done)
-      .catch(fail);
-
-    }, 10000);
-
-    it(`GET /languages - If-Modified-Since`, function(done) {
-
-      const lang = {
+      const secondItem = {
         permissions: { owner: [config.testUser] },
         test,
         type,
       };
 
-      const request = ts => req.get(`${v}/languages`)
-      .set(`Authorization`, `Bearer ${this.token}`)
-      .set(`If-Modified-Since`, ts)
-      .expect(200)
-      .expect(res => expect(res.body.length).toBe(1));
+      await upsert(coll, firstItem);
+      await upsert(coll, secondItem);
+
+      const res = await req.get(`${v}/languages`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .expect(200);
+
+      expect(res.body.length).toBeGreaterThan(0);
+      expect(res.body.some(item => item.tid === firstItem.tid)).toBe(false);
+
+    }), 10000);
+
+    it(`GET /languages`, testAsync(async function() {
 
       const wait = () => new Promise(resolve => setTimeout(resolve, 1000));
 
-      const runTest = async () => {
-        await upsertDocument(lang);
-        await wait();
-        const doc2 = await upsertDocument(lang);
-        await request(new Date(doc2._ts * 1000).toUTCString());
-      };
-
-      runTest().then(done).catch(fail);
-
-    });
-
-    it(`GET /languages/{language}`, function(done) {
-
-      const lang = {
-        id: `test-getLanguage`,
-        permissions: { public: true },
+      const data = {
+        permissions: { owner: [config.testUser] },
         test,
         type,
       };
 
-      const getLanguage = () => req.get(`${v}/languages/${lang.id}`)
-      .set(`Authorization`, `Bearer ${this.token}`)
-      .expect(200)
-      .expect(res => expect(res.headers[`last-modified`]).toBeDefined());
+      await upsert(coll, data);
+      await wait();
+      const doc = await upsert(coll, data);
 
-      upsertDocument(lang)
-      .then(getLanguage)
-      .then(done)
-      .catch(fail);
+      const res = await req.get(`${v}/languages`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .set(`If-Modified-Since`, new Date(doc._ts * 1000).toUTCString())
+      .expect(200);
 
-    });
+      expect(res.body.length >= 1).toBe(true);
 
-    it(`DELETE /languages/{language}`, function(done) {
+    }));
 
-      const lang = {
-        permissions: { owner: [config.testUser] },
-        ttl,
+    it(`GET /languages/{language}`, testAsync(async function() {
+
+      const data = {
+        permissions: {
+          contributor: [],
+          owner:       [config.testUser],
+          public:      false,
+          viewer:      [],
+        },
+        test,
+        type,
       };
 
-      const test = doc => req.delete(`${v}/languages/${doc.id}`)
-      .set(`Authorization`, `Bearer ${this.token}`)
+      const doc = await upsert(coll, data);
+
+      const res = await req.get(`${v}/languages/${doc.id}`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .expect(200);
+
+      expect(res.headers[`last-modified`]).toBeDefined();
+
+    }));
+
+    it(`DELETE /languages/{language}`, testAsync(async function() {
+
+      const doc = await upsert(coll, defaultData);
+
+      await req.delete(`${v}/languages/${doc.id}`)
+      .set(`Authorization`, `Bearer ${token}`)
       .expect(204);
 
-      upsertDocument(lang)
-      .then(test)
-      .then(done)
-      .catch(fail);
-
-    });
+    }));
 
   });
 

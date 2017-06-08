@@ -8,11 +8,16 @@
   prefer-arrow-callback
 */
 
-const config   = require(`../lib/config`);
-const getToken = require(`./token`);
-const http     = require(`http`);
-const jwt      = require(`jsonwebtoken`);
-const { client: db, coll } = require(`../lib/db`);
+const agent       = require('superagent');
+const config      = require('../lib/config');
+const getToken    = require('./token');
+const { signJwt } = require('./jwt');
+const testAsync   = require('./async');
+
+const {
+  coll,
+  upsert,
+} = require(`./db`);
 
 const permissions = {
   contributor: [],
@@ -22,47 +27,39 @@ const permissions = {
 };
 
 const test = true;
+const ttl  = 500;
 
 // The "v" parameter is a version path, e.g. "/v0", "/v1", etc.
 module.exports = (req, v = ``) => {
 
   describe(`REST API Errors`, function() {
 
-    beforeAll(function(done) {
-      getToken()
-      .then(token => { this.token = token; })
-      .then(done)
-      .catch(fail);
-    });
+    let token;
 
-    it(`HTTP > HTTPS`, function(done) {
+    beforeAll(testAsync(async function() {
+      token = await getToken();
+    }));
 
-      const req = http.get(`http://api.digitallinguistics.io/test`, res => {
-        let data = ``;
-        res.on(`error`, fail);
-        res.on(`data`, chunk => { data += chunk; });
-        res.on(`end`, () => {
-          expect(res.headers.location.includes(`https`)).toBe(true);
-          done();
-        });
-      });
+    it(`HTTP > HTTPS`, testAsync(async function() {
+      try {
+        await agent.get(`http://api.digitallinguistics.io/test`)
+        .set(`Authorization`, `Bearer ${token}`);
+      } catch (err) {
+        expect(err.response.redirects[0].includes(`https`));
+      }
+    }));
 
-      req.on(`error`, fail);
+    it(`401: credentials_required`, testAsync(async function() {
 
-    });
+      const res = await req.get(`${v}/test`)
+      .expect(401);
 
-    it(`401: credentials_required`, function(done) {
-      req.get(`${v}/test`)
-      .expect(401)
-      .expect(res => {
-        expect(res.headers[`www-authenticate`]).toBeDefined();
-        expect(res.body.error).toBe(`credentials_required`);
-      })
-      .then(done)
-      .catch(fail);
-    });
+      expect(res.headers[`www-authenticate`]).toBeDefined();
+      expect(res.body.error).toBe(`credentials_required`);
 
-    it(`403: bad user permissions`, function(done) {
+    }));
+
+    it(`403: Forbidden`, testAsync(async function() {
 
       const lang = {
         permissions,
@@ -70,21 +67,15 @@ module.exports = (req, v = ``) => {
         type: `Language`,
       };
 
-      db.upsertDocument(coll, lang, (err, doc) => {
+      const doc = await upsert(coll, lang);
 
-        if (err) fail(err);
+      await req.get(`${v}/languages/${doc.id}`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .expect(403);
 
-        req.get(`${v}/languages/${doc.id}`)
-        .set(`Authorization`, `Bearer ${this.token}`)
-        .expect(403)
-        .then(done)
-        .catch(fail);
+    }));
 
-      });
-
-    });
-
-    it(`403: bad scope`, function(done) {
+    it(`403: Forbidden (scope)`, testAsync(async function() {
 
       const payload = {
         azp:   config.authClientId,
@@ -97,136 +88,98 @@ module.exports = (req, v = ``) => {
         subject:  config.testUser,
       };
 
-      jwt.sign(payload, config.authSecret, opts, (err, token) => {
+      const token = await signJwt(payload, config.authSecret, opts);
 
-        if (err) fail(err);
+      const data = {
+        test,
+        ttl,
+        type: `Language`,
+      };
 
-        const lang = {
-          id: `test-403`,
-          test,
-          type: `Language`,
-        };
+      await req.put(`${v}/languages`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .send(data)
+      .expect(403);
 
-        const put = () => req.put(`${v}/languages`)
-        .set(`Authorization`, `Bearer ${token}`)
-        .send(lang)
-        .expect(403);
+    }));
 
-        const destroy = () => req.delete(`${v}/languages/${lang.id}`)
-        .set(`Authorization`, `Bearer ${token}`)
-        .expect(403);
+    it(`404: No Route`, testAsync(async function() {
+      await req.get(`${v}/badroute`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .expect(404);
+    }));
 
-        put()
-        .then(destroy)
-        .then(done)
-        .catch(fail);
-
-      });
-
-    });
-
-    it(`404: No Route`, function(done) {
-      req.get(`${v}/badroute`)
-      .set(`Authorization`, `Bearer ${this.token}`)
+    it(`404: Not Found`, testAsync(async function() {
+      await req.get(`${v}/languages/does-not-exist`)
+      .set(`Authorization`, `Bearer ${token}`)
       .expect(404)
-      .then(done)
-      .catch(fail);
-    });
+      .expect(res => expect(res.body.error_description.includes(`ID`)).toBe(true));
+    }));
 
-    it(`404: resource does not exist`, function(done) {
+    it(`405: Method Not Allowed`, testAsync(async function() {
+      await req.post(`${v}/test`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .expect(405);
+    }));
 
-      req.get(`${v}/languages/does-not-exist`)
-      .set(`Authorization`, `Bearer ${this.token}`)
-      .expect(404)
-      .expect(res => expect(res.body.error_description.includes(`ID`)).toBe(true))
-      .then(done)
-      .catch(fail);
-
-    });
-
-    it(`405: Method Not Allowed`, function(done) {
-      req.post(`${v}/test`)
-      .set(`Authorization`, `Bearer ${this.token}`)
-      .expect(405)
-      .then(done)
-      .catch(fail);
-    });
-
-    it(`409: Data Conflict`, function(done) {
+    it(`409: Data Conflict`, testAsync(async function() {
 
       const data = {
         permissions: { owner: [config.testUser] },
         test,
-        ttl: 500,
+        ttl,
         type: `Language`,
       };
 
-      db.upsertDocument(coll, data, (err, doc) => {
+      await upsert(coll, data);
 
-        if (err) return fail(err);
+      const res = await req.post(`${v}/languages`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .send(data)
+      .expect(409);
 
-        data.id = doc.id;
+      expect(res.body.error_description.includes(`ID`)).toBe(true);
 
-        req.post(`${v}/languages`)
-        .set(`Authorization`, `Bearer ${this.token}`)
-        .send(data)
-        .expect(409)
-        .expect(res => expect(res.body.error_description.includes(`ID`)).toBe(true))
-        .then(done)
-        .catch(fail);
+    }));
 
-      });
+    it(`412: Precondition Failed`, testAsync(async function() {
 
-    });
-
-    it(`412: Precondition Failed`, function(done) {
-
-      const lang = {
+      const data = {
         permissions: { owner: [config.testUser] },
         test,
-        ttl: 500,
+        ttl,
         type: `Language`,
       };
 
-      db.upsertDocument(coll, lang, (err, doc) => {
+      const doc = await upsert(coll, data);
 
-        if (err) return fail(err);
+      await req.put(`${v}/languages`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .set(`If-Match`, `bad-etag`)
+      .send(doc)
+      .expect(412);
 
-        const test1 = () => req.put(`${v}/languages`)
-        .set(`Authorization`, `Bearer ${this.token}`)
-        .set(`If-Match`, `bad-etag`)
-        .send(doc)
-        .expect(412);
+      await req.delete(`${v}/languages/${doc.id}`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .set(`If-Match`, `bad-etag`)
+      .expect(412);
 
-        const test2 = () => req.delete(`${v}/languages/${doc.id}`)
-        .set(`Authorization`, `Bearer ${this.token}`)
-        .set(`If-Match`, `bad-etag`)
-        .expect(412);
+    }));
 
-        test1()
-        .then(test2)
-        .then(done)
-        .catch(fail);
-
-      });
-
-    });
-
-    it(`422: malformed data`, function(done) {
+    it(`422: Malformed Data`, testAsync(async function() {
 
       const lang = {
         name: true,
         test,
+        ttl,
       };
 
-      req.put(`${v}/languages`)
-      .set(`Authorization`, `Bearer ${this.token}`)
+      await req.put(`${v}/languages`)
+      .set(`Authorization`, `Bearer ${token}`)
       .send(lang)
-      .expect(422)
-      .then(done)
-      .catch(fail);
+      .expect(422);
 
-    });
+    }));
 
     it(`429: rate limit`, function(done) {
 
@@ -235,7 +188,7 @@ module.exports = (req, v = ``) => {
       const arr = Array(600).fill({});
 
       const test = () => req.get(`${v}/test`)
-      .set(`Authorization`, `Bearer ${this.token}`)
+      .set(`Authorization`, `Bearer ${token}`)
       .expect(200);
 
       Promise.all(arr.map(test))
@@ -244,14 +197,15 @@ module.exports = (req, v = ``) => {
 
     });
 
-    it(`GET /test`, function(done) {
-      req.get(`${v}/test`)
-      .set(`Authorization`, `Bearer ${this.token}`)
-      .expect(200)
-      .expect(res => expect(res.body.message).toBe(`Test successful.`))
-      .then(done)
-      .catch(fail);
-    });
+    it(`GET /test`, testAsync(async function() {
+
+      const res = await req.get(`${v}/test`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .expect(200);
+
+      expect(res.body.message).toBe(`Test successful.`);
+
+    }));
 
   });
 

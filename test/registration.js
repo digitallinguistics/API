@@ -8,19 +8,15 @@
   prefer-arrow-callback
 */
 
-const config = require('../lib/config');
-const https  = require('https');
+const config    = require('../lib/config');
+const req       = require('superagent');
+const testAsync = require('./async');
 
-describe('Client Registration', function() {
+describe(`Client Registration`, function() {
 
-  xit('registers client', function(done) {
+  xit(`registers client`, testAsync(async function() {
 
-    const opts = {
-      headers: { 'Content-Type': `application/json` },
-      hostname: config.authDomain,
-      method:  `POST`,
-      path:    `/oidc/register`,
-    };
+    pending(`This test registers a client, and should only be run when needed.`);
 
     const body = {
       client_name:   `3rd Party Test Client`,
@@ -30,23 +26,13 @@ describe('Client Registration', function() {
       ],
     };
 
-    const request = https.request(opts, response => {
+    const res = await req.post(`https://${config.authDomain}/oidc/register`)
+    .type(`application/json`)
+    .send(body);
 
-      let data = ``;
+    const client = res.body;
+    expect(client.client_name).toBe(body.client_name);
 
-      response.on(`data`, chunk => { data += chunk; });
-      response.on(`error`, fail);
-      response.on(`end`, () => {
-        const client = JSON.parse(data);
-        expect(client.client_name).toBe(body.client_name);
-        done();
-      });
-
-    });
-
-    request.on(`error`, fail);
-    request.end(JSON.stringify(body), `utf8`);
-
-  });
+  }));
 
 });
