@@ -49,10 +49,6 @@ module.exports = (req, v = ``) => {
       Reflect.deleteProperty(defaultData, `id`);
     });
 
-    afterAll(testAsync(async function() {
-      await deleteTestDocs();
-    }), 10000);
-
     it(`anonymizes data`, function() {
       pending(`Need to add Person or Media routes to test this.`);
     });
