@@ -35,7 +35,7 @@ module.exports = (req, v = ``) => {
     let token;
 
     const defaultData = {
-      permissions: { owner: [config.testUser] },
+      permissions: { owners: [config.testUser] },
       test,
       ttl,
       type,
@@ -95,7 +95,7 @@ module.exports = (req, v = ``) => {
     it(`dlx-max-item-count`, testAsync(async function() {
 
       const data = {
-        permissions: { owner: [config.testUser] },
+        permissions: { owners: [config.testUser] },
         test,
         type,
       };
@@ -143,7 +143,7 @@ module.exports = (req, v = ``) => {
     it(`304: Not Modified`, testAsync(async function() {
 
       const data = {
-        permissions: { owner: [config.testUser] },
+        permissions: { owners: [config.testUser] },
         test,
         type,
       };
@@ -208,14 +208,14 @@ module.exports = (req, v = ``) => {
     it(`GET /languages`, testAsync(async function() {
 
       const firstItem = {
-        permissions: { owner: [`some-other-user`] },
+        permissions: { owners: [`some-other-user`] },
         test,
         tid: `GET /languages`,
         type,
       };
 
       const secondItem = {
-        permissions: { owner: [config.testUser] },
+        permissions: { owners: [config.testUser] },
         test,
         type,
       };
@@ -237,7 +237,7 @@ module.exports = (req, v = ``) => {
       const wait = () => new Promise(resolve => setTimeout(resolve, 1000));
 
       const data = {
-        permissions: { owner: [config.testUser] },
+        permissions: { owners: [config.testUser] },
         test,
         type,
       };
@@ -259,10 +259,10 @@ module.exports = (req, v = ``) => {
 
       const data = {
         permissions: {
-          contributor: [],
-          owner:       [config.testUser],
-          public:      false,
-          viewer:      [],
+          contributors: [],
+          owners:       [config.testUser],
+          public:       false,
+          viewers:      [],
         },
         test,
         type,
