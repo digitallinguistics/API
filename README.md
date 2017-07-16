@@ -411,6 +411,10 @@ This example shows how to make a resource public:
 socket.emit(`updatePermission`, `12345`, { public: true });
 ```
 
+## Maintainers
+This repo is maintained by:
+- Daniel W. Hieber ([dhieber@umail.ucsb.edu](mailto:dhieber@umail.ucsb.edu))
+
 [1]:  https://github.com/digitallinguistics/api-js#readme
 [2]:  https://github.com/digitallinguistics/api-node#readme
 [3]:  https://app.swaggerhub.com/api/DLx/dlx/
