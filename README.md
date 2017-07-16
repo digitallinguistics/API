@@ -411,6 +411,9 @@ This example shows how to make a resource public:
 socket.emit(`updatePermission`, `12345`, { public: true });
 ```
 
+## Want to Contribute?
+Check out DLx's [general contributing guidelines][14].
+
 ## Maintainers
 This repo is maintained by:
 - Daniel W. Hieber ([dhieber@umail.ucsb.edu](mailto:dhieber@umail.ucsb.edu))
@@ -428,3 +431,4 @@ This repo is maintained by:
 [11]: http://data.digitallinguistics.io/
 [12]: https://github.com/digitallinguistics/api/issues
 [13]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since
+[14]: https://github.com/digitallinguistics/digitallinguistics.github.io/blob/master/CONTRIBUTING.md
