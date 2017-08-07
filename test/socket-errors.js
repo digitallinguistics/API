@@ -54,6 +54,14 @@ module.exports = (v = ``) => {
       Reflect.deleteProperty(defaultData, `id`);
     });
 
+    it(`400: Missing argument`, function(done) {
+      client.emit(`delete`, err => {
+        expect(err.status).toBe(400);
+        expect(typeof err.error_description).toBe(`string`);
+        done();
+      });
+    });
+
     it(`401: Unauthorized`, function(done) {
 
       const socketOpts = { transports: [`websocket`, `xhr-polling`] };
