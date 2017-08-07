@@ -160,11 +160,13 @@ module.exports = (req, v = ``) => {
 
       const doc = await upsert(coll, data);
 
-      await req.put(`${v}/languages`)
+      const res = await req.put(`${v}/languages`)
       .set(`Authorization`, `Bearer ${token}`)
       .set(`If-Match`, `bad-etag`)
       .send(doc)
       .expect(412);
+
+      expect(res.body.error_description.includes(`ID`)).toBe(true);
 
       await req.delete(`${v}/languages/${doc.id}`)
       .set(`Authorization`, `Bearer ${token}`)
