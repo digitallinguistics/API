@@ -58,6 +58,12 @@ module.exports = (req, v = ``) => {
 
 
     // FEATURES
+    it(`can authenticate twice`, function(done) {
+      client.on(`authenticated`, done);
+      client.on(`error`, fail);
+      client.on(`unauthorized`, fail);
+      client.emit(`authenticate`, { token }, done);
+    });
 
     it(`option: maxItemCount`, testAsync(async function() {
 
@@ -179,26 +185,6 @@ module.exports = (req, v = ``) => {
       const data = Object.assign({ tid: `upsert` }, defaultData);
       const res = await emit(`upsert`, data);
       expect(res.tid).toBe(data.tid);
-    }));
-
-    it(`receives new data (Socket)`, testAsync(async function() {
-
-      const data = Object.assign({}, defaultData);
-      Reflect.deleteProperty(data, `ttl`);
-
-      const firstClient  = await authenticate(v, token);
-      const secondClient = await authenticate(v, token);
-      const emit         = promisify(secondClient.emit).bind(secondClient);
-
-      await Promise.all([
-        new Promise(resolve => firstClient.on(`add`, () => {
-          firstClient.close();
-          secondClient.close();
-          resolve();
-        })),
-        emit(`addLanguage`, data),
-      ]);
-
     }));
 
     it(`receives deleted data (REST)`, testAsync(async function() {

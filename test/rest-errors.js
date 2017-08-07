@@ -116,6 +116,13 @@ module.exports = (req, v = ``) => {
       .expect(res => expect(res.body.error_description.includes(`ID`)).toBe(true));
     }));
 
+    it(`404: Not Found (DELETE + If-Match)`, testAsync(async function() {
+      await req.delete(`${v}/languages/does-not-exist`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .set(`If-Match`, `fake-if-match-header`)
+      .expect(404);
+    }));
+
     it(`405: Method Not Allowed`, testAsync(async function() {
       await req.post(`${v}/test`)
       .set(`Authorization`, `Bearer ${token}`)
