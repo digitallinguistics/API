@@ -1,5 +1,5 @@
 {
-  "name": "dlx-api",
+  "name": "@digitallinguistics/api",
   "version": "0.1.0",
   "description": "Source code for the DLx database API and Web Socket.",
   "contributors": [
