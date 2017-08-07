@@ -51,7 +51,6 @@
   },
   "devDependencies": {
     "jasmine": "^2.7.0",
-    "socket.io-client": "^2.0.3",
     "supertest": "^2.0.1"
   }
 }
