@@ -181,29 +181,6 @@ module.exports = (req, v = ``) => {
       expect(res.tid).toBe(data.tid);
     }));
 
-    it(`receives new data (REST)`, testAsync(async function() {
-
-      const data = Object.assign({}, defaultData);
-      Reflect.deleteProperty(data, `ttl`);
-
-      const client = await authenticate(v, token);
-
-      await Promise.all([
-
-        req.post(`${v}/languages`)
-        .send(data)
-        .set(`Authorization`, `Bearer ${token}`)
-        .expect(201),
-
-        new Promise(resolve => client.on(`add`, () => {
-          client.close();
-          resolve();
-        })),
-
-      ]);
-
-    }));
-
     it(`receives new data (Socket)`, testAsync(async function() {
 
       const data = Object.assign({}, defaultData);
