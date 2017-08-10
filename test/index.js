@@ -8,14 +8,14 @@ const socketErrors = require(`./socket-errors`);
 require(`./authentication`);
 require(`./registration`);
 
-// restErrors(req);
-// restErrors(req, `/v0`);
+restErrors(req);
+restErrors(req, `/v0`);
 
 rest(req);
-// rest(req, `/v0`);
+rest(req, `/v0`);
 
-// socketErrors();
-// socketErrors(`/v0`);
+socketErrors();
+socketErrors(`/v0`);
 
-// socket(req);
-// socket(req, `/v0`);
+socket(req);
+socket(req, `/v0`);
