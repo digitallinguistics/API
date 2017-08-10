@@ -20,13 +20,11 @@ const testAsync = require('./async');
 
 const {
   coll,
-  deleteTestDocs,
   upsert,
 } = require('./db');
 
 const test = true;
 const ttl  = 500;
-const type = `Language`;
 
 module.exports = (req, v = ``) => {
 
@@ -35,10 +33,10 @@ module.exports = (req, v = ``) => {
     let token;
 
     const defaultData = {
+      name: `Language Name`,
       permissions: { owners: [config.testUser] },
       test,
       ttl,
-      type,
     };
 
     beforeAll(testAsync(async function() {
@@ -49,11 +47,21 @@ module.exports = (req, v = ``) => {
       Reflect.deleteProperty(defaultData, `id`);
     });
 
-    it(`anonymizes data`, function() {
+    xit(`anonymizes data`, function() {
       pending(`Need to add Person or Media routes to test this.`);
     });
 
-    it(`returns simplified data objects`, testAsync(async function() {
+    xit(`adds a "type" field`, testAsync(async function() {
+
+      const res = await req.put(`${v}/languages`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .send({});
+
+      expect(res.body.type).toBe(`Language`);
+
+    }));
+
+    xit(`returns simplified data objects`, testAsync(async function() {
 
       const data = Object.assign({ emptyProp: '' }, defaultData);
 
@@ -68,7 +76,7 @@ module.exports = (req, v = ``) => {
 
     }));
 
-    it(`returns objects without database properties`, testAsync(async function() {
+    xit(`returns objects without database properties`, testAsync(async function() {
 
       const res = await req.put(`${v}/languages`)
       .set(`Authorization`, `Bearer ${token}`)
@@ -82,7 +90,7 @@ module.exports = (req, v = ``) => {
 
     }));
 
-    it(`does not return resources that have a TTL`, testAsync(async function() {
+    xit(`does not return resources that have a TTL`, testAsync(async function() {
 
       const doc = await upsert(coll, defaultData);
 
@@ -92,12 +100,12 @@ module.exports = (req, v = ``) => {
 
     }));
 
-    it(`dlx-max-item-count`, testAsync(async function() {
+    xit(`dlx-max-item-count`, testAsync(async function() {
 
       const data = {
+        name: `Language Name`,
         permissions: { owners: [config.testUser] },
         test,
-        type,
       };
 
       const continuationHeader = `dlx-continuation`;
@@ -121,12 +129,12 @@ module.exports = (req, v = ``) => {
 
     }), 10000);
 
-    it(`public={Boolean}`, testAsync(async function() {
+    xit(`public={Boolean}`, testAsync(async function() {
 
       const data = {
+        name: `Language Name`,
         permissions: { public: true },
         test,
-        type,
       };
 
       const doc = await upsert(coll, data);
@@ -140,12 +148,12 @@ module.exports = (req, v = ``) => {
 
     }), 10000);
 
-    it(`304: Not Modified`, testAsync(async function() {
+    xit(`304: Not Modified`, testAsync(async function() {
 
       const data = {
+        name: `Language Name`,
         permissions: { owners: [config.testUser] },
         test,
-        type,
       };
 
       const doc = await upsert(coll, data);
@@ -157,7 +165,7 @@ module.exports = (req, v = ``) => {
 
     }));
 
-    it(`POST /languages`, testAsync(async function() {
+    xit(`POST /languages`, testAsync(async function() {
 
       const res = await req.post(`${v}/languages`)
       .send(Object.assign({ tid: `post` }, defaultData))
@@ -168,7 +176,7 @@ module.exports = (req, v = ``) => {
 
     }));
 
-    it(`PUT /languages`, testAsync(async function() {
+    xit(`PUT /languages`, testAsync(async function() {
 
       const data = Object.assign({ tid: `put` }, defaultData);
       const doc  = await upsert(coll, data);
@@ -184,7 +192,7 @@ module.exports = (req, v = ``) => {
 
     }));
 
-    it(`PATCH /languages/{language}`, testAsync(async function() {
+    xit(`PATCH /languages/{language}`, testAsync(async function() {
 
       const data = Object.assign({
         notChnaged: `This property should not be changed.`,
@@ -194,7 +202,7 @@ module.exports = (req, v = ``) => {
       const doc = await upsert(coll, data);
 
       const res = await req.patch(`${v}/languages/${doc.id}`)
-      .send({ tid: `upsertOneAgain`, type })
+      .send({ tid: `upsertOneAgain` })
       .set(`Authorization`, `Bearer ${token}`)
       .expect(200);
 
@@ -208,16 +216,16 @@ module.exports = (req, v = ``) => {
     it(`GET /languages`, testAsync(async function() {
 
       const firstItem = {
+        name: `First Language`,
         permissions: { owners: [`some-other-user`] },
         test,
         tid: `GET /languages`,
-        type,
       };
 
       const secondItem = {
+        name: `Second Language`,
         permissions: { owners: [config.testUser] },
         test,
-        type,
       };
 
       await upsert(coll, firstItem);
@@ -232,14 +240,14 @@ module.exports = (req, v = ``) => {
 
     }), 10000);
 
-    it(`GET /languages`, testAsync(async function() {
+    xit(`GET /languages (If-Modified-Since)`, testAsync(async function() {
 
       const wait = () => new Promise(resolve => setTimeout(resolve, 1000));
 
       const data = {
+        name: `Language Name`,
         permissions: { owners: [config.testUser] },
         test,
-        type,
       };
 
       await upsert(coll, data);
@@ -255,9 +263,10 @@ module.exports = (req, v = ``) => {
 
     }));
 
-    it(`GET /languages/{language}`, testAsync(async function() {
+    xit(`GET /languages/{language}`, testAsync(async function() {
 
       const data = {
+        name: `Language Name`,
         permissions: {
           contributors: [],
           owners:       [config.testUser],
@@ -265,7 +274,6 @@ module.exports = (req, v = ``) => {
           viewers:      [],
         },
         test,
-        type,
       };
 
       const doc = await upsert(coll, data);
@@ -278,7 +286,7 @@ module.exports = (req, v = ``) => {
 
     }));
 
-    it(`DELETE /languages/{language}`, testAsync(async function() {
+    xit(`DELETE /languages/{language}`, testAsync(async function() {
 
       const doc = await upsert(coll, defaultData);
 

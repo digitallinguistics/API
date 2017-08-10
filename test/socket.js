@@ -32,7 +32,6 @@ module.exports = (req, v = ``) => {
 
     const test = true;
     const ttl  = 500;
-    const type = `Language`;
 
     const defaultData = {
       permissions: {
@@ -43,7 +42,6 @@ module.exports = (req, v = ``) => {
       },
       test,
       ttl,
-      type,
     };
 
     beforeAll(testAsync(async function() {
@@ -127,7 +125,6 @@ module.exports = (req, v = ``) => {
         permissions: defaultData.permissions,
         test,
         tid: `get`,
-        type,
       };
 
       const doc  = await upsert(coll, data);
@@ -143,7 +140,6 @@ module.exports = (req, v = ``) => {
         permissions: Object.assign({}, defaultData.permissions),
         test,
         tid: `getAll`,
-        type,
       };
 
       data.permissions.owners = [`some-other-user`];
@@ -162,6 +158,7 @@ module.exports = (req, v = ``) => {
       const data = Object.assign({
         notChanged: `This property should not be changed.`,
         tid:        `upsertOne`,
+        type:       `Language`,
       }, defaultData);
 
       const doc = await upsert(coll, data);
@@ -171,7 +168,6 @@ module.exports = (req, v = ``) => {
         test,
         tid: `upsertOneAgain`,
         ttl,
-        type,
       };
 
       const res = await emit(`update`, newData);
@@ -182,7 +178,7 @@ module.exports = (req, v = ``) => {
     }));
 
     it(`upsert`, testAsync(async function() {
-      const data = Object.assign({ tid: `upsert` }, defaultData);
+      const data = Object.assign({ tid: `upsert`, type: `Language` }, defaultData);
       const res = await emit(`upsert`, data);
       expect(res.tid).toBe(data.tid);
     }));
@@ -276,7 +272,7 @@ module.exports = (req, v = ``) => {
 
     it(`receives upserted data (REST)`, testAsync(async function() {
 
-      const data = Object.assign({}, defaultData);
+      const data = Object.assign({ type: `Language` }, defaultData);
       Reflect.deleteProperty(data, `ttl`);
 
       const doc    = await upsert(coll, data);
@@ -301,7 +297,7 @@ module.exports = (req, v = ``) => {
 
     it(`receives upserted data (Socket)`, testAsync(async function() {
 
-      const data = Object.assign({}, defaultData);
+      const data = Object.assign({ type: `Language` }, defaultData);
       Reflect.deleteProperty(data, `ttl`);
 
       const secondClient = await authenticate(v, token);

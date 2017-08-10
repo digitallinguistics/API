@@ -30,7 +30,6 @@ module.exports = (v = ``) => {
 
     const test = true;
     const ttl  = 500;
-    const type = `Language`;
 
     const defaultData = {
       permissions: {
@@ -41,7 +40,6 @@ module.exports = (v = ``) => {
       },
       test,
       ttl,
-      type,
     };
 
     beforeAll(testAsync(async function() {
@@ -86,7 +84,6 @@ module.exports = (v = ``) => {
           viewers:      [],
         },
         test,
-        type,
       };
 
       const doc = await upsert(coll, data);

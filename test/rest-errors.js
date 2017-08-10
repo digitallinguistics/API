@@ -64,7 +64,6 @@ module.exports = (req, v = ``) => {
       const lang = {
         permissions,
         test,
-        type: `Language`,
       };
 
       const doc = await upsert(coll, lang);
@@ -93,7 +92,6 @@ module.exports = (req, v = ``) => {
       const data = {
         test,
         ttl,
-        type: `Language`,
       };
 
       await req.put(`${v}/languages`)
@@ -135,7 +133,6 @@ module.exports = (req, v = ``) => {
         permissions: { owners: [config.testUser] },
         test,
         ttl,
-        type: `Language`,
       };
 
       await upsert(coll, data);
@@ -155,7 +152,6 @@ module.exports = (req, v = ``) => {
         permissions: { owners: [config.testUser] },
         test,
         ttl,
-        type: `Language`,
       };
 
       const doc = await upsert(coll, data);
