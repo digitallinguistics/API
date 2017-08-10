@@ -20,10 +20,10 @@ const testAsync = require('./async');
 
 const {
   coll,
-  deleteTestDocs,
   upsert,
 } = require('./db');
 
+const name = `Language Name`;
 const test = true;
 const ttl  = 500;
 const type = `Language`;
@@ -35,6 +35,7 @@ module.exports = (req, v = ``) => {
     let token;
 
     const defaultData = {
+      name,
       permissions: { owners: [config.testUser] },
       test,
       ttl,
@@ -52,6 +53,16 @@ module.exports = (req, v = ``) => {
     it(`anonymizes data`, function() {
       pending(`Need to add Person or Media routes to test this.`);
     });
+
+    it(`adds a "type" field`, testAsync(async function() {
+
+      const res = await req.put(`${v}/languages`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .send({});
+
+      expect(res.body.type).toBe(`Language`);
+
+    }));
 
     it(`returns simplified data objects`, testAsync(async function() {
 
@@ -95,6 +106,7 @@ module.exports = (req, v = ``) => {
     it(`dlx-max-item-count`, testAsync(async function() {
 
       const data = {
+        name,
         permissions: { owners: [config.testUser] },
         test,
         type,
@@ -124,6 +136,7 @@ module.exports = (req, v = ``) => {
     it(`public={Boolean}`, testAsync(async function() {
 
       const data = {
+        name,
         permissions: { public: true },
         test,
         type,
@@ -143,6 +156,7 @@ module.exports = (req, v = ``) => {
     it(`304: Not Modified`, testAsync(async function() {
 
       const data = {
+        name,
         permissions: { owners: [config.testUser] },
         test,
         type,
@@ -194,7 +208,7 @@ module.exports = (req, v = ``) => {
       const doc = await upsert(coll, data);
 
       const res = await req.patch(`${v}/languages/${doc.id}`)
-      .send({ tid: `upsertOneAgain`, type })
+      .send({ tid: `upsertOneAgain` })
       .set(`Authorization`, `Bearer ${token}`)
       .expect(200);
 
@@ -208,6 +222,7 @@ module.exports = (req, v = ``) => {
     it(`GET /languages`, testAsync(async function() {
 
       const firstItem = {
+        name: `First Language`,
         permissions: { owners: [`some-other-user`] },
         test,
         tid: `GET /languages`,
@@ -215,6 +230,7 @@ module.exports = (req, v = ``) => {
       };
 
       const secondItem = {
+        name: `Second Language`,
         permissions: { owners: [config.testUser] },
         test,
         type,
@@ -232,11 +248,12 @@ module.exports = (req, v = ``) => {
 
     }), 10000);
 
-    it(`GET /languages`, testAsync(async function() {
+    it(`GET /languages (If-Modified-Since)`, testAsync(async function() {
 
       const wait = () => new Promise(resolve => setTimeout(resolve, 1000));
 
       const data = {
+        name,
         permissions: { owners: [config.testUser] },
         test,
         type,
@@ -258,6 +275,7 @@ module.exports = (req, v = ``) => {
     it(`GET /languages/{language}`, testAsync(async function() {
 
       const data = {
+        name,
         permissions: {
           contributors: [],
           owners:       [config.testUser],

@@ -26,8 +26,10 @@ const permissions = {
   viewers:      [],
 };
 
+const name = `Language Name`;
 const test = true;
 const ttl  = 500;
+const type = `Language`;
 
 // The "v" parameter is a version path, e.g. "/v0", "/v1", etc.
 module.exports = (req, v = ``) => {
@@ -62,9 +64,10 @@ module.exports = (req, v = ``) => {
     it(`403: Forbidden`, testAsync(async function() {
 
       const lang = {
+        name,
         permissions,
         test,
-        type: `Language`,
+        type,
       };
 
       const doc = await upsert(coll, lang);
@@ -93,7 +96,6 @@ module.exports = (req, v = ``) => {
       const data = {
         test,
         ttl,
-        type: `Language`,
       };
 
       await req.put(`${v}/languages`)
@@ -132,10 +134,11 @@ module.exports = (req, v = ``) => {
     it(`409: Data Conflict`, testAsync(async function() {
 
       const data = {
+        name,
         permissions: { owners: [config.testUser] },
         test,
         ttl,
-        type: `Language`,
+        type,
       };
 
       await upsert(coll, data);
@@ -152,10 +155,11 @@ module.exports = (req, v = ``) => {
     it(`412: Precondition Failed`, testAsync(async function() {
 
       const data = {
+        name,
         permissions: { owners: [config.testUser] },
         test,
         ttl,
-        type: `Language`,
+        type,
       };
 
       const doc = await upsert(coll, data);
@@ -181,6 +185,7 @@ module.exports = (req, v = ``) => {
         name: true,
         test,
         ttl,
+        type,
       };
 
       await req.put(`${v}/languages`)

@@ -28,11 +28,13 @@ module.exports = (v = ``) => {
     let client;
     let emit;
 
+    const name = `Language Name`;
     const test = true;
     const ttl  = 500;
     const type = `Language`;
 
     const defaultData = {
+      name,
       permissions: {
         contributors: [],
         owners:       [config.testUser],
@@ -79,6 +81,7 @@ module.exports = (v = ``) => {
     it(`403: Forbidden`, testAsync(async function() {
 
       const data = {
+        name,
         permissions: {
           contributors: [],
           owners:       [],
@@ -157,6 +160,7 @@ module.exports = (v = ``) => {
         name: true,
         test,
         ttl,
+        type,
       };
 
       try {

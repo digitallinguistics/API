@@ -30,11 +30,13 @@ module.exports = (req, v = ``) => {
     let emit;
     let token;
 
+    const name = `Language Name`;
     const test = true;
     const ttl  = 500;
     const type = `Language`;
 
     const defaultData = {
+      name,
       permissions: {
         contributors: [],
         owners:       [config.testUser],
@@ -124,6 +126,7 @@ module.exports = (req, v = ``) => {
     it(`get`, testAsync(async function() {
 
       const data = {
+        name,
         permissions: defaultData.permissions,
         test,
         tid: `get`,
@@ -140,6 +143,7 @@ module.exports = (req, v = ``) => {
     it(`getAll`, testAsync(async function() {
 
       const data = {
+        name,
         permissions: Object.assign({}, defaultData.permissions),
         test,
         tid: `getAll`,
@@ -162,6 +166,7 @@ module.exports = (req, v = ``) => {
       const data = Object.assign({
         notChanged: `This property should not be changed.`,
         tid:        `upsertOne`,
+        type:       `Language`,
       }, defaultData);
 
       const doc = await upsert(coll, data);
@@ -182,7 +187,7 @@ module.exports = (req, v = ``) => {
     }));
 
     it(`upsert`, testAsync(async function() {
-      const data = Object.assign({ tid: `upsert` }, defaultData);
+      const data = Object.assign({ tid: `upsert`, type }, defaultData);
       const res = await emit(`upsert`, data);
       expect(res.tid).toBe(data.tid);
     }));
