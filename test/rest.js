@@ -129,7 +129,7 @@ module.exports = (req, v = ``) => {
 
     }), 10000);
 
-    xit(`public={Boolean}`, testAsync(async function() {
+    it(`public={Boolean}`, testAsync(async function() {
 
       const data = {
         name: `Language Name`,
@@ -213,7 +213,7 @@ module.exports = (req, v = ``) => {
 
     }));
 
-    it(`GET /languages`, testAsync(async function() {
+    xit(`GET /languages`, testAsync(async function() {
 
       const firstItem = {
         name: `First Language`,
