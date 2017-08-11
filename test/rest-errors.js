@@ -11,6 +11,7 @@
 const agent       = require('superagent');
 const config      = require('../lib/config');
 const getToken    = require('./token');
+const http        = require('http');
 const { signJwt } = require('./jwt');
 const testAsync   = require('./async');
 
@@ -81,7 +82,7 @@ module.exports = (req, v = ``) => {
     it(`403: Forbidden (scope)`, testAsync(async function() {
 
       const payload = {
-        azp:   config.authClientId,
+        azp:   config.authClientID,
         scope: `public`,
       };
 
@@ -197,19 +198,30 @@ module.exports = (req, v = ``) => {
 
     it(`429: rate limit`, function(done) {
 
-      pending(`Only run this as needed.`);
+      pending(`Only run this test as needed.`);
 
-      const arr = Array(600).fill({});
+      const opts = {
+        headers: { Authorization: `Bearer ${token}` },
+        path: `${v}/test`,
+        port: config.port,
+      };
 
-      const test = () => req.get(`${v}/test`)
-      .set(`Authorization`, `Bearer ${token}`)
-      .expect(200);
+      const test = () => new Promise((resolve, reject) => {
+        const req = http.get(opts, res => {
+          if (res.statusCode === 200) resolve();
+          else if (res.statusCode === 429) done();
+        });
+        req.on(`error`, reject);
+      });
 
-      Promise.all(arr.map(test))
+      const arr   = Array(750).fill({});
+      const tasks = arr.map(test);
+
+      Promise.all(tasks)
       .then(fail)
-      .catch(done);
+      .catch(fail);
 
-    });
+    }, 10000);
 
     it(`GET /test`, testAsync(async function() {
 

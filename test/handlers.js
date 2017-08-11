@@ -5,10 +5,10 @@ const https  = require(`https`);
 const qs     = require(`querystring`);
 
 const audience      = `https://api.digitallinguistics.io/`;
-const authUrl       = `https://${config.authDomain}`;
-const client_id     = config.authClientId;
+const authURL       = `https://${config.authDomain}`;
+const client_id     = config.authClientID;
 const client_secret = config.authClientSecret;
-const redirect_uri  = `${config.baseUrl}/test/callback`;
+const redirect_uri  = `${config.baseURL}/test/callback`;
 const state         = `12345`;
 
 const callback = (req, res) => {
@@ -62,7 +62,7 @@ const code = (req, res) => {
     state,
   };
 
-  res.redirect(`${authUrl}/authorize?${qs.stringify(params)}`);
+  res.redirect(`${authURL}/authorize?${qs.stringify(params)}`);
 
 };
 
@@ -78,7 +78,7 @@ const implicit = (req, res) => {
     state,
   };
 
-  res.redirect(`${authUrl}/authorize?${qs.stringify(params)}`);
+  res.redirect(`${authURL}/authorize?${qs.stringify(params)}`);
 
 };
 

@@ -22,7 +22,7 @@ describe('Authentication', function() {
 
     const body = {
       audience,
-      client_id:     config.authClientId,
+      client_id:     config.authClientID,
       client_secret: config.authClientSecret,
       grant_type:    `client_credentials`,
     };
@@ -42,7 +42,7 @@ describe('Authentication', function() {
       algorithms: [`HS256`],
       audience,
       issuer:     `https://${config.authDomain}/`,
-      subject:    `${config.authClientId}@clients`,
+      subject:    `${config.authClientID}@clients`,
     };
 
     const payload = await verifyJwt(token, config.authSecret, opts);

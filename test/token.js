@@ -2,7 +2,7 @@ const config      = require('../lib/config');
 const { signJwt } = require('./jwt');
 
 const payload = {
-  azp:   config.authClientId,
+  azp:   config.authClientID,
   scope: `user`,
 };
 

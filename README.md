@@ -231,6 +231,7 @@ Status | Description
 419    | Authorization token expired
 422    | Unprocessable entity
 429    | Too many requests
+449    | Retry Operation
 500    | Internal server error [Open an issue][12]
 501    | Not implemented
 

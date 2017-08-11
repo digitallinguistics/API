@@ -67,7 +67,7 @@ module.exports = (v = ``) => {
     it(`401: Unauthorized`, function(done) {
 
       const socketOpts = { transports: [`websocket`, `xhr-polling`] };
-      const client     = io(`${config.baseUrl}${v}`, socketOpts);
+      const client     = io(`${config.baseURL}${v}`, socketOpts);
 
       client.on(`error`, err => {
         expect(err.status).toBe(401);
@@ -105,7 +105,7 @@ module.exports = (v = ``) => {
     it(`403: Forbidden (bad scope)`, testAsync(async function() {
 
       const payload = {
-        azp:   config.authClientId,
+        azp:   config.authClientID,
         scope: `public`,
       };
 
