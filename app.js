@@ -2,19 +2,18 @@
 const config = require(`./lib/config`);
 
 // load modules
-const authenticate = require(`./lib/rest/middleware/authenticate`);
-const bodyParser   = require(`body-parser`);
-const createServer = require(`./lib/server`);
-const createSocket = require(`./lib/socket`);
-const error        = require(`./lib/rest/middleware/error`);
-const errors       = require(`./lib/rest/errors`);
-const express      = require(`express`);
-const helmet       = require(`helmet`);
-const limiter      = require(`./lib/rest/middleware/limit`);
-const logger       = require(`./lib/rest/middleware/logger`);
-const route        = require(`./lib/rest/router`);
-const routeSocket  = require(`./lib/socket/router`);
-const type         = require(`./lib/rest/middleware/type`);
+const authenticate = require('./lib/rest/middleware/authenticate');
+const bodyParser   = require('body-parser');
+const createServer = require('./lib/server');
+const createSocket = require('./lib/socket');
+const error        = require('./lib/rest/middleware/error');
+const errors       = require('./lib/rest/errors');
+const express      = require('express');
+const helmet       = require('helmet');
+const limiter      = require('./lib/rest/middleware/limit');
+const route        = require('./lib/rest/router');
+const routeSocket  = require('./lib/socket/router');
+const type         = require('./lib/rest/middleware/type');
 
 // initialize Express and routers
 const app = express();               // create the Express app
@@ -30,7 +29,10 @@ app.use(limiter);                    // rate limiting
 app.use(bodyParser.json());          // parse JSON data in the request body
 app.use(express.static(`public`));   // routing for static files
 app.use(error);                      // adds res.error method to response
-app.use(logger);                     // custom middleware (logs URL)
+if (config.logInfo) {                // log requested URLs
+  const logger = require('./lib/rest/middleware/logger');
+  app.use(logger);
+}
 app.use(type);                       // set req.type
 app.use(authenticate.unless({        // authenticate requests to the API
   path: [/\/test\//],                // don't authenticate test routes
