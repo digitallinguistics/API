@@ -81,7 +81,7 @@ module.exports = (req, v = ``) => {
     it(`403: Forbidden (scope)`, testAsync(async function() {
 
       const payload = {
-        azp:   config.authClientId,
+        azp:   config.authClientID,
         scope: `public`,
       };
 
