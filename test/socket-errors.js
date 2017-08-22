@@ -28,7 +28,7 @@ module.exports = (v = ``) => {
     let client;
     let emit;
 
-    const name = `Language Name`;
+    const name = { eng: `Language Name` };
     const test = true;
     const ttl  = 500;
     const type = `Language`;
