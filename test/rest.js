@@ -23,7 +23,7 @@ const {
   upsert,
 } = require('./db');
 
-const name = `Language Name`;
+const name = { eng: `Language Name` };
 const test = true;
 const ttl  = 500;
 const type = `Language`;
@@ -222,7 +222,7 @@ module.exports = (req, v = ``) => {
     it(`GET /languages`, testAsync(async function() {
 
       const firstItem = {
-        name: `First Language`,
+        name: { eng: `First Language` },
         permissions: { owners: [`some-other-user`] },
         test,
         tid: `GET /languages`,
@@ -230,7 +230,7 @@ module.exports = (req, v = ``) => {
       };
 
       const secondItem = {
-        name: `Second Language`,
+        name: { eng: `Second Language` },
         permissions: { owners: [config.testUser] },
         test,
         type,

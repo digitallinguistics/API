@@ -30,7 +30,7 @@ module.exports = (req, v = ``) => {
     let emit;
     let token;
 
-    const name = `Language Name`;
+    const name = { eng: `Language Name` };
     const test = true;
     const ttl  = 500;
     const type = `Language`;
