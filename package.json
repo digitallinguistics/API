@@ -35,7 +35,7 @@
     "test": "npm run clean & jasmine JASMINE_CONFIG_PATH=test/jasmine.json & npm run clean"
   },
   "dependencies": {
-    "@digitallinguistics/dlx-js": "^0.16.0",
+    "@digitallinguistics/dlx-js": "^0.17.0",
     "body-parser": "^1.17.2",
     "documentdb": "^1.12.2",
     "express": "^4.15.4",
