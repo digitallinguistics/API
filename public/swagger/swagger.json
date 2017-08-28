@@ -2,7 +2,7 @@
   "swagger" : "2.0",
   "info" : {
     "description" : "The Digital Linguistics (DLx) database API",
-    "version" : "0.1.1",
+    "version" : "0.2.0",
     "title" : "DLx",
     "contact" : {
       "name" : "Daniel W. Hieber",
@@ -36,12 +36,6 @@
           "name" : "continuation",
           "in" : "header",
           "description" : "The `dlx-continuation` header is used to send a continuation token with the request, when retrieving the next page of results.",
-          "required" : false,
-          "type" : "string"
-        }, {
-          "name" : "ifModifiedSince",
-          "in" : "header",
-          "description" : "The `If-Modified-Since` header is used to return only results which have been modified since the time provided in the header. The value of the header must be a valid UTC date string.",
           "required" : false,
           "type" : "string"
         }, {
@@ -159,13 +153,13 @@
         }
       }
     },
-    "/languages/{languageId}" : {
+    "/languages/{languageID}" : {
       "get" : {
         "tags" : [ "Language" ],
         "summary" : "Retrieve a Language by ID",
         "operationId" : "getLanguage",
         "parameters" : [ {
-          "name" : "languageId",
+          "name" : "languageID",
           "in" : "path",
           "description" : "The ID of the Language to perform the operation on",
           "required" : true,
@@ -207,7 +201,7 @@
         "summary" : "Delete a Language by ID",
         "operationId" : "deleteLanguage",
         "parameters" : [ {
-          "name" : "languageId",
+          "name" : "languageID",
           "in" : "path",
           "description" : "The ID of the Language to perform the operation on",
           "required" : true,
@@ -240,7 +234,7 @@
         "description" : "Performs a partial update the Language whose ID is specified in the URL. If the Language object has an `id` property, is ignored in favor of the ID in the URL.",
         "operationId" : "updateLanguage",
         "parameters" : [ {
-          "name" : "languageId",
+          "name" : "languageID",
           "in" : "path",
           "description" : "The ID of the Language to perform the operation on",
           "required" : true,
@@ -331,13 +325,6 @@
       "name" : "ifMatch",
       "in" : "header",
       "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
-      "required" : false,
-      "type" : "string"
-    },
-    "ifModifiedSince" : {
-      "name" : "ifModifiedSince",
-      "in" : "header",
-      "description" : "The `If-Modified-Since` header is used to return only results which have been modified since the time provided in the header. The value of the header must be a valid UTC date string.",
       "required" : false,
       "type" : "string"
     },
