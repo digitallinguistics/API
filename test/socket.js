@@ -48,9 +48,17 @@ module.exports = (req, v = ``) => {
     };
 
     beforeAll(testAsync(async function() {
+
       token  = await getToken();
       client = await authenticate(v, token);
-      emit   = promisify(client.emit).bind(client);
+
+      emit = (...args) => new Promise((resolve, reject) => {
+        client.emit(...args, (err, res, info) => {
+          if (err) return reject(err);
+          resolve({ res, info });
+        });
+      });
+
     }));
 
     beforeEach(function() {
@@ -112,13 +120,13 @@ module.exports = (req, v = ``) => {
 
     it(`add`, testAsync(async function() {
       const data = Object.assign({ tid: `add` }, defaultData);
-      const res  = await emit(`add`, `Language`, data);
+      const { res }  = await emit(`add`, `Language`, data);
       expect(res.tid).toBe(data.tid);
     }));
 
     it(`delete`, testAsync(async function() {
       const doc = await upsert(coll, defaultData);
-      const res = await emit(`delete`, doc.id);
+      const { res } = await emit(`delete`, doc.id);
       expect(res.status).toBe(204);
     }));
 
@@ -133,7 +141,7 @@ module.exports = (req, v = ``) => {
       };
 
       const doc  = await upsert(coll, data);
-      const lang = await emit(`get`, doc.id);
+      const { res: lang } = await emit(`get`, doc.id);
 
       expect(lang.tid).toBe(data.tid);
 
@@ -153,9 +161,10 @@ module.exports = (req, v = ``) => {
 
       const doc = await upsert(coll, data);
       await upsert(coll, defaultData);
-      const res = await emit(`getAll`, `Language`);
+      const { res, info } = await emit(`getAll`, `Language`);
 
       expect(res.length).toBeGreaterThan(0);
+      expect(info.itemCount).toBeGreaterThan(0);
       expect(res.some(item => item.tid === doc.tid)).toBe(false);
 
     }));
@@ -178,7 +187,7 @@ module.exports = (req, v = ``) => {
         type,
       };
 
-      const res = await emit(`update`, newData);
+      const { res } = await emit(`update`, newData);
 
       expect(res.notChanged).toBe(doc.notChanged);
       expect(res.tid).toBe(newData.tid);
@@ -187,7 +196,7 @@ module.exports = (req, v = ``) => {
 
     it(`upsert`, testAsync(async function() {
       const data = Object.assign({ tid: `upsert`, type }, defaultData);
-      const res = await emit(`upsert`, data);
+      const { res } = await emit(`upsert`, data);
       expect(res.tid).toBe(data.tid);
     }));
 

@@ -240,6 +240,7 @@ module.exports = (req, v = ``) => {
 
       const res = await req.get(`${v}/languages`)
       .set(`Authorization`, `Bearer ${token}`)
+      .expect(`dlx-item-count`, /[0-9]+/)
       .expect(200);
 
       expect(res.body.length).toBeGreaterThan(0);
