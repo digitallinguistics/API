@@ -218,7 +218,7 @@ Status | Description
 200    | Operation successful
 201    | Upsert successful
 204    | Delete operation successful
-304    | Not Modified
+304    | Not modified
 400    | Bad request The request URL, headers, or body are invalid
 401    | `Authorization` header missing or invalid
 403    | Unauthorized (Insufficient permissions)
@@ -231,7 +231,7 @@ Status | Description
 419    | Authorization token expired
 422    | Unprocessable entity
 429    | Too many requests
-449    | Retry Operation
+449    | Retry operation
 500    | Internal server error [Open an issue][12]
 501    | Not implemented
 
