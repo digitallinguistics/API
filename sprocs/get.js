@@ -20,9 +20,9 @@ function get(id, userID, options) {
       case 400:
         throw new Error(500, `Unknown database error.`);
       case 404:
-        throw new Error(404, `Document with ID ${id} does not exist.`);
+        throw new Error(404, `Resource with ID ${id} does not exist.`);
       case 412:
-        throw new Error(412, `Precondition not met for document with ID ${id}.`);
+        throw new Error(412, `Precondition not met for resource with ID ${id}.`);
       default:
         throw new Error(err.number, `Database error.`);
     }
@@ -35,7 +35,7 @@ function get(id, userID, options) {
 
     parseError(err);
 
-    if (doc.ttl) throw new Error(404, `Document with ID ${id} no longer exists.`);
+    if (doc.ttl) throw new Error(410, `Resource with ID ${doc.id} no longer exists.`);
 
     const p = doc.permissions;
 
@@ -52,6 +52,6 @@ function get(id, userID, options) {
 
   });
 
-  if (!accepted) throw new Error(408, `Timeout reading document for upsert.`);
+  if (!accepted) throw new Error(408, `Timeout reading resource for upsert.`);
 
 }

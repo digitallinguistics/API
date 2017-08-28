@@ -42,7 +42,6 @@ module.exports = (v = ``) => {
         viewers:      [],
       },
       test,
-      ttl,
       type,
     };
 

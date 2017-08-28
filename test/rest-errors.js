@@ -159,7 +159,6 @@ module.exports = (req, v = ``) => {
         name,
         permissions: { owners: [config.testUser] },
         test,
-        ttl,
         type,
       };
 

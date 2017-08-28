@@ -44,7 +44,6 @@ module.exports = (req, v = ``) => {
         viewers:      [],
       },
       test,
-      ttl,
       type,
     };
 

@@ -21,9 +21,9 @@ function destroy(id, userID, { ifMatch } = {}) {
       case 403:
         throw new Error(500, `Unknown database error.`);
       case 404:
-        throw new Error(404, `No document with ID ${id} exists.`);
+        throw new Error(404, `No resource with ID ${id} exists.`);
       case 412:
-        throw new Error(412, `Precondition not met for document with ID ${id}.`);
+        throw new Error(412, `Precondition not met for resource with ID ${id}.`);
       default:
         throw new Error(err.number, `Database error.`);
     }
@@ -33,6 +33,8 @@ function destroy(id, userID, { ifMatch } = {}) {
   const accepted = __.readDocument(`${link}/docs/${id}`, (err, doc) => {
 
     parseError(err);
+
+    if (doc.ttl) throw new Error(410, `Resource with ID ${doc.id} no longer exists.`);
 
     if (doc.permissions.owners.includes(userID)) {
 
@@ -46,13 +48,13 @@ function destroy(id, userID, { ifMatch } = {}) {
 
         response.setBody({
           status:  204,
-          details: `Document with ID ${id} was successfully set to expire.`,
-          type:    doc.type,
+          details: `Resource with ID ${id} was successfully set to expire.`,
+          type:    doc.type, // NOTE: a "type" is needed for the Socket to return an informative response
         });
 
       });
 
-      if (!accepted) throw new Error(408, `Timeout deleting the document with ID ${id}.`);
+      if (!accepted) throw new Error(408, `Timeout deleting the resouce with ID ${id}.`);
 
     } else {
 
