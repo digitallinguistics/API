@@ -21,9 +21,9 @@ function upsert(data = {}, userID, { ifMatch } = {}) {
       case 403:
         throw new Error(500, `Unknown database error.`);
       case 404:
-        throw new Error(404, `Document with ID ${data.id} does not exist.`);
+        throw new Error(404, `Resource with ID ${data.id} does not exist.`);
       case 412:
-        throw new Error(412, `Precondition not met for document with ID ${data.id}.`);
+        throw new Error(412, `Precondition not met for resource with ID ${data.id}.`);
       default:
         throw new Error(err.number, `Database error.`);
     }
@@ -35,6 +35,8 @@ function upsert(data = {}, userID, { ifMatch } = {}) {
     const accepted = __.readDocument(`${link}/docs/${data.id}`, (err, doc) => {
 
       parseError(err);
+
+      if (doc.ttl) throw new Error(410, `Resource with ID ${doc.id} no longer exists.`);
 
       if (doc.permissions.owners.includes(userID) || doc.permissions.contributors.includes(userID)) {
 
@@ -48,7 +50,7 @@ function upsert(data = {}, userID, { ifMatch } = {}) {
           response.setBody(res);
         });
 
-        if (!accepted) throw new Error(408, `Timeout upserting document.`);
+        if (!accepted) throw new Error(408, `Timeout upserting resource.`);
 
       } else {
 
@@ -58,7 +60,7 @@ function upsert(data = {}, userID, { ifMatch } = {}) {
 
     });
 
-    if (!accepted) throw new Error(408, `Timeout reading document for upsert.`);
+    if (!accepted) throw new Error(408, `Timeout reading resource for upsert.`);
 
   } else {
 
@@ -74,7 +76,7 @@ function upsert(data = {}, userID, { ifMatch } = {}) {
       response.setBody(res);
     });
 
-    if (!accepted) throw new Error(408, `Timeout upserting document.`);
+    if (!accepted) throw new Error(408, `Timeout upserting resource.`);
 
   }
 

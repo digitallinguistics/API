@@ -38,7 +38,6 @@ module.exports = (req, v = ``) => {
       name,
       permissions: { owners: [config.testUser] },
       test,
-      ttl,
       type,
     };
 
@@ -95,11 +94,11 @@ module.exports = (req, v = ``) => {
 
     it(`does not return resources that have a TTL`, testAsync(async function() {
 
-      const doc = await upsert(coll, defaultData);
+      const doc = await upsert(coll, Object.assign({}, defaultData, { ttl }));
 
       await req.get(`${v}/languages/${doc.id}`)
       .set(`Authorization`, `Bearer ${token}`)
-      .expect(404);
+      .expect(410);
 
     }));
 
