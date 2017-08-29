@@ -18,6 +18,9 @@
   "tags" : [ {
     "name" : "Language",
     "description" : "Operations on Languages"
+  }, {
+    "name" : "Lexeme",
+    "description" : "Operations on Lexemes"
   } ],
   "schemes" : [ "https" ],
   "consumes" : [ "application/json" ],
@@ -30,7 +33,7 @@
       "get" : {
         "tags" : [ "Language" ],
         "summary" : "Get all Languages",
-        "description" : "Retrieves all the resources that the authenticated user or client has permission to access.",
+        "description" : "Retrieves all the Languages that the authenticated user or client has permission to access.",
         "operationId" : "getLanguages",
         "parameters" : [ {
           "name" : "continuation",
@@ -65,9 +68,6 @@
                 "description" : "The time that the item was last modified."
               }
             }
-          },
-          "408" : {
-            "description" : "408: The request timed out."
           }
         }
       },
@@ -93,22 +93,13 @@
                 "description" : "The time that the item was last modified."
               }
             }
-          },
-          "409" : {
-            "description" : "409: There was a data conflict in the database."
-          },
-          "413" : {
-            "description" : "413: Request payload is too large."
-          },
-          "422" : {
-            "description" : "422: The data is not properly formatted."
           }
         }
       },
       "put" : {
         "tags" : [ "Language" ],
         "summary" : "Upsert (create or replace) a Language",
-        "description" : "Creates a Language if it does not yet exist (i.e. if the resource does not have an `id` property yet), or replaces the existing Language resource if it does. Note that this replaces the *entire* Language object. It is not just a partial update.",
+        "description" : "Creates a Language if it does not yet exist (i.e. if the resource does not have an `id` property yet), or replaces the existing Language resource if it does. Note that this replaces the *entire* Language. It is not a partial update.",
         "operationId" : "upsertLanguage",
         "parameters" : [ {
           "in" : "body",
@@ -134,21 +125,6 @@
                 "description" : "The time that the item was last modified."
               }
             }
-          },
-          "403" : {
-            "description" : "403: Unauthorized."
-          },
-          "409" : {
-            "description" : "409: There was a data conflict in the database."
-          },
-          "412" : {
-            "description" : "412: A precondition for the operation was not met."
-          },
-          "413" : {
-            "description" : "413: Request payload is too large."
-          },
-          "422" : {
-            "description" : "422: The data is not properly formatted."
           }
         }
       }
@@ -187,12 +163,6 @@
           },
           "304" : {
             "description" : "304: Not modified."
-          },
-          "403" : {
-            "description" : "403: Unauthorized."
-          },
-          "404" : {
-            "description" : "404: Database resource not found."
           }
         }
       },
@@ -216,15 +186,6 @@
         "responses" : {
           "204" : {
             "description" : "204: Delete operation successful."
-          },
-          "403" : {
-            "description" : "403: Unauthorized."
-          },
-          "404" : {
-            "description" : "404: Database resource not found."
-          },
-          "412" : {
-            "description" : "412: A precondition for the operation was not met."
           }
         }
       },
@@ -263,18 +224,124 @@
                 "description" : "The time that the item was last modified."
               }
             }
-          },
-          "403" : {
-            "description" : "403: Unauthorized."
-          },
-          "404" : {
-            "description" : "404: Database resource not found."
-          },
-          "412" : {
-            "description" : "412: A precondition for the operation was not met."
-          },
-          "422" : {
-            "description" : "422: The data is not properly formatted."
+          }
+        }
+      }
+    },
+    "/languages/{languageID}/lexemes" : {
+      "get" : {
+        "tags" : [ "Lexeme" ],
+        "summary" : "Get all lexemes",
+        "description" : "Retrieves all the Lexemes for a Language that the authenticated user or client has permission to access.",
+        "operationId" : "getLexemes",
+        "parameters" : [ {
+          "name" : "languageID",
+          "in" : "path",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "continuation",
+          "in" : "header",
+          "description" : "The `dlx-continuation` header is used to send a continuation token with the request, when retrieving the next page of results.",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "maxItems",
+          "in" : "header",
+          "description" : "The `dlx-max-item-count` header is used to limit the number of results to a certain amount at a time (by default all results will be returned). If there are more results to be returned, a continuation token will also be sent in the `dlx-continuation` header.",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "public",
+          "in" : "query",
+          "description" : "Set this parameter to `true` to include all publicly-accessible resources, not just those that the user is listed as an Owner, Contributor, or Viewer for.",
+          "required" : false,
+          "type" : "string",
+          "default" : "false"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200: Operation successful.",
+            "headers" : {
+              "dlx-continuation" : {
+                "type" : "string",
+                "description" : "A continuation token for retrieving more results"
+              },
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified."
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Lexeme" ],
+        "summary" : "Add a new Lexeme",
+        "operationId" : "addLexeme",
+        "parameters" : [ {
+          "name" : "languageID",
+          "in" : "path",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "A database resource to upsert",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Document"
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "201: The resource was created successfully.",
+            "headers" : {
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified."
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Lexeme" ],
+        "summary" : "Upsert (create or replace) a Lexeme",
+        "description" : "Creates a Lexeme for the the Language if it does not yet exist (i.e. if the resource does not yet have an `id` property), or replaces the existing Lexeme if it does. Note that this replaces the *entire* Lexeme. It is not a partial update.",
+        "operationId" : "upsertLexeme",
+        "parameters" : [ {
+          "name" : "languageID",
+          "in" : "path",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "A database resource to upsert",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Document"
+          }
+        }, {
+          "name" : "ifMatch",
+          "in" : "header",
+          "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "201: Upsert successful.",
+            "headers" : {
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified."
+              }
+            }
           }
         }
       }
@@ -333,6 +400,13 @@
       "in" : "header",
       "description" : "If `If-None-Match` header is used with GET requests to check whether you already have the most up-to-date version of the resource, and therefore do not need the resource sent again. The value of the `If-None-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to reduce bandwidth.",
       "required" : false,
+      "type" : "string"
+    },
+    "languageID" : {
+      "name" : "languageID",
+      "in" : "path",
+      "description" : "The ID of the Language to perform the operation on",
+      "required" : true,
       "type" : "string"
     },
     "maxItems" : {
