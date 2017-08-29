@@ -10,6 +10,7 @@ const config = require('../../lib/config');
 
 const {
   db,
+  getToken,
   testAsync,
 } = require('../utilities');
 
@@ -18,7 +19,12 @@ const {
   upsert,
 } = db;
 
-const permissions = { owners: [config.testUser] };
+const permissions = {
+  contributors: [],
+  owners:  [config.testUser],
+  public:  false,
+  viewers: [],
+};
 const test        = true;
 const type        = `Language`;
 
@@ -33,7 +39,11 @@ module.exports = (req, v = ``) => {
 
   describe(`Languages`, function() {
 
-    const { token } = this;
+    let token;
+
+    beforeAll(testAsync(async function() {
+      token = await getToken();
+    }));
 
     it(`type: Language`, testAsync(async function() {
 
@@ -68,8 +78,8 @@ module.exports = (req, v = ``) => {
     it(`POST /languages`, testAsync(async function() {
 
       const res = await req.post(`${v}/languages`)
-      .send(Object.assign({ tid: `post` }, defaultData))
       .set(`Authorization`, `Bearer ${token}`)
+      .send(Object.assign({ tid: `post` }, defaultData))
       .expect(201);
 
       expect(res.body.tid).toBe(`post`);
@@ -81,21 +91,21 @@ module.exports = (req, v = ``) => {
       const data = Object.assign({ tid: `put` }, defaultData);
 
       // test create
-      const lang = await req.put(`${v}/languages`)
+      const res1 = await req.put(`${v}/languages`)
       .set(`Authorization`, `Bearer ${token}`)
       .send(data)
       .expect(201);
 
       // test upsert
-      const res = await req.put(`${v}/languages`)
+      const res2 = await req.put(`${v}/languages`)
       .set(`Authorization`, `Bearer ${token}`)
-      .send(Object.assign(lang, { newProp: true }))
+      .send(Object.assign(res1.body, { newProp: true }))
       .expect(201);
 
-      expect(typeof res.headers[`last-modified`]).toBe(`string`);
-      expect(res.headers[`last-modified`]).not.toBe(`Invalid Date`);
-      expect(res.body.tid).toBe(data.tid);
-      expect(res.body.newProp).toBe(true);
+      expect(typeof res2.headers[`last-modified`]).toBe(`string`);
+      expect(res2.headers[`last-modified`]).not.toBe(`Invalid Date`);
+      expect(res2.body.tid).toBe(data.tid);
+      expect(res2.body.newProp).toBe(true);
 
     }));
 
@@ -165,7 +175,7 @@ module.exports = (req, v = ``) => {
 
     it(`DELETE /languages/{language}`, testAsync(async function() {
 
-      const doc = await upsert(coll, defaultData);
+      const doc = await upsert(coll, Object.assign({}, defaultData));
 
       await req.delete(`${v}/languages/${doc.id}`)
       .set(`Authorization`, `Bearer ${token}`)

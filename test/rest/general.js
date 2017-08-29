@@ -12,6 +12,7 @@ const config = require('../../lib/config');
 
 const {
   db,
+  getToken,
   testAsync,
 } = require('../utilities');
 
@@ -35,7 +36,11 @@ module.exports = (req, v = ``) => {
 
   describe(`General`, function() {
 
-    const { token } = this;
+    let token;
+
+    beforeAll(testAsync(async function() {
+      token = await getToken();
+    }));
 
     it(`HTTP > HTTPS`, testAsync(async function() {
       try {

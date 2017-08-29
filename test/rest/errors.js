@@ -14,6 +14,7 @@ const http   = require('http');
 
 const {
   db,
+  getToken,
   jwt,
   testAsync,
 } = require('../utilities');
@@ -46,7 +47,11 @@ module.exports = (req, v = ``) => {
 
   describe(`Errors`, function() {
 
-    const { token } = this;
+    let token;
+
+    beforeAll(testAsync(async function() {
+      token = await getToken();
+    }));
 
     it(`401: credentials_required`, testAsync(async function() {
 
@@ -63,7 +68,7 @@ module.exports = (req, v = ``) => {
       const lang = {
         name: {},
         permissions: {
-          editors: [],
+          contributors: [],
           owners:  [],
           public:  false,
           viewers: [],

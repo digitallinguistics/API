@@ -4,22 +4,13 @@
   prefer-arrow-callback,
 */
 
-const errors    = require('./errors');
-const general   = require('./general');
-const languages = require('./languages');
-
-const {
-  getToken,
-  testAsync,
-} = require('../utilities');
+const errors       = require('./errors');
+const general      = require('./general');
+const languages    = require('./languages');
 
 module.exports = req => {
 
   describe(`REST API`, function() {
-
-    beforeAll(testAsync(async function() {
-      this.token = await getToken();
-    }));
 
     errors(req);
     errors(req, `/v0`);
