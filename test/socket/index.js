@@ -1,6 +1,5 @@
 /* eslint-disable
   func-names,
-  no-invalid-this,
   prefer-arrow-callback,
 */
 
@@ -10,16 +9,16 @@ const languages = require('./languages');
 
 module.exports = req => {
 
-  describe(`REST API`, function() {
+  describe(`Socket API`, function() {
 
-    errors(req);
-    errors(req, `/v0`);
+    errors();
+    errors(`/v0`);
 
     general(req);
     general(req, `/v0`);
 
-    languages(req);
-    languages(req, `/v0`);
+    languages();
+    languages(`/v0`);
 
   });
 
