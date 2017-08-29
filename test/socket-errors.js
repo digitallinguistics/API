@@ -8,18 +8,22 @@
   prefer-arrow-callback,
 */
 
-const authenticate  = require('./authenticate');
 const config        = require('../lib/config');
-const getToken      = require('./token');
 const io            = require('socket.io-client');
 const { promisify } = require('util');
-const { signJwt }   = require('./jwt');
-const testAsync     = require('./async');
+
+const {
+  authenticate,
+  db,
+  getToken,
+  jwt,
+  testAsync,
+} = require('./utilities');
 
 const {
   coll,
   upsert,
-} = require('./db');
+} = db;
 
 module.exports = (v = ``) => {
 
@@ -114,7 +118,7 @@ module.exports = (v = ``) => {
         subject:  config.testUser,
       };
 
-      const token  = await signJwt(payload, config.authSecret, opts);
+      const token  = await jwt.signJwt(payload, config.authSecret, opts);
       const doc    = await upsert(coll, defaultData);
       const client = await authenticate(v, token);
       const emit   = promisify(client.emit).bind(client);

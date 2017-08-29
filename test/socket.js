@@ -11,16 +11,19 @@
   prefer-arrow-callback,
 */
 
-const authenticate  = require('./authenticate');
-const config        = require('../lib/config');
-const getToken      = require('./token');
-const { promisify } = require('util');
-const testAsync     = require('./async');
+const config = require('../lib/config');
+
+const {
+  authenticate,
+  db,
+  getToken,
+  testAsync,
+} = require('./utilities');
 
 const {
   coll,
   upsert,
-} = require('./db');
+} = db;
 
 module.exports = (req, v = ``) => {
 

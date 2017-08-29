@@ -1,18 +1,11 @@
-const app          = require(`../app`);
-const rest         = require(`./rest`);
-const restErrors   = require(`./rest-errors`);
-const req          = require(`supertest`).agent(app);
-const socket       = require(`./socket`);
-const socketErrors = require(`./socket-errors`);
+const app          = require('../app');
+const req          = require('supertest').agent(app);
+const socket       = require('./socket');
+const socketErrors = require('./socket-errors');
 
-require(`./authentication`);
-require(`./registration`);
-
-restErrors(req);
-restErrors(req, `/v0`);
-
-rest(req);
-rest(req, `/v0`);
+require('./authentication');
+require('./registration');
+require('./rest')(req);
 
 socketErrors();
 socketErrors(`/v0`);

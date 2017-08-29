@@ -3,54 +3,50 @@
   max-nested-callbacks,
   max-statements,
   newline-per-chained-call,
+  no-invalid-this,
   no-magic-numbers,
   no-shadow,
   prefer-arrow-callback
 */
 
-const agent       = require('superagent');
-const config      = require('../lib/config');
-const getToken    = require('./token');
-const http        = require('http');
-const { signJwt } = require('./jwt');
-const testAsync   = require('./async');
+const config = require('../../lib/config');
+const http   = require('http');
+
+const {
+  db,
+  jwt,
+  testAsync,
+} = require('../utilities');
 
 const {
   coll,
   upsert,
-} = require(`./db`);
+} = db;
 
-const permissions = {
-  contributors: [],
-  owners:       [],
-  public:       false,
-  viewers:      [],
-};
-
-const name = { eng: `Language Name` };
 const test = true;
 const ttl  = 500;
 const type = `Language`;
 
+const permissions = {
+  contributors: [],
+  owners:       [config.testUser],
+  public:       false,
+  viewers:      [],
+};
+
+const defaultData = {
+  name: {},
+  permissions,
+  test,
+  type,
+};
+
 // The "v" parameter is a version path, e.g. "/v0", "/v1", etc.
 module.exports = (req, v = ``) => {
 
-  describe(`REST API Errors`, function() {
+  describe(`Errors`, function() {
 
-    let token;
-
-    beforeAll(testAsync(async function() {
-      token = await getToken();
-    }));
-
-    it(`HTTP > HTTPS`, testAsync(async function() {
-      try {
-        await agent.get(`http://api.digitallinguistics.io/test`)
-        .set(`Authorization`, `Bearer ${token}`);
-      } catch (err) {
-        expect(err.response.redirects[0].includes(`https`));
-      }
-    }));
+    const { token } = this;
 
     it(`401: credentials_required`, testAsync(async function() {
 
@@ -65,8 +61,13 @@ module.exports = (req, v = ``) => {
     it(`403: Forbidden`, testAsync(async function() {
 
       const lang = {
-        name,
-        permissions,
+        name: {},
+        permissions: {
+          editors: [],
+          owners:  [],
+          public:  false,
+          viewers: [],
+        },
         test,
         type,
       };
@@ -92,16 +93,11 @@ module.exports = (req, v = ``) => {
         subject:  config.testUser,
       };
 
-      const token = await signJwt(payload, config.authSecret, opts);
-
-      const data = {
-        test,
-        ttl,
-      };
+      const token = await jwt.signJwt(payload, config.authSecret, opts);
 
       await req.put(`${v}/languages`)
       .set(`Authorization`, `Bearer ${token}`)
-      .send(data)
+      .send(defaultData)
       .expect(403);
 
     }));
@@ -127,26 +123,18 @@ module.exports = (req, v = ``) => {
     }));
 
     it(`405: Method Not Allowed`, testAsync(async function() {
-      await req.post(`${v}/test`)
+      await req.patch(`${v}/languages`)
       .set(`Authorization`, `Bearer ${token}`)
       .expect(405);
     }));
 
     it(`409: Data Conflict`, testAsync(async function() {
 
-      const data = {
-        name,
-        permissions: { owners: [config.testUser] },
-        test,
-        ttl,
-        type,
-      };
-
-      await upsert(coll, data);
+      const doc = await upsert(coll, defaultData);
 
       const res = await req.post(`${v}/languages`)
       .set(`Authorization`, `Bearer ${token}`)
-      .send(data)
+      .send(doc)
       .expect(409);
 
       expect(res.body.error_description.includes(`ID`)).toBe(true);
@@ -155,14 +143,7 @@ module.exports = (req, v = ``) => {
 
     it(`412: Precondition Failed`, testAsync(async function() {
 
-      const data = {
-        name,
-        permissions: { owners: [config.testUser] },
-        test,
-        type,
-      };
-
-      const doc = await upsert(coll, data);
+      const doc = await upsert(coll, defaultData);
 
       const res = await req.put(`${v}/languages`)
       .set(`Authorization`, `Bearer ${token}`)
@@ -221,16 +202,6 @@ module.exports = (req, v = ``) => {
       .catch(fail);
 
     }, 10000);
-
-    it(`GET /test`, testAsync(async function() {
-
-      const res = await req.get(`${v}/test`)
-      .set(`Authorization`, `Bearer ${token}`)
-      .expect(200);
-
-      expect(res.body.message).toBe(`Test successful.`);
-
-    }));
 
   });
 
