@@ -55,7 +55,7 @@ module.exports = (req, v = ``) => {
 
     it(`401: credentials_required`, testAsync(async function() {
 
-      const res = await req.get(`${v}/test`)
+      const res = await req.get(`${v}/languages`)
       .expect(401);
 
       expect(res.headers[`www-authenticate`]).toBeDefined();
