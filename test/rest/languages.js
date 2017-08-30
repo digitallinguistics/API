@@ -25,8 +25,9 @@ const permissions = {
   public:  false,
   viewers: [],
 };
-const test        = true;
-const type        = `Language`;
+
+const test = true;
+const type = `Language`;
 
 const defaultData = {
   name: {},
