@@ -133,18 +133,9 @@ module.exports = (req, v = ``) => {
       .expect(405);
     }));
 
-    it(`409: Data Conflict`, testAsync(async function() {
-
-      const doc = await upsert(coll, defaultData);
-
-      const res = await req.post(`${v}/languages`)
-      .set(`Authorization`, `Bearer ${token}`)
-      .send(doc)
-      .expect(409);
-
-      expect(res.body.error_description.includes(`ID`)).toBe(true);
-
-    }));
+    it(`409: Data Conflict`, function() {
+      pending(`It's currently not possible to trigger a 409 error. The .create() method deletes any provided ID.`);
+    });
 
     it(`412: Precondition Failed`, testAsync(async function() {
 

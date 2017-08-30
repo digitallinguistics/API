@@ -60,20 +60,20 @@ module.exports = (v = ``) => {
 
     it(`add`, testAsync(async function() {
       const data = Object.assign({ tid: `add` }, defaultData);
-      const { res }  = await emit(`add`, `Language`, data);
+      const { res }  = await emit(`addLanguage`, data);
       expect(res.tid).toBe(data.tid);
     }));
 
     it(`delete`, testAsync(async function() {
       const doc = await upsert(coll, Object.assign({}, defaultData));
-      const { res } = await emit(`delete`, doc.id);
+      const { res } = await emit(`deleteLanguage`, doc.id);
       expect(res.status).toBe(204);
     }));
 
     it(`get`, testAsync(async function() {
 
       const doc  = await upsert(coll, Object.assign({ tid: `get` }, defaultData));
-      const { res: lang } = await emit(`get`, doc.id);
+      const { res: lang } = await emit(`getLanguage`, doc.id);
 
       expect(lang.tid).toBe(`get`);
 
@@ -91,7 +91,7 @@ module.exports = (v = ``) => {
 
       const doc = await upsert(coll, data);
       await upsert(coll, Object.assign({}, defaultData));
-      const { res, info } = await emit(`getAll`, `Language`);
+      const { res, info } = await emit(`getLanguages`);
 
       expect(res.length).toBeGreaterThan(0);
       expect(info.itemCount).toBeGreaterThan(0);
@@ -115,7 +115,7 @@ module.exports = (v = ``) => {
         type,
       };
 
-      const { res } = await emit(`update`, newData);
+      const { res } = await emit(`updateLanguage`, newData);
 
       expect(res.notChanged).toBe(doc.notChanged);
       expect(res.tid).toBe(newData.tid);
@@ -124,7 +124,7 @@ module.exports = (v = ``) => {
 
     it(`upsert`, testAsync(async function() {
       const data = Object.assign({ tid: `upsert` }, defaultData);
-      const { res } = await emit(`upsert`, data);
+      const { res } = await emit(`upsertLanguage`, data);
       expect(res.tid).toBe(data.tid);
     }));
 

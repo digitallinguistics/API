@@ -6,6 +6,7 @@
 const errors    = require('./errors');
 const general   = require('./general');
 const languages = require('./languages');
+const lexemes   = require('./lexemes');
 
 module.exports = req => {
 
@@ -19,6 +20,9 @@ module.exports = req => {
 
     languages();
     languages(`/v0`);
+
+    lexemes();
+    lexemes(`/v0`);
 
   });
 
