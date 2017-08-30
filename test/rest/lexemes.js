@@ -36,6 +36,14 @@ const defaultData = {
   type:        `Lexeme`,
 };
 
+const lang = {
+  id: languageID,
+  name: {},
+  permissions,
+  test,
+  type: `Language`,
+};
+
 module.exports = (req, v = ``) => {
 
   describe(`Lexemes`, function() {
@@ -81,14 +89,7 @@ module.exports = (req, v = ``) => {
 
     it(`POST /languages/:language/lexemes`, testAsync(async function() {
 
-      const lang = {
-        id: languageID,
-        name: {},
-        permissions,
-        test,
-        type: `Language`,
-      };
-
+      // create a Lexeme for a Language that exists
       await upsert(coll, lang);
 
       const data = Object.assign({}, defaultData);
@@ -96,21 +97,53 @@ module.exports = (req, v = ``) => {
 
       const { body } = await req.post(`${v}/languages/${languageID}/lexemes`)
       .set(`Authorization`, `Bearer ${token}`)
-      .send(Object.assign({}, defaultData))
+      .send(data)
       .expect(`Last-Modified`, /.+/)
       .expect(201);
 
       expect(body.languageID).toBe(lang.id);
 
+      // create a Lexeme for a Language that does not exist
       await req.post(`${v}/languages/678910/lexemes`)
       .set(`Authorization`, `Bearer ${token}`)
-      .send(Object.assign({}, data))
+      .send(data)
       .expect(404);
 
     }));
 
-    xit(`PUT /languages/:language/lexemes`, testAsync(async function() {
-      pending(`Test not yet written.`);
+    it(`PUT /languages/:language/lexemes`, testAsync(async function() {
+
+      // create a Lexeme for a Language that exists
+      await upsert(coll, lang);
+
+      const data = Object.assign({}, defaultData);
+      delete data.languageID;
+
+      const { body } = await req.put(`${v}/languages/${languageID}/lexemes`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .send(data)
+      .expect(`Last-Modified`, /.+/)
+      .expect(201);
+
+      expect(body.languageID).toBe(lang.id);
+
+      // create a Lexeme for a Language that does not exist
+      await req.put(`${v}/languages/678910/lexemes`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .send(data)
+      .expect(404);
+
+      // replace a Lexeme
+      body.newProp = true;
+
+      const { body: lex } = await req.put(`${v}/languages/${languageID}/lexemes`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .send(body)
+      .expect(`Last-Modified`, /.+/)
+      .expect(201);
+
+      expect(lex.newProp).toBe(true);
+
     }));
 
   });
