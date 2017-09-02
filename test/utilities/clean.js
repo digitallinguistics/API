@@ -10,7 +10,7 @@
 */
 
 const chalk         = require('chalk');
-const db            = require('../db');
+const db            = require('../../lib/db');
 const { promisify } = require('util');
 
 const { client, coll } = db;

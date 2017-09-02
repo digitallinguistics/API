@@ -31,7 +31,7 @@
     "node": ">=8.x"
   },
   "scripts": {
-    "clean": "node lib/utils/clean.js",
+    "clean": "node test/utilities/clean.js",
     "test": "npm run clean & jasmine JASMINE_CONFIG_PATH=test/jasmine.json & npm run clean"
   },
   "dependencies": {
