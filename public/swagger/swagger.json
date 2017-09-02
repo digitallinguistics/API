@@ -63,9 +63,13 @@
                 "type" : "string",
                 "description" : "A continuation token for retrieving more results"
               },
+              "dlx-item-count" : {
+                "type" : "string",
+                "description" : "The number of items returned in the response"
+              },
               "Last-Modified" : {
                 "type" : "string",
-                "description" : "The time that the item was last modified."
+                "description" : "The time that the item was last modified"
               }
             }
           }
@@ -90,7 +94,7 @@
             "headers" : {
               "Last-Modified" : {
                 "type" : "string",
-                "description" : "The time that the item was last modified."
+                "description" : "The time that the item was last modified"
               }
             }
           }
@@ -122,7 +126,7 @@
             "headers" : {
               "Last-Modified" : {
                 "type" : "string",
-                "description" : "The time that the item was last modified."
+                "description" : "The time that the item was last modified"
               }
             }
           }
@@ -155,9 +159,13 @@
                 "type" : "string",
                 "description" : "A continuation token for retrieving more results"
               },
+              "dlx-item-count" : {
+                "type" : "string",
+                "description" : "The number of items returned in the response"
+              },
               "Last-Modified" : {
                 "type" : "string",
-                "description" : "The time that the item was last modified."
+                "description" : "The time that the item was last modified"
               }
             }
           },
@@ -221,7 +229,7 @@
             "headers" : {
               "Last-Modified" : {
                 "type" : "string",
-                "description" : "The time that the item was last modified."
+                "description" : "The time that the item was last modified"
               }
             }
           }
@@ -268,9 +276,13 @@
                 "type" : "string",
                 "description" : "A continuation token for retrieving more results"
               },
+              "dlx-item-count" : {
+                "type" : "string",
+                "description" : "The number of items returned in the response"
+              },
               "Last-Modified" : {
                 "type" : "string",
-                "description" : "The time that the item was last modified."
+                "description" : "The time that the item was last modified"
               }
             }
           }
@@ -301,7 +313,7 @@
             "headers" : {
               "Last-Modified" : {
                 "type" : "string",
-                "description" : "The time that the item was last modified."
+                "description" : "The time that the item was last modified"
               }
             }
           }
@@ -339,7 +351,7 @@
             "headers" : {
               "Last-Modified" : {
                 "type" : "string",
-                "description" : "The time that the item was last modified."
+                "description" : "The time that the item was last modified"
               }
             }
           }
@@ -433,9 +445,13 @@
           "type" : "string",
           "description" : "A continuation token for retrieving more results"
         },
+        "dlx-item-count" : {
+          "type" : "string",
+          "description" : "The number of items returned in the response"
+        },
         "Last-Modified" : {
           "type" : "string",
-          "description" : "The time that the item was last modified."
+          "description" : "The time that the item was last modified"
         }
       }
     },
@@ -444,7 +460,7 @@
       "headers" : {
         "Last-Modified" : {
           "type" : "string",
-          "description" : "The time that the item was last modified."
+          "description" : "The time that the item was last modified"
         }
       }
     },
@@ -453,7 +469,7 @@
       "headers" : {
         "Last-Modified" : {
           "type" : "string",
-          "description" : "The time that the item was last modified."
+          "description" : "The time that the item was last modified"
         }
       }
     },
@@ -462,7 +478,7 @@
       "headers" : {
         "Last-Modified" : {
           "type" : "string",
-          "description" : "The time that the item was last modified."
+          "description" : "The time that the item was last modified"
         }
       }
     },
