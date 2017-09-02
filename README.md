@@ -360,15 +360,17 @@ socket.on(`add`, id => {
 ```
 
 ### Parameters
-Parameters that are part of the path in the REST API must be passed as arguments in the socket API. For example, this is how you would run `GET /languages/12345` in the socket API:
+Parameters that are part of the path in the REST API are often passed as options in the socket API. For example, this is how you would run `GET /languages/12345/lexemes/678910` in the socket API:
 
 ```js
-socket.emit(`getLanguage`, `12345`, (err, language) => {
+socket.emit(`getLexeme`, `678910`, { languageID: `12345` }, (err, language) => {
   /* Do something with the returned language object */
 });
 ```
 
-Parameters that are part of the query string in the REST API must be passed as part of an optional options argument in the socket API. For example, this is how you would run `GET /languages?fields=id,title` in the socket API:
+If the Lexeme already has a `languageID` property provided, you can omit the option.
+
+Parameters that are part of the query string in the REST API must be passed as part of the options argument in the socket API. For example, this is how you would run `GET /languages?fields=id,title` in the socket API:
 
 ```js
 socket.emit(`getLanguages`, { fields: [`id`, `title`] }, (err, languages) => {

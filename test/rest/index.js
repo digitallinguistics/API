@@ -7,7 +7,7 @@
 const errors    = require('./errors');
 const general   = require('./general');
 const languages = require('./languages');
-const lexemes    = require('./lexemes');
+const lexemes   = require('./lexemes');
 
 module.exports = req => {
 

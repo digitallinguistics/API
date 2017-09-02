@@ -65,7 +65,7 @@ module.exports = (v = ``) => {
 
     }));
 
-    it(`add`, testAsync(async function() {
+    fit(`add`, testAsync(async function() {
 
       // add Lexeme with Language that exists
       const data = Object.assign({ tid: `addLexeme` }, defaultData);
@@ -73,11 +73,11 @@ module.exports = (v = ``) => {
       expect(res.tid).toBe(data.tid);
 
       // add Lexeme with Language that does not exist
-      const lex1 = Object.assign({}, defaultData, { languageID: `678910` });
+      const lex1 = Object.assign({}, defaultData);
 
       try {
-        const { info } = await emit(`add`, `Lexeme`, lex1);
-        expect(info.status).not.toBe(201);
+        const { info } = await emit(`add`, `Lexeme`, { languageID: `678910` }, lex1);
+        expect(info.status).toBe(404);
       } catch (e) {
         expect(e.status).toBe(404);
       }
