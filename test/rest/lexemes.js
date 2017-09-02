@@ -55,16 +55,6 @@ module.exports = (req, v = ``) => {
       await upsert(coll, lang);
     }));
 
-    it(`DELETE /languages/:language/lexemes/:lexeme`, testAsync(async function() {
-
-      const lex = await upsert(coll, Object.assign({}, defaultData));
-
-      await req.delete(`/languages/${lex.languageID}/lexemes/${lex.id}`)
-      .set(`Authorization`, `Bearer ${token}`)
-      .expect(204);
-
-    }));
-
     it(`GET /languages/:language/lexemes`, testAsync(async function() {
 
       const lex1 = await upsert(coll, Object.assign({}, defaultData));
@@ -107,7 +97,7 @@ module.exports = (req, v = ``) => {
       const { body } = await req.post(`${v}/languages/${languageID}/lexemes`)
       .set(`Authorization`, `Bearer ${token}`)
       .send(data)
-      .expect(`Last-Modified`, /.+/)
+      // .expect(`Last-Modified`, /.+/)
       .expect(201);
 
       expect(body.languageID).toBe(lang.id);
@@ -152,6 +142,16 @@ module.exports = (req, v = ``) => {
       .expect(201);
 
       expect(lex.newProp).toBe(true);
+
+    }));
+
+    it(`DELETE /languages/:language/lexemes/:lexeme`, testAsync(async function() {
+
+      const lex = await upsert(coll, Object.assign({}, defaultData));
+
+      await req.delete(`/languages/${lex.languageID}/lexemes/${lex.id}`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .expect(204);
 
     }));
 
