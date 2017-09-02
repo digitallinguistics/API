@@ -52,6 +52,17 @@ module.exports = (req, v = ``) => {
 
     beforeAll(testAsync(async function() {
       token = await getToken();
+      await upsert(coll, lang);
+    }));
+
+    it(`DELETE /languages/:language/lexemes/:lexeme`, testAsync(async function() {
+
+      const lex = await upsert(coll, Object.assign({}, defaultData));
+
+      await req.delete(`/languages/${lex.languageID}/lexemes/${lex.id}`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .expect(204);
+
     }));
 
     it(`GET /languages/:language/lexemes`, testAsync(async function() {
@@ -90,8 +101,6 @@ module.exports = (req, v = ``) => {
     it(`POST /languages/:language/lexemes`, testAsync(async function() {
 
       // create a Lexeme for a Language that exists
-      await upsert(coll, lang);
-
       const data = Object.assign({}, defaultData);
       delete data.languageID;
 
