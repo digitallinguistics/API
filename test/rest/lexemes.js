@@ -55,6 +55,16 @@ module.exports = (req, v = ``) => {
       await upsert(coll, lang);
     }));
 
+    it(`DELETE /languages/:language/lexemes/:lexeme`, testAsync(async function() {
+
+      const lex = await upsert(coll, Object.assign({}, defaultData));
+
+      await req.delete(`/languages/${lex.languageID}/lexemes/${lex.id}`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .expect(204);
+
+    }));
+
     it(`GET /languages/:language/lexemes`, testAsync(async function() {
 
       const lex1 = await upsert(coll, Object.assign({}, defaultData));
@@ -85,6 +95,38 @@ module.exports = (req, v = ``) => {
 
       expect(body.some(lex => lex.id === lex1.id)).toBe(false);
       expect(body.some(lex => lex.id === lex2.id)).toBe(true);
+
+    }));
+
+    it(`GET /languages/:language/lexemes/:lexeme`, testAsync(async function() {
+
+      const doc = await upsert(coll, Object.assign({ tid: `getLexeme` }, defaultData));
+
+      const { body } = await req.get(`/languages/${doc.languageID}/lexemes/${doc.id}`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .expect(`Last-Modified`, /.+/)
+      .expect(200);
+
+      expect(body.id).toBe(doc.id);
+      expect(body.tid).toBe(doc.tid);
+
+    }));
+
+    it(`PATCH /languages/:language/lexemes/:lexeme`, testAsync(async function() {
+
+      const doc = await upsert(coll, Object.assign({ tid: `updateLexeme` }, defaultData));
+
+      const newData = {
+        id:      doc.id,
+        newProp: `new property`,
+      };
+
+      const { body } = await req.patch(`/languages/${doc.languageID}/lexemes/${doc.id}`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .send(newData)
+      .expect(200);
+
+      expect(body.newProp).toBe(newData.newProp);
 
     }));
 
@@ -142,16 +184,6 @@ module.exports = (req, v = ``) => {
       .expect(201);
 
       expect(lex.newProp).toBe(true);
-
-    }));
-
-    it(`DELETE /languages/:language/lexemes/:lexeme`, testAsync(async function() {
-
-      const lex = await upsert(coll, Object.assign({}, defaultData));
-
-      await req.delete(`/languages/${lex.languageID}/lexemes/${lex.id}`)
-      .set(`Authorization`, `Bearer ${token}`)
-      .expect(204);
 
     }));
 

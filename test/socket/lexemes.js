@@ -70,14 +70,14 @@ module.exports = (v = ``) => {
 
       // add Lexeme with Language that exists
       const data = Object.assign({ tid: `addLexeme` }, defaultData);
-      const { res }  = await emit(`add`, `Lexeme`, data);
+      const { res }  = await emit(`addLexeme`, data);
       expect(res.tid).toBe(data.tid);
 
       // add Lexeme with Language that does not exist
       const lex1 = Object.assign({}, defaultData);
 
       try {
-        const { info } = await emit(`add`, `Lexeme`, lex1, { languageID: `678910` });
+        const { info } = await emit(`addLexeme`, lex1, { languageID: `678910` });
         expect(info.status).toBe(404);
       } catch (e) {
         expect(e.status).toBe(404);
@@ -88,7 +88,7 @@ module.exports = (v = ``) => {
       delete lex2.languageID;
 
       try {
-        const { info } = await emit(`add`, `Lexeme`, lex2);
+        const { info } = await emit(`addLexeme`, lex2);
         expect(info.status).not.toBe(201);
       } catch (e) {
         expect(e.status).toBe(400);
