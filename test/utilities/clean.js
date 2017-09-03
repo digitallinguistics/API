@@ -124,8 +124,8 @@ const deleteStrandedLexemes = async () => {
 
   }, Promise.resolve());
 
-  if (docsFound.length) console.warn(chalk.red(`${docsFound} stranded Lexemes found.`));
-  else console.log(chalk.green(`No stranded Lexemes found.`));
+  if (docsFound.length) console.warn(chalk.red(`${docsFound} stranded Lexemes found`));
+  else console.log(chalk.green(`No stranded Lexemes found`));
 
 };
 
