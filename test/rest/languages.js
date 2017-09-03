@@ -12,10 +12,12 @@ const {
   db,
   getToken,
   testAsync,
+  timeout,
 } = require('../utilities');
 
 const {
   coll,
+  read,
   upsert,
 } = db;
 
@@ -53,6 +55,36 @@ module.exports = (req, v = ``) => {
       .send(defaultData);
 
       expect(res.body.type).toBe(`Language`);
+
+    }));
+
+    fit(`deletes Lexemes when a Language is deleted`, testAsync(async function() {
+
+      const lang = await upsert(coll, Object.assign({}, defaultData));
+
+      const lexData = {
+        languageID:  lang.id,
+        lemma:       {},
+        permissions,
+        senses:      [],
+        test,
+        type:        `Lexeme`,
+      };
+
+      const lex = await upsert(coll, lexData);
+
+      await req.delete(`${v}/languages/${lang.id}`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .expect(204);
+
+      await timeout(500);
+
+      try {
+        const res = await read(coll, lex.id);
+        expect(res.status).toBe(404);
+      } catch (e) {
+        expect(e.status).toBe(404);
+      }
 
     }));
 
