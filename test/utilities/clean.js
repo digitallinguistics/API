@@ -104,6 +104,7 @@ const deleteStrandedLexemes = async () => {
   const iterator    = client.queryDocuments(coll, query);
   const toArray     = promisify(iterator.toArray).bind(iterator);
   const lexemes     = await toArray();
+  let docsFound     = 0;
 
   await lexemes.reduce(async (p, lex) => {
 
@@ -113,11 +114,18 @@ const deleteStrandedLexemes = async () => {
       const lang = await read(`${coll}/docs/${lex.languageID}`);
       languageIDs.add(lang.id);
     } catch (e) {
-      if (e.code === 404 || e.substatus === 404) toDelete.push(lex);
-      else throw e;
+      if (e.code === 404 || e.substatus === 404) {
+        docsFound++;
+        toDelete.push(lex);
+      } else {
+        throw e;
+      }
     }
 
   }, Promise.resolve());
+
+  if (docsFound.length) console.warn(chalk.red(`${docsFound} stranded Lexemes found.`));
+  else console.log(chalk.green(`No stranded Lexemes found.`));
 
 };
 
