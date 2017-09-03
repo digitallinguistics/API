@@ -16,6 +16,7 @@ const { promisify } = require('util');
 const { client, coll } = db;
 
 const destroy = promisify(client.deleteDocument).bind(client);
+const read    = promisify(client.readDocument).bind(client);
 const upsert  = promisify(client.upsertDocument).bind(client);
 
 const toDelete = [];
@@ -89,6 +90,37 @@ const deleteTestDocs = async () => {
 
 };
 
+// queues Lexemes with non-existent Language IDs for deletion
+const deleteStrandedLexemes = async () => {
+
+  console.log(`Checking for standed Lexemes`);
+
+  const query = `
+    SELECT * FROM items c
+    WHERE c.type = "Lexeme"
+  `;
+
+  const languageIDs = new Set;
+  const iterator    = client.queryDocuments(coll, query);
+  const toArray     = promisify(iterator.toArray).bind(iterator);
+  const lexemes     = await toArray();
+
+  await lexemes.reduce(async (p, lex) => {
+
+    if (languageIDs.has(lex.languageID)) return;
+
+    try {
+      const lang = await read(`${coll}/docs/${lex.languageID}`);
+      languageIDs.add(lang.id);
+    } catch (e) {
+      if (e.code === 404 || e.substatus === 404) toDelete.push(lex);
+      else throw e;
+    }
+
+  }, Promise.resolve());
+
+};
+
 // queues docs without a "type" field for deletion
 const deleteTypelessDocs = async () => {
 
@@ -118,6 +150,7 @@ const deleteTypelessDocs = async () => {
     await deleteTestDocs();
     await deleteTypelessDocs();
     await cleanLanguageNames();
+    await deleteStrandedLexemes();
     await deleteDocs();
     console.log(`Cleaning done`);
   } catch (e) {
