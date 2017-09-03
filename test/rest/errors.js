@@ -114,14 +114,17 @@ module.exports = (req, v = ``) => {
     }));
 
     it(`404: Not Found`, testAsync(async function() {
-      await req.get(`${v}/languages/does-not-exist`)
+
+      const { body } = await req.get(`${v}/languages/does-not-exist-1`)
       .set(`Authorization`, `Bearer ${token}`)
-      .expect(404)
-      .expect(res => expect(res.body.error_description.includes(`ID`)).toBe(true));
+      .expect(404);
+
+      expect(body.error_description.includes(`ID`)).toBe(true);
+
     }));
 
     it(`404: Not Found (DELETE + If-Match)`, testAsync(async function() {
-      await req.delete(`${v}/languages/does-not-exist`)
+      await req.delete(`${v}/languages/does-not-exist-2`)
       .set(`Authorization`, `Bearer ${token}`)
       .set(`If-Match`, `fake-if-match-header`)
       .expect(404);

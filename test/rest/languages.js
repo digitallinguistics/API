@@ -58,7 +58,7 @@ module.exports = (req, v = ``) => {
 
     }));
 
-    fit(`deletes Lexemes when a Language is deleted`, testAsync(async function() {
+    it(`deletes Lexemes when a Language is deleted`, testAsync(async function() {
 
       const lang = await upsert(coll, Object.assign({}, defaultData));
 
@@ -79,12 +79,18 @@ module.exports = (req, v = ``) => {
 
       await timeout(500);
 
-      try {
-        const res = await read(coll, lex.id);
-        expect(res.status).toBe(404);
-      } catch (e) {
-        expect(e.status).toBe(404);
-      }
+      const res = await read(`${coll}/docs/${lex.id}`);
+      expect(res.ttl).toBeDefined();
+
+    }));
+
+    it(`DELETE /languages/{language}`, testAsync(async function() {
+
+      const doc = await upsert(coll, Object.assign({}, defaultData));
+
+      await req.delete(`${v}/languages/${doc.id}`)
+      .set(`Authorization`, `Bearer ${token}`)
+      .expect(204);
 
     }));
 
@@ -203,16 +209,6 @@ module.exports = (req, v = ``) => {
 
       expect(res.headers[`last-modified`]).toBeDefined();
       expect(res.body.tid).toBe(doc.tid);
-
-    }));
-
-    it(`DELETE /languages/{language}`, testAsync(async function() {
-
-      const doc = await upsert(coll, Object.assign({}, defaultData));
-
-      await req.delete(`${v}/languages/${doc.id}`)
-      .set(`Authorization`, `Bearer ${token}`)
-      .expect(204);
 
     }));
 

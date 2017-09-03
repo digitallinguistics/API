@@ -4,6 +4,7 @@
  */
 
 /* eslint-disable
+  max-len,
   no-console,
   no-param-reassign,
   no-underscore-dangle,
@@ -59,41 +60,26 @@ const cleanLanguageNames = async () => {
 
 // deletes any documents in the toDelete Array
 const deleteDocs = async () => {
+
+  const deleted = new Set;
   if (toDelete.length) console.log(`Deleting ${toDelete.length} documents`);
-  await toDelete.reduce((p, doc) => p.then(() => destroy(doc._self)), Promise.resolve());
+
+  await toDelete.reduce(async (p, doc) => {
+    await p;
+    if (deleted.has(doc.id)) return;
+    await destroy(doc._self);
+    deleted.add(doc.id);
+  }, Promise.resolve());
+
   if (toDelete.length) console.log(`${toDelete.length} documents deleted`);
   else console.log(`No documents needed deletion.`);
-};
-
-// queues test documents for deletion
-const deleteTestDocs = async () => {
-
-  console.log(`Retrieving test documents to delete`);
-
-  const query = `
-    SELECT * FROM items c
-    WHERE c.test = true
-    OR IS_DEFINED(c.testName)
-    OR IS_DEFINED(c.tid)
-  `;
-
-  const res     = client.queryDocuments(coll, query);
-  const toArray = promisify(res.toArray).bind(res);
-  const docs    = await toArray();
-
-  if (docs.length) {
-    console.log(`${docs.length} test documents queued for deletion`);
-    toDelete.push(...docs);
-  } else {
-    console.log(`No test documents found for deletion`);
-  }
 
 };
 
 // queues Lexemes with non-existent Language IDs for deletion
 const deleteStrandedLexemes = async () => {
 
-  console.log(`Checking for standed Lexemes`);
+  console.log(`Checking for stranded Lexemes`);
 
   const query = `
     SELECT * FROM items c
@@ -126,6 +112,31 @@ const deleteStrandedLexemes = async () => {
 
   if (docsFound.length) console.warn(chalk.red(`${docsFound} stranded Lexemes found`));
   else console.log(chalk.green(`No stranded Lexemes found`));
+
+};
+
+// queues test documents for deletion
+const deleteTestDocs = async () => {
+
+  console.log(`Retrieving test documents to delete`);
+
+  const query = `
+    SELECT * FROM items c
+    WHERE c.test = true
+    OR IS_DEFINED(c.testName)
+    OR IS_DEFINED(c.tid)
+  `;
+
+  const res     = client.queryDocuments(coll, query);
+  const toArray = promisify(res.toArray).bind(res);
+  const docs    = await toArray();
+
+  if (docs.length) {
+    console.log(`${docs.length} test documents queued for deletion`);
+    toDelete.push(...docs);
+  } else {
+    console.log(`No test documents found for deletion`);
+  }
 
 };
 
