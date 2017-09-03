@@ -1,8 +1,8 @@
 {
   "swagger" : "2.0",
   "info" : {
-    "description" : "The Digital Linguistics (DLx) database API",
-    "version" : "0.1.1",
+    "description" : "The Digital Linguistics (DLx) REST API",
+    "version" : "0.2.0",
     "title" : "DLx",
     "contact" : {
       "name" : "Daniel W. Hieber",
@@ -18,6 +18,9 @@
   "tags" : [ {
     "name" : "Language",
     "description" : "Operations on Languages"
+  }, {
+    "name" : "Lexeme",
+    "description" : "Operations on Lexemes"
   } ],
   "schemes" : [ "https" ],
   "consumes" : [ "application/json" ],
@@ -30,18 +33,12 @@
       "get" : {
         "tags" : [ "Language" ],
         "summary" : "Get all Languages",
-        "description" : "Retrieves all the resources that the authenticated user or client has permission to access.",
+        "description" : "Retrieves all the Languages that the authenticated user or client has permission to access.",
         "operationId" : "getLanguages",
         "parameters" : [ {
           "name" : "continuation",
           "in" : "header",
           "description" : "The `dlx-continuation` header is used to send a continuation token with the request, when retrieving the next page of results.",
-          "required" : false,
-          "type" : "string"
-        }, {
-          "name" : "ifModifiedSince",
-          "in" : "header",
-          "description" : "The `If-Modified-Since` header is used to return only results which have been modified since the time provided in the header. The value of the header must be a valid UTC date string.",
           "required" : false,
           "type" : "string"
         }, {
@@ -60,20 +57,21 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "Operation successful.",
+            "description" : "200: Operation successful.",
             "headers" : {
               "dlx-continuation" : {
                 "type" : "string",
                 "description" : "A continuation token for retrieving more results"
               },
+              "dlx-item-count" : {
+                "type" : "string",
+                "description" : "The number of items returned in the response"
+              },
               "Last-Modified" : {
                 "type" : "string",
-                "description" : "The time that the item was last modified."
+                "description" : "The time that the item was last modified"
               }
             }
-          },
-          "408" : {
-            "description" : "The request timed out."
           }
         }
       },
@@ -92,29 +90,20 @@
         } ],
         "responses" : {
           "201" : {
-            "description" : "The resource was created successfully.",
+            "description" : "201: The resource was created successfully.",
             "headers" : {
               "Last-Modified" : {
                 "type" : "string",
-                "description" : "The time that the item was last modified."
+                "description" : "The time that the item was last modified"
               }
             }
-          },
-          "409" : {
-            "description" : "There was a data conflict in the database."
-          },
-          "413" : {
-            "description" : "Request payload is too large."
-          },
-          "422" : {
-            "description" : "The data is not properly formatted."
           }
         }
       },
       "put" : {
         "tags" : [ "Language" ],
         "summary" : "Upsert (create or replace) a Language",
-        "description" : "Creates a Language if it does not yet exist (i.e. if the resource does not have an `id` property yet), or replaces the existing Language resource if it does. Note that this replaces the *entire* Language object. It is not just a partial update.",
+        "description" : "Creates a Language if it does not yet exist (i.e. if the resource does not have an `id` property yet), or replaces the existing Language resource if it does. Note that this replaces the *entire* Language. It is not a partial update.",
         "operationId" : "upsertLanguage",
         "parameters" : [ {
           "in" : "body",
@@ -133,39 +122,24 @@
         } ],
         "responses" : {
           "201" : {
-            "description" : "Upsert successful.",
+            "description" : "201: Upsert successful.",
             "headers" : {
               "Last-Modified" : {
                 "type" : "string",
-                "description" : "The time that the item was last modified."
+                "description" : "The time that the item was last modified"
               }
             }
-          },
-          "403" : {
-            "description" : "Unauthorized."
-          },
-          "409" : {
-            "description" : "There was a data conflict in the database."
-          },
-          "412" : {
-            "description" : "A precondition for the operation was not met."
-          },
-          "413" : {
-            "description" : "Request payload is too large."
-          },
-          "422" : {
-            "description" : "The data is not properly formatted."
           }
         }
       }
     },
-    "/languages/{languageId}" : {
+    "/languages/{languageID}" : {
       "get" : {
         "tags" : [ "Language" ],
         "summary" : "Retrieve a Language by ID",
         "operationId" : "getLanguage",
         "parameters" : [ {
-          "name" : "languageId",
+          "name" : "languageID",
           "in" : "path",
           "description" : "The ID of the Language to perform the operation on",
           "required" : true,
@@ -179,26 +153,24 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "Operation successful.",
+            "description" : "200: Operation successful.",
             "headers" : {
               "dlx-continuation" : {
                 "type" : "string",
                 "description" : "A continuation token for retrieving more results"
               },
+              "dlx-item-count" : {
+                "type" : "string",
+                "description" : "The number of items returned in the response"
+              },
               "Last-Modified" : {
                 "type" : "string",
-                "description" : "The time that the item was last modified."
+                "description" : "The time that the item was last modified"
               }
             }
           },
           "304" : {
-            "description" : "Not modified."
-          },
-          "403" : {
-            "description" : "Unauthorized."
-          },
-          "404" : {
-            "description" : "Database resource not found."
+            "description" : "304: Not modified."
           }
         }
       },
@@ -207,7 +179,7 @@
         "summary" : "Delete a Language by ID",
         "operationId" : "deleteLanguage",
         "parameters" : [ {
-          "name" : "languageId",
+          "name" : "languageID",
           "in" : "path",
           "description" : "The ID of the Language to perform the operation on",
           "required" : true,
@@ -221,16 +193,7 @@
         } ],
         "responses" : {
           "204" : {
-            "description" : "Delete operation successful."
-          },
-          "403" : {
-            "description" : "Unauthorized."
-          },
-          "404" : {
-            "description" : "Database resource not found."
-          },
-          "412" : {
-            "description" : "A precondition for the operation was not met."
+            "description" : "204: Delete operation successful."
           }
         }
       },
@@ -240,7 +203,7 @@
         "description" : "Performs a partial update the Language whose ID is specified in the URL. If the Language object has an `id` property, is ignored in favor of the ID in the URL.",
         "operationId" : "updateLanguage",
         "parameters" : [ {
-          "name" : "languageId",
+          "name" : "languageID",
           "in" : "path",
           "description" : "The ID of the Language to perform the operation on",
           "required" : true,
@@ -262,25 +225,135 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "Update successful.",
+            "description" : "200: Update successful.",
             "headers" : {
               "Last-Modified" : {
                 "type" : "string",
-                "description" : "The time that the item was last modified."
+                "description" : "The time that the item was last modified"
               }
             }
-          },
-          "403" : {
-            "description" : "Unauthorized."
-          },
-          "404" : {
-            "description" : "Database resource not found."
-          },
-          "412" : {
-            "description" : "A precondition for the operation was not met."
-          },
-          "422" : {
-            "description" : "The data is not properly formatted."
+          }
+        }
+      }
+    },
+    "/languages/{languageID}/lexemes" : {
+      "get" : {
+        "tags" : [ "Lexeme" ],
+        "summary" : "Get all lexemes",
+        "description" : "Retrieves all the Lexemes for a Language that the authenticated user or client has permission to access.",
+        "operationId" : "getLexemes",
+        "parameters" : [ {
+          "name" : "languageID",
+          "in" : "path",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "continuation",
+          "in" : "header",
+          "description" : "The `dlx-continuation` header is used to send a continuation token with the request, when retrieving the next page of results.",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "maxItems",
+          "in" : "header",
+          "description" : "The `dlx-max-item-count` header is used to limit the number of results to a certain amount at a time (by default all results will be returned). If there are more results to be returned, a continuation token will also be sent in the `dlx-continuation` header.",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "public",
+          "in" : "query",
+          "description" : "Set this parameter to `true` to include all publicly-accessible resources, not just those that the user is listed as an Owner, Contributor, or Viewer for.",
+          "required" : false,
+          "type" : "string",
+          "default" : "false"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200: Operation successful.",
+            "headers" : {
+              "dlx-continuation" : {
+                "type" : "string",
+                "description" : "A continuation token for retrieving more results"
+              },
+              "dlx-item-count" : {
+                "type" : "string",
+                "description" : "The number of items returned in the response"
+              },
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Lexeme" ],
+        "summary" : "Add a new Lexeme",
+        "operationId" : "addLexeme",
+        "parameters" : [ {
+          "name" : "languageID",
+          "in" : "path",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "A database resource to upsert",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Document"
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "201: The resource was created successfully.",
+            "headers" : {
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Lexeme" ],
+        "summary" : "Upsert (create or replace) a Lexeme",
+        "description" : "Creates a Lexeme for the the Language if it does not yet exist (i.e. if the resource does not yet have an `id` property), or replaces the existing Lexeme if it does. Note that this replaces the *entire* Lexeme. It is not a partial update.",
+        "operationId" : "upsertLexeme",
+        "parameters" : [ {
+          "name" : "languageID",
+          "in" : "path",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "A database resource to upsert",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Document"
+          }
+        }, {
+          "name" : "ifMatch",
+          "in" : "header",
+          "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "201: Upsert successful.",
+            "headers" : {
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
           }
         }
       }
@@ -334,18 +407,18 @@
       "required" : false,
       "type" : "string"
     },
-    "ifModifiedSince" : {
-      "name" : "ifModifiedSince",
-      "in" : "header",
-      "description" : "The `If-Modified-Since` header is used to return only results which have been modified since the time provided in the header. The value of the header must be a valid UTC date string.",
-      "required" : false,
-      "type" : "string"
-    },
     "ifNoneMatch" : {
       "name" : "ifNoneMatch",
       "in" : "header",
       "description" : "If `If-None-Match` header is used with GET requests to check whether you already have the most up-to-date version of the resource, and therefore do not need the resource sent again. The value of the `If-None-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to reduce bandwidth.",
       "required" : false,
+      "type" : "string"
+    },
+    "languageID" : {
+      "name" : "languageID",
+      "in" : "path",
+      "description" : "The ID of the Language to perform the operation on",
+      "required" : true,
       "type" : "string"
     },
     "maxItems" : {
@@ -365,75 +438,61 @@
     }
   },
   "responses" : {
-    "BadRequest" : {
-      "description" : "There was a problem with the request."
-    },
-    "Conflict" : {
-      "description" : "There was a data conflict in the database."
-    },
-    "Created" : {
-      "description" : "The resource was created successfully.",
-      "headers" : {
-        "Last-Modified" : {
-          "type" : "string",
-          "description" : "The time that the item was last modified."
-        }
-      }
-    },
-    "DeleteSuccessful" : {
-      "description" : "Delete operation successful."
-    },
-    "Forbidden" : {
-      "description" : "Unauthorized."
-    },
-    "LargePayload" : {
-      "description" : "Request payload is too large."
-    },
-    "MethodNotAllowed" : {
-      "description" : "Method not allowed."
-    },
-    "NotAcceptable" : {
-      "description" : "Cannot return data in requested format."
-    },
-    "NotModified" : {
-      "description" : "Not modified."
-    },
-    "NotFound" : {
-      "description" : "Database resource not found."
-    },
-    "NotImplemented" : {
-      "description" : "This feature is not yet implemented."
-    },
-    "PreconditionFailed" : {
-      "description" : "A precondition for the operation was not met."
-    },
-    "ServerError" : {
-      "description" : "An error occurred on the server."
-    },
     "Success" : {
-      "description" : "Operation successful.",
+      "description" : "200: Operation successful.",
       "headers" : {
         "dlx-continuation" : {
           "type" : "string",
           "description" : "A continuation token for retrieving more results"
         },
+        "dlx-item-count" : {
+          "type" : "string",
+          "description" : "The number of items returned in the response"
+        },
         "Last-Modified" : {
           "type" : "string",
-          "description" : "The time that the item was last modified."
+          "description" : "The time that the item was last modified"
         }
       }
     },
-    "Timeout" : {
-      "description" : "The request timed out."
+    "UpdateSuccessful" : {
+      "description" : "200: Update successful.",
+      "headers" : {
+        "Last-Modified" : {
+          "type" : "string",
+          "description" : "The time that the item was last modified"
+        }
+      }
     },
-    "TokenExpired" : {
-      "description" : "Access token expired."
+    "Created" : {
+      "description" : "201: The resource was created successfully.",
+      "headers" : {
+        "Last-Modified" : {
+          "type" : "string",
+          "description" : "The time that the item was last modified"
+        }
+      }
     },
-    "TooManyRequests" : {
-      "description" : "Too many requests."
+    "UpsertSuccessful" : {
+      "description" : "201: Upsert successful.",
+      "headers" : {
+        "Last-Modified" : {
+          "type" : "string",
+          "description" : "The time that the item was last modified"
+        }
+      }
+    },
+    "DeleteSuccessful" : {
+      "description" : "204: Delete operation successful."
+    },
+    "NotModified" : {
+      "description" : "304: Not modified."
+    },
+    "BadRequest" : {
+      "description" : "400: There was a problem with the request."
     },
     "Unauthorized" : {
-      "description" : "Authorization missing or invalid.",
+      "description" : "401: Authorization missing or invalid.",
       "headers" : {
         "WWW-Authenticate" : {
           "type" : "string",
@@ -441,26 +500,47 @@
         }
       }
     },
+    "Forbidden" : {
+      "description" : "403: Unauthorized."
+    },
+    "NotFound" : {
+      "description" : "404: Database resource not found."
+    },
+    "MethodNotAllowed" : {
+      "description" : "405: Method not allowed."
+    },
+    "NotAcceptable" : {
+      "description" : "406: Cannot return data in requested format."
+    },
+    "Timeout" : {
+      "description" : "408: The request timed out."
+    },
+    "Conflict" : {
+      "description" : "409: There was a data conflict in the database."
+    },
+    "PreconditionFailed" : {
+      "description" : "412: A precondition for the operation was not met."
+    },
+    "LargePayload" : {
+      "description" : "413: Request payload is too large."
+    },
+    "TokenExpired" : {
+      "description" : "419: Access token expired."
+    },
     "Unprocessable" : {
-      "description" : "The data is not properly formatted."
+      "description" : "422: The data is not properly formatted."
     },
-    "UpdateSuccessful" : {
-      "description" : "Update successful.",
-      "headers" : {
-        "Last-Modified" : {
-          "type" : "string",
-          "description" : "The time that the item was last modified."
-        }
-      }
+    "TooManyRequests" : {
+      "description" : "429: Too many requests."
     },
-    "UpsertSuccessful" : {
-      "description" : "Upsert successful.",
-      "headers" : {
-        "Last-Modified" : {
-          "type" : "string",
-          "description" : "The time that the item was last modified."
-        }
-      }
+    "RetryOperation" : {
+      "description" : "449: Retry the operation"
+    },
+    "ServerError" : {
+      "description" : "500: An error occurred on the server."
+    },
+    "NotImplemented" : {
+      "description" : "501: This feature is not yet implemented."
     }
   },
   "externalDocs" : {

@@ -4,17 +4,20 @@
  */
 
 /* eslint-disable
+  max-len,
   no-console,
   no-param-reassign,
   no-underscore-dangle,
 */
 
-const chalk = require('chalk');
-const db    = require('../db');
-const { client, coll } = db;
+const chalk         = require('chalk');
+const db            = require('../../lib/db');
 const { promisify } = require('util');
 
+const { client, coll } = db;
+
 const destroy = promisify(client.deleteDocument).bind(client);
+const read    = promisify(client.readDocument).bind(client);
 const upsert  = promisify(client.upsertDocument).bind(client);
 
 const toDelete = [];
@@ -57,10 +60,59 @@ const cleanLanguageNames = async () => {
 
 // deletes any documents in the toDelete Array
 const deleteDocs = async () => {
+
+  const deleted = new Set;
   if (toDelete.length) console.log(`Deleting ${toDelete.length} documents`);
-  await toDelete.reduce((p, doc) => p.then(() => destroy(doc._self)), Promise.resolve());
+
+  await toDelete.reduce(async (p, doc) => {
+    await p;
+    if (deleted.has(doc.id)) return;
+    await destroy(doc._self);
+    deleted.add(doc.id);
+  }, Promise.resolve());
+
   if (toDelete.length) console.log(`${toDelete.length} documents deleted`);
   else console.log(`No documents needed deletion.`);
+
+};
+
+// queues Lexemes with non-existent Language IDs for deletion
+const deleteStrandedLexemes = async () => {
+
+  console.log(`Checking for stranded Lexemes`);
+
+  const query = `
+    SELECT * FROM items c
+    WHERE c.type = "Lexeme"
+  `;
+
+  const languageIDs = new Set;
+  const iterator    = client.queryDocuments(coll, query);
+  const toArray     = promisify(iterator.toArray).bind(iterator);
+  const lexemes     = await toArray();
+  let docsFound     = 0;
+
+  await lexemes.reduce(async (p, lex) => {
+
+    if (languageIDs.has(lex.languageID)) return;
+
+    try {
+      const lang = await read(`${coll}/docs/${lex.languageID}`);
+      languageIDs.add(lang.id);
+    } catch (e) {
+      if (e.code === 404 || e.substatus === 404) {
+        docsFound++;
+        toDelete.push(lex);
+      } else {
+        throw e;
+      }
+    }
+
+  }, Promise.resolve());
+
+  if (docsFound.length) console.warn(chalk.red(`${docsFound} stranded Lexemes found`));
+  else console.log(chalk.green(`No stranded Lexemes found`));
+
 };
 
 // queues test documents for deletion
@@ -117,6 +169,7 @@ const deleteTypelessDocs = async () => {
     await deleteTestDocs();
     await deleteTypelessDocs();
     await cleanLanguageNames();
+    await deleteStrandedLexemes();
     await deleteDocs();
     console.log(`Cleaning done`);
   } catch (e) {

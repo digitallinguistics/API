@@ -1,4 +1,5 @@
 /* eslint-disable
+  camelcase,
   func-names,
   max-nested-callbacks,
   max-statements,
@@ -8,10 +9,13 @@
   prefer-arrow-callback
 */
 
-const config        = require('../lib/config');
-const req           = require('superagent');
-const testAsync     = require('./async');
-const { verifyJwt } = require('./jwt');
+const config = require('../lib/config');
+const req    = require('superagent');
+
+const {
+  jwt,
+  testAsync,
+} = require('./utilities');
 
 const audience = `https://api.digitallinguistics.io/`;
 const scope    = `public user admin openid offline_access`;
@@ -45,7 +49,7 @@ describe('Authentication', function() {
       subject:    `${config.authClientID}@clients`,
     };
 
-    const payload = await verifyJwt(token, config.authSecret, opts);
+    const payload = await jwt.verifyJwt(token, config.authSecret, opts);
 
     expect(payload.scope).toBe(scope);
 

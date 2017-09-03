@@ -1,65 +1,65 @@
 /* eslint-disable
-  camelcase,
   func-names,
-  handle-callback-err,
   max-nested-callbacks,
-  max-statements,
-  max-statements-per-line,
-  newline-per-chained-call,
   no-magic-numbers,
   no-shadow,
   prefer-arrow-callback,
+  sort-keys,
 */
 
-const authenticate  = require('./authenticate');
-const config        = require('../lib/config');
-const getToken      = require('./token');
-const { promisify } = require('util');
-const testAsync     = require('./async');
+const config = require('../../lib/config');
+
+const {
+  authenticate,
+  db,
+  getToken,
+  testAsync,
+} = require('../utilities');
 
 const {
   coll,
   upsert,
-} = require('./db');
+} = db;
+
+const test = true;
+const type = `Language`;
+
+const permissions = {
+  contributors: [],
+  owners:       [config.testUser],
+  public:       false,
+  viewers:      [],
+};
+
+const defaultData = {
+  name: {},
+  permissions,
+  test,
+  type,
+};
 
 module.exports = (req, v = ``) => {
 
-  describe(`Socket API`, function() {
+  describe(`General`, function() {
 
+    let token;
     let client;
     let emit;
-    let token;
-
-    const name = { eng: `Language Name` };
-    const test = true;
-    const ttl  = 500;
-    const type = `Language`;
-
-    const defaultData = {
-      name,
-      permissions: {
-        contributors: [],
-        owners:       [config.testUser],
-        public:       false,
-        viewers:      [],
-      },
-      test,
-      ttl,
-      type,
-    };
 
     beforeAll(testAsync(async function() {
+
       token  = await getToken();
       client = await authenticate(v, token);
-      emit   = promisify(client.emit).bind(client);
+
+      emit = (...args) => new Promise((resolve, reject) => {
+        client.emit(...args, (err, res, info) => {
+          if (err) return reject(err);
+          resolve({ res, info });
+        });
+      });
+
     }));
 
-    beforeEach(function() {
-      Reflect.deleteProperty(defaultData, `id`);
-    });
-
-
-    // FEATURES
     it(`can authenticate twice`, function(done) {
       client.on(`authenticated`, done);
       client.on(`error`, fail);
@@ -67,7 +67,7 @@ module.exports = (req, v = ``) => {
       client.emit(`authenticate`, { token }, done);
     });
 
-    it(`option: maxItemCount`, testAsync(async function() {
+    it(`maxItemCount`, testAsync(async function() {
 
       const data = Object.assign({}, defaultData);
       Reflect.deleteProperty(data, `ttl`);
@@ -93,109 +93,10 @@ module.exports = (req, v = ``) => {
 
     }), 10000);
 
-    it(`304: Not Modified`, testAsync(async function() {
-
-      const data = Object.assign({}, defaultData);
-      Reflect.deleteProperty(data, `ttl`);
-
-      const doc = await upsert(coll, data);
-
-      try {
-        await emit(`get`, doc.id, { ifNoneMatch: doc._etag });
-      } catch (e) {
-        expect(e.status).toBe(304);
-      }
-
-    }));
-
-
-    // GENERIC CRUD METHODS
-
-    it(`add`, testAsync(async function() {
-      const data = Object.assign({ tid: `add` }, defaultData);
-      const res  = await emit(`add`, `Language`, data);
-      expect(res.tid).toBe(data.tid);
-    }));
-
-    it(`delete`, testAsync(async function() {
-      const doc = await upsert(coll, defaultData);
-      const res = await emit(`delete`, doc.id);
-      expect(res.status).toBe(204);
-    }));
-
-    it(`get`, testAsync(async function() {
-
-      const data = {
-        name,
-        permissions: defaultData.permissions,
-        test,
-        tid: `get`,
-        type,
-      };
-
-      const doc  = await upsert(coll, data);
-      const lang = await emit(`get`, doc.id);
-
-      expect(lang.tid).toBe(data.tid);
-
-    }));
-
-    it(`getAll`, testAsync(async function() {
-
-      const data = {
-        name,
-        permissions: Object.assign({}, defaultData.permissions),
-        test,
-        tid: `getAll`,
-        type,
-      };
-
-      data.permissions.owners = [`some-other-user`];
-
-      const doc = await upsert(coll, data);
-      await upsert(coll, defaultData);
-      const res = await emit(`getAll`, `Language`);
-
-      expect(res.length).toBeGreaterThan(0);
-      expect(res.some(item => item.tid === doc.tid)).toBe(false);
-
-    }));
-
-    it(`update`, testAsync(async function() {
-
-      const data = Object.assign({
-        notChanged: `This property should not be changed.`,
-        tid:        `upsertOne`,
-        type:       `Language`,
-      }, defaultData);
-
-      const doc = await upsert(coll, data);
-
-      const newData = {
-        id: doc.id,
-        test,
-        tid: `upsertOneAgain`,
-        ttl,
-        type,
-      };
-
-      const res = await emit(`update`, newData);
-
-      expect(res.notChanged).toBe(doc.notChanged);
-      expect(res.tid).toBe(newData.tid);
-
-    }));
-
-    it(`upsert`, testAsync(async function() {
-      const data = Object.assign({ tid: `upsert`, type }, defaultData);
-      const res = await emit(`upsert`, data);
-      expect(res.tid).toBe(data.tid);
-    }));
-
     it(`receives deleted data (REST)`, testAsync(async function() {
 
       const client = await authenticate(v, token);
-      const doc    = await upsert(coll, defaultData);
+      const doc    = await upsert(coll, Object.assign({}, defaultData));
 
       await Promise.all([
 
@@ -215,7 +116,7 @@ module.exports = (req, v = ``) => {
 
     it(`receives deleted data (Socket)`, testAsync(async function() {
 
-      const doc          = await upsert(coll, defaultData);
+      const doc          = await upsert(coll, Object.assign({}, defaultData));
       const secondClient = await authenticate(v, token);
 
       await Promise.all([
@@ -234,7 +135,7 @@ module.exports = (req, v = ``) => {
 
     it(`receives updated data (REST)`, testAsync(async function() {
 
-      const data = Object.assign({}, defaultData);
+      const data = Object.assign({}, Object.assign({}, defaultData));
       Reflect.deleteProperty(data, `ttl`);
 
       const doc    = await upsert(coll, data);
@@ -321,6 +222,19 @@ module.exports = (req, v = ``) => {
         emit(`upsertLanguage`, data),
 
       ]);
+
+    }));
+
+    it(`304: Not Modified`, testAsync(async function() {
+
+      const data = Object.assign({}, defaultData);
+      const doc  = await upsert(coll, data);
+
+      try {
+        await emit(`get`, doc.id, { ifNoneMatch: doc._etag });
+      } catch (e) {
+        expect(e.status).toBe(304);
+      }
 
     }));
 
