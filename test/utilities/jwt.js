@@ -1,4 +1,4 @@
-const jwt  = require('jsonwebtoken');
+const jwt           = require('jsonwebtoken');
 const { promisify } = require('util');
 
 module.exports = {

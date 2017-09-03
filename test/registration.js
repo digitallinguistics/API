@@ -8,9 +8,10 @@
   prefer-arrow-callback
 */
 
-const config    = require('../lib/config');
-const req       = require('superagent');
-const testAsync = require('./async');
+const config = require('../lib/config');
+const req    = require('superagent');
+
+const { testAsync } = require('./utilities');
 
 describe(`Client Registration`, function() {
 

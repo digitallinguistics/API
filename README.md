@@ -34,7 +34,7 @@ Each item in the database must be formatted according to the Digital Linguistics
 Some types of resources contain subitems that may also be accessed with the API. For example, texts contain phrases, so a user may request one or more phrases from a text, rather than having to request the entire text at once.
 
 #### Resource Properties
-- **IDs (`id`):** Each resource in the database is given a unique ID which cannot be altered or set by your application. If you attempt to create a new resource with an `id` property, the API will return an error. (If you are just updating a resource, however, including the `id` property will not throw an error.) If your application needs to maintain its own set of IDs, it is recommended that you create a `cid` (Client ID) property for that purpose.
+- **IDs (`id`):** Each resource in the database is given a unique ID which should not be altered or set by your application. If you attempt to create a new resource with an `id` property, the API will overwrite that ID. If your application needs to maintain its own set of IDs, it is recommended that you create a `cid` (Client ID) property for that purpose.
 
 - **URL (`url`):** The `url` property of a resource is a unique URL where that resource can be accessed, or used to perform different operations on the resource.
 
@@ -94,7 +94,9 @@ There are three ways to request tokens for use with the DLx API service:
 * **[Client Credentials](#c-client-credentials-grant):** A single-step process where you authenticate your application and immediately receive an access token, without authenticating the user. In this strategy, your app will only have access to publicly-available resources. This is most useful when your app is acting on behalf of the app itself rather than on behalf of any particular user. Follow [these directions][9] to authenticate using this strategy.
 
 #### Important Notes on Authenticating
+
 * DLx uses [Auth0][5] to log in users and issue access tokens. Requests for tokens must be sent to the domain `digitallinguistics.auth0.com`.
+
 * Use `https://api.digitallinguistics.io/` as the value for the `audience` parameter.
 
 #### Scopes
@@ -132,7 +134,7 @@ DELETE | Deletes the resource
 GET    | Retrieves the resource
 PATCH  | Updates the resource
 
-You can also perform operations on multiple resources at once by sending requests to the entire collection (the first part of the path, e.g. `/languages` or `/lexicons`).
+You can also perform operations on multiple resources at once by sending requests to the entire collection (e.g. `/languages`).
 
 You can retrieve multiple items at once by making a GET request to a collection. For example, a GET request to `https://api.digitallinguistics.io/languages` will retrieve all the Languages that the currently-authenticated user has permission to access.
 
@@ -148,11 +150,8 @@ Request Format                                        | Operation
 
 **[View the complete reference documentation for the REST API here.][3]**
 
-#### Versioning
-The DLX REST API is versioned, so that applications can continue using older versions of the API as new versions come out. If no version is specified, requests to the API default to the most current version. To specify a version, simply include the version number in the form of `/vX` immediately after the domain. For example, `https://api.digitallinguistics.io/v1/languages` is a request to version 1 of the API, while `https://api.digitallinguistics.io/v2/languages` is a request to version 2.
-
-#### Operations on Subitems **NOT YET SUPPORTED**
-Certain resources contain subitems or references to other resources. These can often be accessed by appending additional segments to the URL. For example, to retrieve all the phrases in a text, you would make a GET request to `https://api.digitallinguistics.io/texts/{text}/phrases`. To retrieve a specific phrase from a text, you would make a GET request to `https://api.digitallinguistics.io/texts/{text}/phrases/{phrase}`. In general, the format for performing operations on collections of subitems or individual subitems is as follows:
+#### Operations on Subitems
+Certain resources contain subitems or references to other resources. These can often be accessed by appending additional segments to the URL. For example, to retrieve all the lexemes for a language, you would make a GET request to `https://api.digitallinguistics.io/languages/{language}/lexemes`. To retrieve a specific lexeme, you would make a GET request to `https://api.digitallinguistics.io/languages/{language}/lexemes/{lexeme}`. In general, the format for performing operations on collections of subitems or individual subitems is as follows:
 
 * Operations on collections of subitems: `https://api.digitallinguistics.io/{collection}/{item}/{subitems}`
 * Operations on individual subitems: `https://api.digitallinguistics.io/{collection}/{item}/{subitems}/{subitem}`
@@ -161,6 +160,9 @@ A complete list of the operations that can be performed on each type of resource
 
 #### Operations on Permissions **NOT YET SUPPORTED**
 To add or delete permissions for an object, simply make a POST or DELETE request to the resource URL with `/permissions` appended to the end. For example, to add a new permission for a text with the ID `17`, you would make a PUT request to `https://api.digitallinguistics.io/texts/17/permissions`.
+
+#### Versioning
+The DLX REST API is versioned, so that applications can continue using older versions of the API as new versions come out. If no version is specified, requests to the API default to the most current version. To specify a version, simply include the version number in the form of `/vX` immediately after the domain. For example, `https://api.digitallinguistics.io/v1/languages` is a request to version 1 of the API, while `https://api.digitallinguistics.io/v2/languages` is a request to version 2.
 
 #### Parts of the Request
 
@@ -194,6 +196,8 @@ The body of the request should contain any resources to be uploaded to the datab
 If the request is successful, the API will return a response with a `2xx` status and JSON data in the response body (or sometimes a `3xx` status and no response body, if an `If-None-Match` header was included).
 
 The response may also include a `Last-Modified` header, containing a timestamp of the last time that the resource was modified, in UTC format.
+
+Requests for multiple items will also return a `dlx-item-count` header, indicating the number of items returned in the response.
 
 Unsuccessful requests will return a response with a `4xx` or `5xx` status, and sometimes a JSON object in the response body containing additional details about the error. A `WWW-Authenticate` header may also be included for invalid authorization requests.
 
@@ -356,15 +360,17 @@ socket.on(`add`, id => {
 ```
 
 ### Parameters
-Parameters that are part of the path in the REST API must be passed as arguments in the socket API. For example, this is how you would run `GET /languages/12345` in the socket API:
+Parameters that are part of the path in the REST API are often passed as options in the socket API. For example, this is how you would run `GET /languages/12345/lexemes/678910` in the socket API:
 
 ```js
-socket.emit(`getLanguage`, `12345`, (err, language) => {
+socket.emit(`getLexeme`, `678910`, { languageID: `12345` }, (err, language) => {
   /* Do something with the returned language object */
 });
 ```
 
-Parameters that are part of the query string in the REST API must be passed as part of an optional options argument in the socket API. For example, this is how you would run `GET /languages?fields=id,title` in the socket API:
+If the Lexeme already has a `languageID` property provided, you can omit the option.
+
+Parameters that are part of the query string in the REST API must be passed as part of the options argument in the socket API. For example, this is how you would run `GET /languages?fields=id,title` in the socket API:
 
 ```js
 socket.emit(`getLanguages`, { fields: [`id`, `title`] }, (err, languages) => {

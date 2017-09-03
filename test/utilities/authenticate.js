@@ -1,4 +1,4 @@
-const config = require(`../lib/config`);
+const config = require(`../../lib/config`);
 const io     = require(`socket.io-client`);
 
 module.exports = (v = ``, token) => new Promise((resolve, reject) => {
