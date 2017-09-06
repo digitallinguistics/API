@@ -1,6 +1,7 @@
 /* eslint-disable
   func-names,
   max-nested-callbacks,
+  no-underscore-dangle,
   prefer-arrow-callback,
   sort-keys,
 */
@@ -16,6 +17,7 @@ const {
 
 const {
   coll,
+  read,
   upsert,
 } = db;
 
@@ -65,9 +67,33 @@ module.exports = (v = ``) => {
     }));
 
     it(`delete`, testAsync(async function() {
-      const doc = await upsert(coll, Object.assign({}, defaultData));
-      const { res } = await emit(`deleteLanguage`, doc.id);
+
+      // add test data
+      const lang = await upsert(coll, Object.assign({}, defaultData));
+
+      const lexData = {
+        languageID: lang.id,
+        lemma:      {},
+        permissions,
+        senses:     [],
+        test,
+        type:       `Lexeme`,
+      };
+
+      const lex = await upsert(coll, lexData);
+
+      // delete Language
+      const { res } = await emit(`deleteLanguage`, lang.id);
       expect(res.status).toBe(204);
+
+      // check that Language has been deleted
+      const langCheck = await read(lang._self);
+      expect(langCheck.ttl).toBeDefined();
+
+      // check that Lexeme has been deleted
+      const lexemeCheck = await read(lex._self);
+      expect(lexemeCheck.ttl).toBeDefined();
+
     }));
 
     it(`get`, testAsync(async function() {
