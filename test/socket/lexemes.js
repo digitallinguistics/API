@@ -66,7 +66,7 @@ module.exports = (v = ``) => {
 
     }));
 
-    it(`add`, testAsync(async function() {
+    it(`addLexeme`, testAsync(async function() {
 
       // add Lexeme with Language that exists
       const data = Object.assign({ tid: `addLexeme` }, defaultData);
@@ -96,19 +96,19 @@ module.exports = (v = ``) => {
 
     }));
 
-    it(`delete`, testAsync(async function() {
+    it(`deleteLexeme`, testAsync(async function() {
       const doc     = await upsert(coll, Object.assign({}, defaultData));
       const { res } = await emit(`deleteLexeme`, doc.id);
       expect(res.status).toBe(204);
     }));
 
-    it(`get`, testAsync(async function() {
+    it(`getLexeme`, testAsync(async function() {
       const doc = await upsert(coll, Object.assign({ tid: `get` }, defaultData));
       const { res: lex } = await emit(`getLexeme`, doc.id);
       expect(lex.tid).toBe(`get`);
     }));
 
-    it(`getAll`, testAsync(async function() {
+    it(`getLexemes`, testAsync(async function() {
 
       const data = {
         languageID,
@@ -121,7 +121,7 @@ module.exports = (v = ``) => {
 
       const doc = await upsert(coll, data);
       await upsert(coll, Object.assign({}, defaultData));
-      const { res, info } = await emit(`getLexemes`);
+      const { res, info } = await emit(`getLexemes`, languageID);
 
       expect(res.length).toBeGreaterThan(0);
       expect(info.itemCount).toBeGreaterThan(0);
@@ -129,7 +129,7 @@ module.exports = (v = ``) => {
 
     }));
 
-    it(`update`, testAsync(async function() {
+    it(`updateLexeme`, testAsync(async function() {
 
       const data = Object.assign({
         notChanged: `This property should not be changed.`,
@@ -152,7 +152,7 @@ module.exports = (v = ``) => {
 
     }));
 
-    it(`upsert`, testAsync(async function() {
+    it(`upsertLexeme`, testAsync(async function() {
       const data = Object.assign({ tid: `upsert` }, defaultData);
       const { res } = await emit(`upsertLexeme`, data);
       expect(res.tid).toBe(data.tid);
