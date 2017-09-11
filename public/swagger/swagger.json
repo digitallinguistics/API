@@ -346,7 +346,24 @@
         }
       }
     },
-    "/lexemes/{lexemeID}" : { }
+    "/lexemes/{lexemeID}" : {
+      "delete" : {
+        "summary" : "Delete a Lexeme by ID",
+        "operationId" : "deleteLex",
+        "parameters" : [ {
+          "name" : "lexemeID",
+          "in" : "path",
+          "description" : "The ID of the Lexeme to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "204: Delete operation successful."
+          }
+        }
+      }
+    }
   },
   "securityDefinitions" : {
     "Authorization" : {
