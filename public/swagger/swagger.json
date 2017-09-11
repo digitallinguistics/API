@@ -2,7 +2,7 @@
   "swagger" : "2.0",
   "info" : {
     "description" : "The Digital Linguistics (DLx) REST API",
-    "version" : "0.2.0",
+    "version" : "0.3.0",
     "title" : "DLx",
     "contact" : {
       "name" : "Daniel W. Hieber",
@@ -239,9 +239,9 @@
     "/languages/{languageID}/lexemes" : {
       "get" : {
         "tags" : [ "Lexeme" ],
-        "summary" : "Get all lexemes",
+        "summary" : "Get all the Lexemes for a Language",
         "description" : "Retrieves all the Lexemes for a Language that the authenticated user or client has permission to access.",
-        "operationId" : "getLexemes",
+        "operationId" : "getLexemesByLanguage",
         "parameters" : [ {
           "name" : "languageID",
           "in" : "path",
@@ -290,8 +290,8 @@
       },
       "post" : {
         "tags" : [ "Lexeme" ],
-        "summary" : "Add a new Lexeme",
-        "operationId" : "addLexeme",
+        "summary" : "Add a new Lexeme to a Language",
+        "operationId" : "addLexemeByLanguage",
         "parameters" : [ {
           "name" : "languageID",
           "in" : "path",
@@ -321,9 +321,9 @@
       },
       "put" : {
         "tags" : [ "Lexeme" ],
-        "summary" : "Upsert (create or replace) a Lexeme",
+        "summary" : "Upsert (create or replace) a Lexeme to a Language",
         "description" : "Creates a Lexeme for the the Language if it does not yet exist (i.e. if the resource does not yet have an `id` property), or replaces the existing Lexeme if it does. Note that this replaces the *entire* Lexeme. It is not a partial update.",
-        "operationId" : "upsertLexeme",
+        "operationId" : "upsertLexemeByLanguage",
         "parameters" : [ {
           "name" : "languageID",
           "in" : "path",
@@ -357,7 +357,8 @@
           }
         }
       }
-    }
+    },
+    "/languages/{languageID}/lexemes/{lexemeID}" : { }
   },
   "securityDefinitions" : {
     "Authorization" : {
@@ -418,6 +419,13 @@
       "name" : "languageID",
       "in" : "path",
       "description" : "The ID of the Language to perform the operation on",
+      "required" : true,
+      "type" : "string"
+    },
+    "lexemeID" : {
+      "name" : "lexemeID",
+      "in" : "path",
+      "description" : "The ID of the Lexeme to perform the operation on",
       "required" : true,
       "type" : "string"
     },
