@@ -358,7 +358,38 @@
         }
       }
     },
-    "/lexemes" : { }
+    "/lexemes" : {
+      "get" : {
+        "operationId" : "getLexemes",
+        "parameters" : [ {
+          "name" : "languageID",
+          "in" : "query",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : false,
+          "type" : "string",
+          "allowEmptyValue" : true
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200: Operation successful.",
+            "headers" : {
+              "dlx-continuation" : {
+                "type" : "string",
+                "description" : "A continuation token for retrieving more results"
+              },
+              "dlx-item-count" : {
+                "type" : "string",
+                "description" : "The number of items returned in the response"
+              },
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
+          }
+        }
+      }
+    }
   },
   "securityDefinitions" : {
     "Authorization" : {
