@@ -357,8 +357,7 @@
           }
         }
       }
-    },
-    "/languages/{languageID}/lexemes/{lexemeID}" : { }
+    }
   },
   "securityDefinitions" : {
     "Authorization" : {
@@ -421,6 +420,14 @@
       "description" : "The ID of the Language to perform the operation on",
       "required" : true,
       "type" : "string"
+    },
+    "languageIDQuery" : {
+      "name" : "languageID",
+      "in" : "query",
+      "description" : "The ID of the Language to perform the operation on",
+      "required" : false,
+      "type" : "string",
+      "allowEmptyValue" : true
     },
     "lexemeID" : {
       "name" : "lexemeID",
