@@ -2,7 +2,8 @@ module.exports = {
   authenticate: require('./authenticate'),
   db:           require('./db'),
   getToken:     require('./getToken'),
+  headers:      require('./headers'),
   jwt:          require('./jwt'),
-  timeout:      require('./timeout'),
   testAsync:    require('./testAsync'),
+  timeout:      require('./timeout'),
 };

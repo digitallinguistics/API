@@ -12,6 +12,7 @@ const config = require('../../lib/config');
 const {
   db,
   getToken,
+  headers,
   testAsync,
   timeout,
 } = require('../utilities');
@@ -21,6 +22,13 @@ const {
   read,
   upsert,
 } = db;
+
+const {
+  continuationHeader,
+  itemCountHeader,
+  maxItemsHeader,
+  ifModifiedSinceHeader,
+} = headers;
 
 const permissions = {
   contributors: [],
@@ -100,10 +108,6 @@ module.exports = (req, v = ``) => {
 
         it(`dlx-max-item-count / continuation`, testAsync(async function() {
 
-          const continuationHeader = `dlx-continuation`;
-          const itemCountHeader    = `dlx-item-count`;
-          const maxItemsHeader     = `dlx-max-item-count`;
-
           // add test data
           await upsert(coll, Object.assign({ tid: `getLanguages-continuation1` }, defaultData));
           await upsert(coll, Object.assign({ tid: `getLanguages-continuation2` }, defaultData));
@@ -164,28 +168,95 @@ module.exports = (req, v = ``) => {
         it(`If-Modified-Since`, testAsync(async function() {
 
           // add test data
+          const modifiedBefore = Object.assign({ tid: `modifiedBefore` }, defaultData);
+          const modifiedAfter  = Object.assign({ tid: `modifiedAfter` }, defaultData);
+
+          const lang1 = await upsert(coll, modifiedBefore);
+          await timeout(2000);
+          const lang2 = await upsert(coll, modifiedAfter);
+
           // bad If-Modified-Since value returns 400
+          await req.get(`${v}/languages`)
+          .set(`Authorization`, token)
+          .set(ifModifiedSinceHeader, true)
+          .expect(400);
+
           // If-Modified-Since
+          const ifModifiedSince = new Date((lang1._ts * 1000) + 1000); // add 1s to timestamp of modifiedBefore
+
+          const { body: langs } = await req.get(`${v}/languages`)
+          .set(`Authorization`, token)
+          .set(ifModifiedSinceHeader, ifModifiedSince)
+          .expect(itemCountHeader, /[0-9]+/)
+          .expect(200);
+
+          // check Language attributes
+          expect(langs.every(lang => lang.type === `Language`
+            && typeof lang._attachments === `undefined`
+            && typeof lang._rid === `undefined`
+            && typeof lang._self === `undefined`
+            && typeof lang.permissions === `undefined`
+            && typeof lang.ttl === `undefined`
+          )).toBe(true);
+
           // only results modified after If-Modified-Since are returned
-          // status === 200
-          // all items have type === Language
-          // no items have database properties (_attachments, _rid, _self, permissions)
-          // no items are deleted (ttl)
-          // no items are included in response unless testUser is at least a Viewer
+          expect(langs.some(lang => lang.id === lang1.id)).toBe(false);
+          expect(langs.some(lang => lang.id === lang2.id)).toBe(true);
 
         }));
 
         it(`public=true`, testAsync(async function() {
 
           // add test data
-          // bad public value returns 400
+          const privateData = Object.assign({}, defaultData, {
+            permissions: {
+              owners: [`some-other-user`],
+              public: false,
+            },
+            tid: `privateData`,
+          });
+
+          const publicData  = Object.assign({}, defaultData, {
+            permissions: {
+              owners: [`some-other-user`],
+              public: true,
+            },
+            tid: `publicData`,
+          });
+
+          const privateLang = await upsert(coll, privateData);
+          const publicLang  = await upsert(coll, publicData);
+
+          // bad public value does not return public results
+          const { body: badLangs } = await req.get(`${v}/languages`)
+          .set(`Authorization`, token)
+          .query({ public: `yes` })
+          .expect(itemCountHeader, /[0-9]+/)
+          .expect(200);
+
+          expect(badLangs.find(lang => lang.id === publicLang.id)).toBeUndefined();
+          expect(badLangs.find(lang => lang.id === privateLang.id)).toBeUndefined();
+
           // request public items
+          const { body: langs } = await req.get(`${v}/languages`)
+          .set(`Authorization`, token)
+          .query({ public: true })
+          .expect(itemCountHeader, /[0-9]+/)
+          .expect(200);
+
+          // check Language attributes
+          expect(langs.every(lang => lang.type === `Language`
+            && typeof lang._attachments === `undefined`
+            && typeof lang._rid === `undefined`
+            && typeof lang._self === `undefined`
+            && typeof lang.permissions === `undefined`
+            && typeof lang.ttl === `undefined`
+          )).toBe(true);
+
           // public items are included in response
-          // status === 200
-          // all items have type === Language
-          // no items have database properties (_attachments, _rid, _self, permissions)
-          // no items are deleted (ttl)
-          // no items are included in response unless testUser is at least a Viewer
+          expect(langs.find(lang => lang.id === publicLang.id)).toBeDefined();
+          // private items are not included in response
+          expect(langs.find(lang => lang.id === privateLang.id)).toBeUndefined();
 
         }));
 
@@ -302,26 +373,6 @@ module.exports = (req, v = ``) => {
 //       .expect(204);
 //
 //     }));
-//
-//     it(`GET /languages?public=true`, testAsync(async function() {
-//
-//       const data = {
-//         name: {},
-//         permissions: { public: true },
-//         test,
-//         type,
-//       };
-//
-//       const doc = await upsert(coll, data);
-//
-//       const res = await req.get(`${v}/languages`)
-//       .set(`Authorization`, token)
-//       .query({ public: true })
-//       .expect(200);
-//
-//       expect(res.body.some(item => item.id === doc.id)).toBe(true);
-//
-//     }), 10000);
 //
 //     it(`POST /languages`, testAsync(async function() {
 //
