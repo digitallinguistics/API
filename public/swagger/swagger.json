@@ -409,6 +409,14 @@
           "description" : "The ID of the Lexeme to perform the operation on",
           "required" : true,
           "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "languageID",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/languageID"
+          }
         } ],
         "responses" : {
           "200" : {
@@ -432,7 +440,16 @@
       "in" : "header"
     }
   },
-  "definitions" : { },
+  "definitions" : {
+    "languageID" : {
+      "required" : [ "languageID" ],
+      "properties" : {
+        "languageID" : {
+          "type" : "string"
+        }
+      }
+    }
+  },
   "parameters" : {
     "body" : {
       "in" : "body",
@@ -477,12 +494,7 @@
       "description" : "The ID of the Language to perform the operation on",
       "required" : false,
       "schema" : {
-        "required" : [ "languageID" ],
-        "properties" : {
-          "languageID" : {
-            "type" : "string"
-          }
-        }
+        "$ref" : "#/definitions/languageID"
       }
     },
     "languageIDQuery" : {
