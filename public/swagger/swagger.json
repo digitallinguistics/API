@@ -358,6 +358,7 @@
         }
       }
     },
+    "/languages/{languageID}/lexemes/{lexemeID}" : { },
     "/lexemes" : {
       "get" : {
         "tags" : [ "Lexeme" ],
