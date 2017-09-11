@@ -591,6 +591,60 @@
     },
     "NotModified" : {
       "description" : "304: Not modified."
+    },
+    "BadRequest" : {
+      "description" : "400: There was a problem with the request."
+    },
+    "Unauthorized" : {
+      "description" : "401: Authorization missing or invalid.",
+      "headers" : {
+        "WWW-Authenticate" : {
+          "type" : "string",
+          "description" : "An access token is required."
+        }
+      }
+    },
+    "Forbidden" : {
+      "description" : "403: Unauthorized."
+    },
+    "NotFound" : {
+      "description" : "404: Database resource not found."
+    },
+    "MethodNotAllowed" : {
+      "description" : "405: Method not allowed."
+    },
+    "NotAcceptable" : {
+      "description" : "406: Cannot return data in requested format."
+    },
+    "Timeout" : {
+      "description" : "408: The request timed out."
+    },
+    "Conflict" : {
+      "description" : "409: There was a data conflict in the database."
+    },
+    "PreconditionFailed" : {
+      "description" : "412: A precondition for the operation was not met."
+    },
+    "LargePayload" : {
+      "description" : "413: Request payload is too large."
+    },
+    "TokenExpired" : {
+      "description" : "419: Access token expired."
+    },
+    "Unprocessable" : {
+      "description" : "422: The data is not properly formatted."
+    },
+    "TooManyRequests" : {
+      "description" : "429: Too many requests."
+    },
+    "RetryOperation" : {
+      "description" : "449: Retry the operation"
+    },
+    "ServerError" : {
+      "description" : "500: An error occurred on the server."
+    },
+    "NotImplemented" : {
+      "description" : "501: This feature is not yet implemented."
     }
   },
   "externalDocs" : {
