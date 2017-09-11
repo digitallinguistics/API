@@ -15,9 +15,19 @@
   },
   "host" : "api.digitallinguistics.io",
   "basePath" : "/v0",
+  "tags" : [ {
+    "name" : "Language",
+    "description" : "Operations on Languages"
+  }, {
+    "name" : "Lexeme",
+    "description" : "Operations on Lexemes"
+  } ],
   "schemes" : [ "https" ],
   "consumes" : [ "application/json" ],
   "produces" : [ "application/json" ],
+  "security" : [ {
+    "Authorization" : [ ]
+  } ],
   "paths" : {
     "/languages" : {
       "get" : {
@@ -90,6 +100,14 @@
           }
         }
       }
+    }
+  },
+  "securityDefinitions" : {
+    "Authorization" : {
+      "description" : "An access token (JSON Web Token) included in the `Authorization` header in the format `Bearer {token}`. Tokens may be retrieved programmatically from https://digitallinguistics.auth0.com. See the authorization documentation at http://developer.digitallinguistics.io/api/.",
+      "type" : "apiKey",
+      "name" : "Authorization",
+      "in" : "header"
     }
   },
   "definitions" : { },
