@@ -348,6 +348,7 @@
     },
     "/lexemes/{lexemeID}" : {
       "delete" : {
+        "tags" : [ "Lexeme" ],
         "summary" : "Delete a Lexeme by ID",
         "operationId" : "deleteLexeme",
         "parameters" : [ {
