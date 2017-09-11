@@ -417,13 +417,6 @@
       "type" : "string",
       "allowEmptyValue" : true
     },
-    "lexemeID" : {
-      "name" : "lexemeID",
-      "in" : "path",
-      "description" : "The ID of the Lexeme to perform the operation on",
-      "required" : true,
-      "type" : "string"
-    },
     "maxItems" : {
       "name" : "maxItems",
       "in" : "header",
