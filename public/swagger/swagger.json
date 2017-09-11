@@ -500,6 +500,20 @@
       "required" : true,
       "type" : "string"
     },
+    "languageIDProp" : {
+      "in" : "body",
+      "name" : "languageID",
+      "description" : "The ID of the Language to perform the operation on",
+      "required" : false,
+      "schema" : {
+        "required" : [ "languageID" ],
+        "properties" : {
+          "languageID" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
     "languageIDQuery" : {
       "name" : "languageID",
       "in" : "query",
