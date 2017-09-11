@@ -99,6 +99,38 @@
             }
           }
         }
+      },
+      "put" : {
+        "tags" : [ "Language" ],
+        "summary" : "Upsert (create or replace) a Language",
+        "description" : "Creates a Language if it does not yet exist (i.e. if the resource does not have an `id` property yet), or replaces the existing Language resource if it does. Note that this replaces the *entire* Language. It is not a partial update.",
+        "operationId" : "upsertLanguage",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "A database resource to upsert",
+          "required" : true,
+          "schema" : {
+            "type" : "object"
+          }
+        }, {
+          "name" : "ifMatch",
+          "in" : "header",
+          "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "201: Upsert successful.",
+            "headers" : {
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -125,6 +157,13 @@
       "name" : "continuation",
       "in" : "header",
       "description" : "The `dlx-continuation` header is used to send a continuation token with the request, when retrieving the next page of results.",
+      "required" : false,
+      "type" : "string"
+    },
+    "ifMatch" : {
+      "name" : "ifMatch",
+      "in" : "header",
+      "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
       "required" : false,
       "type" : "string"
     },
@@ -164,6 +203,15 @@
     },
     "Created" : {
       "description" : "201: The resource was created successfully.",
+      "headers" : {
+        "Last-Modified" : {
+          "type" : "string",
+          "description" : "The time that the item was last modified"
+        }
+      }
+    },
+    "UpsertSuccessful" : {
+      "description" : "201: Upsert successful.",
       "headers" : {
         "Last-Modified" : {
           "type" : "string",
