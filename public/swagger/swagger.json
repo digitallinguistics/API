@@ -64,11 +64,45 @@
             }
           }
         }
+      },
+      "post" : {
+        "tags" : [ "Language" ],
+        "summary" : "Add a new Language",
+        "operationId" : "addLanguage",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "A database resource to upsert",
+          "required" : true,
+          "schema" : {
+            "type" : "object"
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "201: The resource was created successfully.",
+            "headers" : {
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
+          }
+        }
       }
     }
   },
   "definitions" : { },
   "parameters" : {
+    "body" : {
+      "in" : "body",
+      "name" : "body",
+      "description" : "A database resource to upsert",
+      "required" : true,
+      "schema" : {
+        "type" : "object"
+      }
+    },
     "continuation" : {
       "name" : "continuation",
       "in" : "header",
@@ -104,6 +138,15 @@
           "type" : "string",
           "description" : "The number of items returned in the response"
         },
+        "Last-Modified" : {
+          "type" : "string",
+          "description" : "The time that the item was last modified"
+        }
+      }
+    },
+    "Created" : {
+      "description" : "201: The resource was created successfully.",
+      "headers" : {
         "Last-Modified" : {
           "type" : "string",
           "description" : "The time that the item was last modified"
