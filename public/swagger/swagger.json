@@ -437,6 +437,38 @@
             }
           }
         }
+      },
+      "put" : {
+        "tags" : [ "Lexeme" ],
+        "summary" : "Upsert (add or replace) a Lexeme",
+        "description" : "Upsert (add or replace) a Lexeme. A `languageID` must be provided either as a query parameter, or as an attribute on the Lexeme body.",
+        "operationId" : "upsertLexeme",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "languageID",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/languageID"
+          }
+        }, {
+          "name" : "ifMatch",
+          "in" : "header",
+          "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "201: Upsert successful.",
+            "headers" : {
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
+          }
+        }
       }
     }
   },
