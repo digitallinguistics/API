@@ -412,6 +412,8 @@
         }
       },
       "post" : {
+        "summary" : "Add a new Lexeme",
+        "description" : "Add a new Lexeme. A `languageID` must be provided either as a query parameter, or as an attribute on the Lexeme body.",
         "operationId" : "addLexeme",
         "parameters" : [ {
           "name" : "languageID",
