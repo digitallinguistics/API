@@ -346,7 +346,7 @@
         }
       }
     },
-    "/lexemes/{lexemeID}" : { }
+    "/lexemes/{lexID}" : { }
   },
   "securityDefinitions" : {
     "Authorization" : {
