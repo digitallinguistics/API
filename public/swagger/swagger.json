@@ -244,6 +244,46 @@
       }
     },
     "/languages/{languageID}" : {
+      "get" : {
+        "tags" : [ "Language" ],
+        "summary" : "Retrieve a Language by ID",
+        "operationId" : "getLanguage",
+        "parameters" : [ {
+          "name" : "languageID",
+          "in" : "path",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "ifNoneMatch",
+          "in" : "header",
+          "description" : "If `If-None-Match` header is used with GET requests to check whether you already have the most up-to-date version of the resource, and therefore do not need the resource sent again. The value of the `If-None-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to reduce bandwidth.",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200: Operation successful.",
+            "headers" : {
+              "dlx-continuation" : {
+                "type" : "string",
+                "description" : "A continuation token for retrieving more results"
+              },
+              "dlx-item-count" : {
+                "type" : "string",
+                "description" : "The number of items returned in the response"
+              },
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
+          },
+          "304" : {
+            "description" : "304: Not modified."
+          }
+        }
+      },
       "delete" : {
         "tags" : [ "Language" ],
         "summary" : "Delete a Language by ID",
@@ -299,6 +339,13 @@
       "name" : "ifMatch",
       "in" : "header",
       "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
+      "required" : false,
+      "type" : "string"
+    },
+    "ifNoneMatch" : {
+      "name" : "ifNoneMatch",
+      "in" : "header",
+      "description" : "If `If-None-Match` header is used with GET requests to check whether you already have the most up-to-date version of the resource, and therefore do not need the resource sent again. The value of the `If-None-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to reduce bandwidth.",
       "required" : false,
       "type" : "string"
     },
@@ -385,6 +432,9 @@
     },
     "DeleteSuccessful" : {
       "description" : "204: Delete operation successful."
+    },
+    "NotModified" : {
+      "description" : "304: Not modified."
     }
   },
   "externalDocs" : {
