@@ -132,6 +132,60 @@
           }
         }
       }
+    },
+    "/lexemes" : {
+      "get" : {
+        "tags" : [ "Lexeme" ],
+        "summary" : "Get all Lexemes",
+        "description" : "Retrieve all Lexemes that the authenticated user has permission to access. Include a `languageID` query parameter to limit results to Lexemes from a particular Language.",
+        "operationId" : "getLexemes",
+        "parameters" : [ {
+          "name" : "continuation",
+          "in" : "header",
+          "description" : "The `dlx-continuation` header is used to send a continuation token with the request, when retrieving the next page of results.",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "languageID",
+          "in" : "query",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : false,
+          "type" : "string",
+          "allowEmptyValue" : true
+        }, {
+          "name" : "maxItems",
+          "in" : "header",
+          "description" : "The `dlx-max-item-count` header is used to limit the number of results to a certain amount at a time (by default all results will be returned). If there are more results to be returned, a continuation token will also be sent in the `dlx-continuation` header.",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "public",
+          "in" : "query",
+          "description" : "Set this parameter to `true` to include all publicly-accessible resources, not just those that the user is listed as an Owner, Contributor, or Viewer for.",
+          "required" : false,
+          "type" : "string",
+          "default" : "false"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200: Operation successful.",
+            "headers" : {
+              "dlx-continuation" : {
+                "type" : "string",
+                "description" : "A continuation token for retrieving more results"
+              },
+              "dlx-item-count" : {
+                "type" : "string",
+                "description" : "The number of items returned in the response"
+              },
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "securityDefinitions" : {
@@ -166,6 +220,14 @@
       "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
       "required" : false,
       "type" : "string"
+    },
+    "languageIDQuery" : {
+      "name" : "languageID",
+      "in" : "query",
+      "description" : "The ID of the Language to perform the operation on",
+      "required" : false,
+      "type" : "string",
+      "allowEmptyValue" : true
     },
     "maxItems" : {
       "name" : "maxItems",
