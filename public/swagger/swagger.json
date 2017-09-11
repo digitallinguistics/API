@@ -288,7 +288,7 @@
         }
       },
       "post" : {
-        "tags" : [ "Lexeme" ],
+        "tags" : [ "Language", "Lexeme" ],
         "summary" : "Add a new Lexeme to a Language",
         "operationId" : "addLexemeByLanguage",
         "parameters" : [ {
@@ -309,8 +309,38 @@
             }
           }
         }
+      },
+      "put" : {
+        "tags" : [ "Language", "Lexeme" ],
+        "summary" : "Upsert (add or replace) a Lexeme",
+        "operationId" : "upsertLexemeByLanguage",
+        "parameters" : [ {
+          "name" : "languageID",
+          "in" : "path",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "ifMatch",
+          "in" : "header",
+          "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "201: Upsert successful.",
+            "headers" : {
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
+          }
+        }
       }
     },
+    "/languages/{languageID}/lexemes/{lexemeID}" : { },
     "/lexemes" : {
       "get" : {
         "tags" : [ "Lexeme" ],
