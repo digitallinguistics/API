@@ -349,7 +349,7 @@
     "/lexemes/{lexemeID}" : {
       "delete" : {
         "summary" : "Delete a Lexeme by ID",
-        "operationId" : "deleteLex",
+        "operationId" : "deleteLexeme",
         "parameters" : [ {
           "name" : "lexemeID",
           "in" : "path",
