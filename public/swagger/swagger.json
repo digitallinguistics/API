@@ -397,6 +397,12 @@
           "description" : "The ID of the Lexeme to perform the operation on",
           "required" : true,
           "type" : "string"
+        }, {
+          "name" : "ifMatch",
+          "in" : "header",
+          "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
+          "required" : false,
+          "type" : "string"
         } ],
         "responses" : {
           "204" : {
