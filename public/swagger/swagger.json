@@ -236,7 +236,81 @@
         }
       }
     },
-    "/languages/{languageID}/lexemes" : { },
+    "/languages/{languageID}/lexemes" : {
+      "get" : {
+        "tags" : [ "Language", "Lexeme" ],
+        "summary" : "Get all Lexemes for a Language",
+        "operationId" : "getLexemesByLanguage",
+        "parameters" : [ {
+          "name" : "languageID",
+          "in" : "path",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "continuation",
+          "in" : "header",
+          "description" : "The `dlx-continuation` header is used to send a continuation token with the request, when retrieving the next page of results.",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "maxItems",
+          "in" : "header",
+          "description" : "The `dlx-max-item-count` header is used to limit the number of results to a certain amount at a time (by default all results will be returned). If there are more results to be returned, a continuation token will also be sent in the `dlx-continuation` header.",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "public",
+          "in" : "query",
+          "description" : "Set this parameter to `true` to include all publicly-accessible resources, not just those that the user is listed as an Owner, Contributor, or Viewer for.",
+          "required" : false,
+          "type" : "string",
+          "default" : "false"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200: Operation successful.",
+            "headers" : {
+              "dlx-continuation" : {
+                "type" : "string",
+                "description" : "A continuation token for retrieving more results"
+              },
+              "dlx-item-count" : {
+                "type" : "string",
+                "description" : "The number of items returned in the response"
+              },
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Lexeme" ],
+        "summary" : "Add a new Lexeme to a Language",
+        "operationId" : "addLexemeByLanguage",
+        "parameters" : [ {
+          "name" : "languageID",
+          "in" : "path",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "201: The resource was created successfully.",
+            "headers" : {
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
+          }
+        }
+      }
+    },
     "/lexemes" : {
       "get" : {
         "tags" : [ "Lexeme" ],
