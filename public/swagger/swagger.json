@@ -410,13 +410,12 @@
           "required" : true,
           "type" : "string"
         }, {
-          "in" : "body",
           "name" : "languageID",
+          "in" : "query",
           "description" : "The ID of the Language to perform the operation on",
           "required" : false,
-          "schema" : {
-            "$ref" : "#/definitions/languageID"
-          }
+          "type" : "string",
+          "allowEmptyValue" : true
         } ],
         "responses" : {
           "200" : {
@@ -440,16 +439,7 @@
       "in" : "header"
     }
   },
-  "definitions" : {
-    "languageID" : {
-      "required" : [ "languageID" ],
-      "properties" : {
-        "languageID" : {
-          "type" : "string"
-        }
-      }
-    }
-  },
+  "definitions" : { },
   "parameters" : {
     "body" : {
       "in" : "body",
@@ -494,7 +484,12 @@
       "description" : "The ID of the Language to perform the operation on",
       "required" : false,
       "schema" : {
-        "$ref" : "#/definitions/languageID"
+        "required" : [ "languageID" ],
+        "properties" : {
+          "languageID" : {
+            "type" : "string"
+          }
+        }
       }
     },
     "languageIDQuery" : {
