@@ -360,6 +360,9 @@
     },
     "/lexemes" : {
       "get" : {
+        "tags" : [ "Lexeme" ],
+        "summary" : "Get all Lexemes",
+        "description" : "Retrieve all Lexemes that the authenticated user has permission to access. Include a `languageID` query parameter to limit results to Lexemes for a particular Language.",
         "operationId" : "getLexemes",
         "parameters" : [ {
           "name" : "languageID",
@@ -368,6 +371,25 @@
           "required" : false,
           "type" : "string",
           "allowEmptyValue" : true
+        }, {
+          "name" : "continuation",
+          "in" : "header",
+          "description" : "The `dlx-continuation` header is used to send a continuation token with the request, when retrieving the next page of results.",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "maxItems",
+          "in" : "header",
+          "description" : "The `dlx-max-item-count` header is used to limit the number of results to a certain amount at a time (by default all results will be returned). If there are more results to be returned, a continuation token will also be sent in the `dlx-continuation` header.",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "public",
+          "in" : "query",
+          "description" : "Set this parameter to `true` to include all publicly-accessible resources, not just those that the user is listed as an Owner, Contributor, or Viewer for.",
+          "required" : false,
+          "type" : "string",
+          "default" : "false"
         } ],
         "responses" : {
           "200" : {
