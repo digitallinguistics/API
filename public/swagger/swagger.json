@@ -410,6 +410,28 @@
             }
           }
         }
+      },
+      "post" : {
+        "operationId" : "addLexeme",
+        "parameters" : [ {
+          "name" : "languageID",
+          "in" : "query",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : false,
+          "type" : "string",
+          "allowEmptyValue" : true
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "201: The resource was created successfully.",
+            "headers" : {
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
+          }
+        }
       }
     }
   },
