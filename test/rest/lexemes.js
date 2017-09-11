@@ -139,7 +139,7 @@ module.exports = (req, v = ``) => {
       const { body } = await req.post(`${v}/languages/${languageID}/lexemes`)
       .set(`Authorization`, `Bearer ${token}`)
       .send(data)
-      // .expect(`Last-Modified`, /.+/)
+      .expect(`Last-Modified`, /.+/)
       .expect(201);
 
       expect(body.languageID).toBe(lang.id);
