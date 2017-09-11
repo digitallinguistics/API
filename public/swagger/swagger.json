@@ -417,12 +417,13 @@
         "description" : "Add a new Lexeme. A `languageID` must be provided either as a query parameter, or as an attribute on the Lexeme body.",
         "operationId" : "addLexeme",
         "parameters" : [ {
+          "in" : "body",
           "name" : "languageID",
-          "in" : "query",
           "description" : "The ID of the Language to perform the operation on",
           "required" : false,
-          "type" : "string",
-          "allowEmptyValue" : true
+          "schema" : {
+            "$ref" : "#/definitions/languageID"
+          }
         } ],
         "responses" : {
           "201" : {
@@ -460,6 +461,14 @@
       },
       "title" : "Document",
       "description" : "A document in the DLx database"
+    },
+    "languageID" : {
+      "required" : [ "languageID" ],
+      "properties" : {
+        "languageID" : {
+          "type" : "string"
+        }
+      }
     }
   },
   "parameters" : {
@@ -506,12 +515,7 @@
       "description" : "The ID of the Language to perform the operation on",
       "required" : false,
       "schema" : {
-        "required" : [ "languageID" ],
-        "properties" : {
-          "languageID" : {
-            "type" : "string"
-          }
-        }
+        "$ref" : "#/definitions/languageID"
       }
     },
     "languageIDQuery" : {
