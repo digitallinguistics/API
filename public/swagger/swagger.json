@@ -357,7 +357,8 @@
           }
         }
       }
-    }
+    },
+    "/lexemes" : { }
   },
   "securityDefinitions" : {
     "Authorization" : {
