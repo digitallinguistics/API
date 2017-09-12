@@ -69,7 +69,15 @@ module.exports = (req, v = ``) => {
 
     describe(`/lexemes/{lexeme}`, function() {
 
-      // 405: method not allowed
+      it(`405: Method Not Allowed`, testAsync(async function() {
+
+        const lex = await upsert(coll, defaultData);
+
+        await req.post(`${v}/lexemes/${lex.id}`)
+        .set(`Authorization`, token)
+        .expect(405);
+
+      }));
 
     });
 

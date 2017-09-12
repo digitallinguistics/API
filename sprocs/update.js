@@ -37,11 +37,12 @@ function update(data, userID, { ifMatch } = {}) {
     // NOTE: Do not return a 410 error here - updating a deleted document should undelete it
 
     // ensure that permissions are correctly formatted, and set to their defaults if not
-    doc.permissions              = doc.permissions || {};
-    doc.permissions.owners       = doc.permissions.owners || [];
-    doc.permissions.contributors = doc.permissions.contributors || [];
-    doc.permissions.viewers      = doc.permissions.viewers || [];
-    if (!(`public` in doc.permissions)) doc.permissions.public = false;
+    doc.permissions = doc.permissions instanceof Object ? doc.permissions : {};
+    const p         = doc.permissions;
+    p.contributors  = Array.isArray(p.contributors) ? p.contributors : [];
+    p.owners        = Array.isArray(p.owners) ? p.owners : [];
+    p.viewers       = Array.isArray(p.viewers) ? p.viewers : [];
+    p.public        = `public` in p ? p.public : false;
 
     if (doc.permissions.owners.includes(userID) || doc.permissions.contributors.includes(userID)) {
 
