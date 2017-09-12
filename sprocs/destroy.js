@@ -34,7 +34,14 @@ function destroy(id, userID, { ifMatch } = {}) {
 
     parseError(err);
 
-    if (doc.ttl) throw new Error(410, `Resource with ID ${doc.id} no longer exists.`);
+    // NOTE: Do not return a 410 response if TTL is already set - just update it
+
+    // ensure that permissions are correctly formatted, and set to their defaults if not
+    doc.permissions              = doc.permissions || {};
+    doc.permissions.owners       = doc.permissions.owners || [];
+    doc.permissions.contributors = doc.permissions.contributors || [];
+    doc.permissions.viewers      = doc.permissions.viewers || [];
+    if (!(`public` in doc.permissions)) doc.permissions.public = false;
 
     if (doc.permissions.owners.includes(userID)) {
 

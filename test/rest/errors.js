@@ -56,29 +56,6 @@ module.exports = (req, v = ``) => {
 
     }));
 
-    // checks for tokens with bad scope
-    it(`403: Forbidden`, testAsync(async function() {
-
-      const payload = {
-        azp:   config.authClientID,
-        scope: `public`,
-      };
-
-      const opts = {
-        audience: [`https://api.digitallinguistics.io/`],
-        issuer:   `https://${config.authDomain}/`,
-        subject:  config.testUser,
-      };
-
-      const token = await jwt.signJwt(payload, config.authSecret, opts);
-
-      await req.put(`${v}/languages`)
-      .set(`Authorization`, `Bearer ${token}`)
-      .send(defaultData)
-      .expect(403);
-
-    }));
-
     it(`404: No Route`, testAsync(async function() {
       await req.get(`${v}/badroute`)
       .set(`Authorization`, `Bearer ${token}`)

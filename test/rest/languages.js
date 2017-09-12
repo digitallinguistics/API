@@ -3,14 +3,17 @@
   max-nested-callbacks,
   no-invalid-this,
   no-magic-numbers,
+  no-shadow,
   no-underscore-dangle,
   prefer-arrow-callback,
 */
 
 const config = require('../../lib/config');
+const uuid   = require('uuid/v4');
 
 const {
   db,
+  getBadToken,
   getToken,
   headers,
   testAsync,
@@ -25,9 +28,12 @@ const {
 
 const {
   continuationHeader,
-  itemCountHeader,
-  maxItemsHeader,
+  ifMatchHeader,
   ifModifiedSinceHeader,
+  ifNoneMatchHeader,
+  itemCountHeader,
+  lastModifiedHeader,
+  maxItemsHeader,
 } = headers;
 
 const permissions = {
@@ -68,7 +74,28 @@ module.exports = (req, v = ``) => {
 
       describe(`GET`, function() {
 
-        it(`no options`, testAsync(async function() {
+        it(`400: bad dlx-max-item-count header`, testAsync(async function() {
+          await req.get(`${v}/languages`)
+          .set(`Authorization`, token)
+          .expect(400)
+          .set(maxItemsHeader, true);
+        }));
+
+        it(`400: bad dlx-continuation header`, testAsync(async function() {
+          await req.get(`${v}/languages`)
+          .set(`Authorization`, token)
+          .expect(400)
+          .set(continuationHeader, true);
+        }));
+
+        it(`400: bad If-Modified-Since header`, testAsync(async function() {
+          await req.get(`${v}/languages`)
+          .set(`Authorization`, token)
+          .expect(400)
+          .set(ifModifiedSinceHeader, true);
+        }));
+
+        it(`200: Added`, testAsync(async function() {
 
           // add test data
           const lang3Data = Object.assign({}, defaultData, {
@@ -84,8 +111,8 @@ module.exports = (req, v = ``) => {
           const { body: langs } = await req.get(`${v}/languages`)
           .set(`Authorization`, token)
           .send({}) // including body should not throw an error
-          .expect(`dlx-item-count`, /[0-9]+/)
-          .expect(200);
+          .expect(200)
+          .expect(itemCountHeader, /[0-9]+/);
 
           // check Language attributes
           expect(langs.every(lang => lang.type === `Language`
@@ -113,12 +140,6 @@ module.exports = (req, v = ``) => {
           await upsert(coll, Object.assign({ tid: `getLanguages-continuation2` }, defaultData));
           await upsert(coll, Object.assign({ tid: `getLanguages-continuation3` }, defaultData));
 
-          // bad dlx-max-item-count value returns 400
-          await req.get(`${v}/languages`)
-          .set(`Authorization`, token)
-          .set(maxItemsHeader, true)
-          .expect(400);
-
           // dlx-max-item-count
           const res = await req.get(`${v}/languages`)
           .set(`Authorization`, token)
@@ -139,18 +160,12 @@ module.exports = (req, v = ``) => {
           // only the requested # of results are returned
           expect(res.body.length).toBe(2);
 
-          // bad continuation header returns 400
-          await req.get(`${v}/languages`)
-          .set(`Authorization`, token)
-          .set(continuationHeader, true)
-          .expect(400);
-
           // dlx-continuation
           const { body: langs } = await req.get(`${v}/languages`)
           .set(`Authorization`, token)
           .set(continuationHeader, res.headers[continuationHeader])
-          .expect(itemCountHeader, /[0-9]+/)
-          .expect(200);
+          .expect(200)
+          .expect(itemCountHeader, /[0-9]+/);
 
           expect(langs.length).toBeGreaterThan(0);
 
@@ -175,20 +190,14 @@ module.exports = (req, v = ``) => {
           await timeout(2000);
           const lang2 = await upsert(coll, modifiedAfter);
 
-          // bad If-Modified-Since value returns 400
-          await req.get(`${v}/languages`)
-          .set(`Authorization`, token)
-          .set(ifModifiedSinceHeader, true)
-          .expect(400);
-
           // If-Modified-Since
           const ifModifiedSince = new Date((lang1._ts * 1000) + 1000); // add 1s to timestamp of modifiedBefore
 
           const { body: langs } = await req.get(`${v}/languages`)
           .set(`Authorization`, token)
           .set(ifModifiedSinceHeader, ifModifiedSince)
-          .expect(itemCountHeader, /[0-9]+/)
-          .expect(200);
+          .expect(200)
+          .expect(itemCountHeader, /[0-9]+/);
 
           // check Language attributes
           expect(langs.every(lang => lang.type === `Language`
@@ -231,8 +240,8 @@ module.exports = (req, v = ``) => {
           const { body: badLangs } = await req.get(`${v}/languages`)
           .set(`Authorization`, token)
           .query({ public: `yes` })
-          .expect(itemCountHeader, /[0-9]+/)
-          .expect(200);
+          .expect(200)
+          .expect(itemCountHeader, /[0-9]+/);
 
           expect(badLangs.find(lang => lang.id === publicLang.id)).toBeUndefined();
           expect(badLangs.find(lang => lang.id === privateLang.id)).toBeUndefined();
@@ -241,8 +250,8 @@ module.exports = (req, v = ``) => {
           const { body: langs } = await req.get(`${v}/languages`)
           .set(`Authorization`, token)
           .query({ public: true })
-          .expect(itemCountHeader, /[0-9]+/)
-          .expect(200);
+          .expect(200)
+          .expect(itemCountHeader, /[0-9]+/);
 
           // check Language attributes
           expect(langs.every(lang => lang.type === `Language`
@@ -264,47 +273,296 @@ module.exports = (req, v = ``) => {
 
       describe(`POST`, function() {
 
-        // missing body returns 400
-        // 403: bad edit scope
-        // malformed data returns 422
-        // provided ID is deleted
-        // add Language
-        // status === 201
-        // type === Language
-        // no database properties (_attachments, _rid, _self, permissions)
-        // check data on server
-        // - permissions set properly
+        it(`403: Forbidden (bad scope)`, testAsync(async function() {
+
+          const badToken = await getBadToken();
+
+          await req.post(`${v}/languages`)
+          .set(`Authorization`, `Bearer ${badToken}`)
+          .expect(403);
+
+        }));
+
+        it(`422: Malformed Data`, testAsync(async function() {
+
+          const data = Object.assign({}, defaultData, { name: true });
+
+          await req.post(`${v}/languages`)
+          .set(`Authorization`, token)
+          .send(data)
+          .expect(422);
+
+        }));
+
+        it(`201: missing body creates new Language`, testAsync(async function() {
+
+          const { body: lang, headers } = await req.post(`${v}/languages`)
+          .set(`Authorization`, token)
+          .expect(201)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Language attributes
+          expect(lang.type).toBe(`Language`);
+          expect(lang._attachments).toBeUndefined();
+          expect(lang._rid).toBeUndefined();
+          expect(lang._self).toBeUndefined();
+          expect(lang.permissions).toBeUndefined();
+          expect(lang.ttl).toBeUndefined();
+
+          // NOTE: don't bother checking data on server - this is done in the next test
+
+        }));
+
+        it(`201: adds a Language`, testAsync(async function() {
+
+          const data = Object.assign({ id: uuid(), tid: `addLanguage` }, defaultData);
+
+          const { body: lang, headers } = await req.post(`${v}/languages`)
+          .set(`Authorization`, token)
+          .send(data)
+          .expect(201)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Language attributes
+          expect(lang.id).not.toBe(data.id); // any provided ID should be deleted
+          expect(lang.type).toBe(`Language`);
+          expect(lang._attachments).toBeUndefined();
+          expect(lang._rid).toBeUndefined();
+          expect(lang._self).toBeUndefined();
+          expect(lang.permissions).toBeUndefined();
+          expect(lang.ttl).toBeUndefined();
+
+          // check data on server
+          const doc = await read(`${coll}/docs/${lang.id}`);
+          expect(doc.type === `Language`).toBe(true);
+          expect(doc.tid).toBe(data.tid);
+          expect(doc.permissions.owners.includes(config.testUser)).toBe(true);
+
+        }));
 
       });
 
       describe(`PUT`, function() {
 
-        // missing body returns 400
-        // 403: bad edit scope
-        // 403: bad permissions for item
-        // 404: not found
-        // 422: malformed
+        it(`403: Forbidden (bad scope)`, testAsync(async function() {
 
-        // create a Language
-        // If-Match ignored when there is no ID
-        // status === 201
-        // type === Language
-        // no database properties
-        // check data on server
-        // - type === Language
-        // - permissions set properly
-        // - tid
+          const badToken = await getBadToken();
 
-        // replace a Language
-        // check status, type, db props
-        // check data on server
+          await req.put(`${v}/languages`)
+          .set(`Authorization`, `Bearer ${badToken}`)
+          .expect(403);
 
-        // replace a Language (If-Match)
-        // - returns 201 if data has not been updated
-        // - returns 412 if data has been updated
-        // for both, check status, type, db props, and data on server
+        }));
 
-        // upserting a deleted language undeletes it
+        it(`403: Forbidden (bad permissions)`, testAsync(async function() {
+
+          const data = Object.assign({}, defaultData, { permissions: { owners: [`some-other-user`] } });
+          const lang = await upsert(coll, data);
+
+          await req.put(`${v}/languages`)
+          .set(`Authorization`, token)
+          .send(lang)
+          .expect(403);
+
+        }));
+
+        it(`404: Not Found`, testAsync(async function() {
+
+          const data = Object.assign({ id: uuid() }, defaultData);
+
+          await req.put(`${v}/languages`)
+          .set(`Authorization`, token)
+          .send(data)
+          .expect(404);
+
+        }));
+
+        it(`412: If-Match precondition not met`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({ tid: `ifMatch` }, defaultData);
+          const lang = await upsert(coll, data);
+
+          // update data on server
+          lang.changedProperty = true;
+          await upsert(coll, lang);
+
+          // returns 412 if data has been updated
+          await req.put(`${v}/languages`)
+          .set(`Authorization`, token)
+          .set(ifMatchHeader, lang._etag)
+          .send(lang)
+          .expect(412);
+
+        }));
+
+        it(`422: Malformed Data`, testAsync(async function() {
+
+          const data = Object.assign({}, defaultData, { name: true });
+
+          await req.put(`${v}/languages`)
+          .set(`Authorization`, token)
+          .send(data)
+          .expect(422);
+
+        }));
+
+        it(`201: missing body creates a Language`, testAsync(async function() {
+
+          const { body: lang, headers } = await req.put(`${v}/languages`)
+          .set(`Authorization`, token)
+          .expect(201)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Language attributes
+          expect(lang.type).toBe(`Language`);
+          expect(lang._attachments).toBeUndefined();
+          expect(lang._rid).toBeUndefined();
+          expect(lang._self).toBeUndefined();
+          expect(lang.permissions).toBeUndefined();
+          expect(lang.ttl).toBeUndefined();
+
+          // check data on server
+          const doc = await read(`${coll}/docs/${lang.id}`);
+          expect(doc.type === `Language`).toBe(true);
+          expect(doc.permissions.owners.includes(config.testUser)).toBe(true);
+
+        }));
+
+        it(`201: creates a new Language when no ID is specified`, testAsync(async function() {
+
+          const data = Object.assign({ tid: `upsertLanguage - add` }, defaultData);
+
+          const { body: lang, headers } = await req.put(`${v}/languages`)
+          .set(`Authorization`, token)
+          .set(ifMatchHeader, `some etag`) // If-Match header should be ignored when creating a new Language
+          .send(data)
+          .expect(201)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Language attributes
+          expect(lang.type).toBe(`Language`);
+          expect(lang.tid).toBe(data.tid);
+          expect(lang._attachments).toBeUndefined();
+          expect(lang._rid).toBeUndefined();
+          expect(lang._self).toBeUndefined();
+          expect(lang.permissions).toBeUndefined();
+          expect(lang.ttl).toBeUndefined();
+
+          // check data on server
+          const doc = await read(`${coll}/docs/${lang.id}`);
+          expect(doc.tid).toBe(data.tid);
+          expect(doc.type === `Language`).toBe(true);
+          expect(doc.permissions.owners.includes(config.testUser)).toBe(true);
+
+        }));
+
+        it(`201: replaces a Language when an ID is specified`, testAsync(async function() {
+
+          // add test data
+          const data     = Object.assign({ tid: `upsertLanguage - replace` }, defaultData);
+          const langData = await upsert(coll, data);
+
+          // change data
+          langData.newProperty = true;
+          langData.tid         = `upsertLanguageAgain`;
+
+          // upsert changed data
+          const { body: lang, headers } = await req.put(`${v}/languages`)
+          .set(`Authorization`, token)
+          .send(langData)
+          .expect(201)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Language attributes
+          expect(lang.type).toBe(`Language`);
+          expect(lang.tid).toBe(langData.tid);
+          expect(lang.newProperty).toBe(true);
+          expect(lang._attachments).toBeUndefined();
+          expect(lang._rid).toBeUndefined();
+          expect(lang._self).toBeUndefined();
+          expect(lang.permissions).toBeUndefined();
+          expect(lang.ttl).toBeUndefined();
+
+          // check data on server
+          const doc = await read(`${coll}/docs/${lang.id}`);
+          expect(doc.tid).toBe(langData.tid);
+          expect(doc.newProperty).toBe(true);
+          expect(doc.type === `Language`).toBe(true);
+          expect(doc.permissions.owners.includes(config.testUser)).toBe(true);
+
+        }));
+
+        it(`201: upserts deleted Languages`, testAsync(async function() {
+
+          const data        = Object.assign({ tid: `upsertDeleted`, ttl: 300 }, defaultData);
+          const deletedLang = await upsert(coll, data);
+          delete deletedLang.ttl;
+
+          // upserting a deleted language undeletes it
+          const { body: lang, headers } = await req.put(`${v}/languages`)
+          .set(`Authorization`, token)
+          .send(deletedLang)
+          .expect(201)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Language attributes
+          expect(lang.type).toBe(`Language`);
+          expect(lang.tid).toBe(data.tid);
+          expect(lang._attachments).toBeUndefined();
+          expect(lang._rid).toBeUndefined();
+          expect(lang._self).toBeUndefined();
+          expect(lang.permissions).toBeUndefined();
+          expect(lang.ttl).toBeUndefined();
+
+          // check data on server
+          const serverData = await read(deletedLang._self);
+          expect(serverData.ttl).toBeUndefined();
+
+
+        }));
+
+        it(`If-Match`, testAsync(async function() {
+
+          const data = Object.assign({ tid: `ifMatch` }, defaultData);
+          const res  = await upsert(coll, data);
+
+          // returns 201 if data has not been updated
+          const { body: lang } = await req.put(`${v}/languages`)
+          .set(`Authorization`, token)
+          .set(ifMatchHeader, res._etag)
+          .send(res)
+          .expect(201)
+          .expect(lastModifiedHeader, /.+/);
+
+          // check Language attributes
+          expect(lang.type).toBe(`Language`);
+          expect(lang.tid).toBe(data.tid);
+          expect(lang._attachments).toBeUndefined();
+          expect(lang._rid).toBeUndefined();
+          expect(lang._self).toBeUndefined();
+          expect(lang.permissions).toBeUndefined();
+          expect(lang.ttl).toBeUndefined();
+
+        }));
 
       });
 
@@ -312,137 +570,387 @@ module.exports = (req, v = ``) => {
 
     describe(`/languages/{language}`, function() {
 
-      it(`405: Method Not Allowed`, function() {
+      it(`405: Method Not Allowed`, testAsync(async function() {
+
+        const data = Object.assign({ tid: 405 }, defaultData);
+        const lang = await upsert(coll, data);
+
+        await req.post(`${v}/languages/${lang.id}`)
+        .set(`Authorization`, token)
+        .expect(405);
+
+      }));
+
+      describe(`DELETE`, function() {
+
+        it(`403: bad scope`, testAsync(async function() {
+
+          const badToken = await getBadToken();
+          const data     = Object.assign({ tid: `bad scope` }, defaultData);
+          const lang     = await upsert(coll, data);
+
+          await req.delete(`${v}/languages/${lang.id}`)
+          .set(`Authorization`, `Bearer ${badToken}`)
+          .expect(403);
+
+        }));
+
+        it(`403: Forbidden (bad permissions)`, testAsync(async function() {
+
+          const data = Object.assign({}, defaultData, { permissions: { owners: [`some-other-user`] } });
+          const lang = await upsert(coll, data);
+
+          await req.delete(`${v}/languages/${lang.id}`)
+          .set(`Authorization`, token)
+          .expect(403);
+
+        }));
+
+        it(`404: Not Found`, testAsync(async function() {
+          await req.delete(`${v}/languages/bad-id`)
+          .set(`Authorization`, token)
+          .expect(404);
+        }));
+
+        it(`412: If-Match precondition not met`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({ tid: `ifMatch` }, defaultData);
+          const lang = await upsert(coll, data);
+
+          // update data on server
+          lang.changedProperty = true;
+          await upsert(coll, lang);
+
+          // returns 412 if data has been updated
+          await req.delete(`${v}/languages/${lang.id}`)
+          .set(`Authorization`, token)
+          .expect(412)
+          .set(ifMatchHeader, lang._etag);
+
+        }));
+
+        it(`204: Delete Successful`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({ tid: `deleteLanguage` }, defaultData);
+          const lang = await upsert(coll, data);
+
+          const lexData = {
+            languageID: lang.id,
+            lemma: {},
+            permissions,
+            senses: [],
+            test,
+            type: `Lexeme`,
+          };
+
+          const lex = await upsert(coll, lexData);
+
+          // delete Language
+          await req.delete(`${v}/languages/${lang.id}`)
+          .set(`Authorization`, token)
+          .expect(204);
+
+          // check data on server
+          const serverLang = await read(lang._self);
+          expect(serverLang.ttl).toBeDefined();
+
+          // check that Lexeme is also deleted
+          const serverLex = await read(lex._self);
+          expect(serverLex.ttl).toBeDefined();
+
+        }));
+
+        it(`204: already deleted`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({ tid: `deleteLanguage`, ttl: 300 }, defaultData);
+          const lang = await upsert(coll, data);
+
+          // delete Language
+          await req.delete(`${v}/languages/${lang.id}`)
+          .set(`Authorization`, token)
+          .expect(204);
+
+          // check data on server
+          const res = await read(lang._self);
+          expect(res.ttl).toBeDefined();
+
+        }));
+
+        it(`If-Match`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({ tid: `deleteLanguage - If-Match` }, defaultData);
+          const lang = await upsert(coll, data);
+
+          // delete Language with If-Match
+          await req.delete(`${v}/languages/${lang.id}`)
+          .set(`Authorization`, token)
+          .set(ifMatchHeader, lang._etag)
+          .expect(204);
+
+          // check data on server
+          const res = await read(lang._self);
+          expect(res.ttl).toBeDefined();
+
+        }));
 
       });
 
-      it(`DELETE`, testAsync(async function() {
+      describe(`GET`, function() {
 
-      }));
+        it(`304: Not Modified`, testAsync(async function() {
 
-      it(`GET`, testAsync(async function() {
+          // add test data
+          const data = Object.assign({ tid: `304: Not Modified` }, defaultData);
+          const lang = await upsert(coll, data);
 
-      }));
+          // If-None-Match
+          await req.get(`${v}/languages/${lang.id}`)
+          .set(`Authorization`, token)
+          .set(ifNoneMatchHeader, lang._etag)
+          .expect(304);
 
-      it(`PATCH`, testAsync(async function() {
+        }));
 
-      }));
+        it(`403: Forbidden (bad permissions)`, testAsync(async function() {
+
+          const data = Object.assign({}, defaultData, { permissions: { owners: [`some-other-user`] } });
+          const lang = await upsert(coll, data);
+
+          await req.get(`${v}/languages/${lang.id}`)
+          .set(`Authorization`, token)
+          .expect(403);
+
+        }));
+
+        it(`404: Not Found`, testAsync(async function() {
+          await req.get(`${v}/languages/bad-id`)
+          .set(`Authorization`, token)
+          .expect(404);
+        }));
+
+        it(`410: gone`, testAsync(async function() {
+
+          const data = Object.assign({ tid: `deletedLang`, ttl: 300 }, defaultData);
+          const lang = await upsert(coll, data);
+
+          await req.get(`${v}/languages/${lang.id}`)
+          .set(`Authorization`, token)
+          .expect(410);
+
+        }));
+
+        it(`200: Success`, testAsync(async function() {
+
+          const data     = Object.assign({ tid: `getLanguage` }, defaultData);
+          const langData = await upsert(coll, data);
+
+          const { body: lang, headers } = await req.get(`${v}/languages/${langData.id}`)
+          .set(`Authorization`, token)
+          .expect(200)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Language attributes
+          expect(lang.type).toBe(`Language`);
+          expect(lang.tid).toBe(data.tid);
+          expect(lang._attachments).toBeUndefined();
+          expect(lang._rid).toBeUndefined();
+          expect(lang._self).toBeUndefined();
+          expect(lang.permissions).toBeUndefined();
+          expect(lang.ttl).toBeUndefined();
+
+        }));
+
+        it(`200: retrieves public items`, testAsync(async function() {
+
+          const data = Object.assign({}, defaultData, {
+            permissions: {
+              owners: [`some-other-user`],
+              public: true,
+            },
+            tid: `public item`,
+          });
+
+          const langData = await upsert(coll, data);
+
+          const { body: lang, headers } = await req.get(`${v}/languages/${langData.id}`)
+          .set(`Authorization`, token)
+          .expect(200)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Language attributes
+          expect(lang.type).toBe(`Language`);
+          expect(lang.tid).toBe(data.tid);
+          expect(lang._attachments).toBeUndefined();
+          expect(lang._rid).toBeUndefined();
+          expect(lang._self).toBeUndefined();
+          expect(lang.permissions).toBeUndefined();
+          expect(lang.ttl).toBeUndefined();
+
+        }));
+
+      });
+
+      describe(`PATCH`, function() {
+
+        it(`403: bad scope`, testAsync(async function() {
+
+          const badToken = await getBadToken();
+          const data  = Object.assign({ tid: `bad scope` }, defaultData);
+          const lang  = await upsert(coll, data);
+
+          await req.patch(`${v}/languages/${lang.id}`)
+          .set(`Authorization`, `Bearer ${badToken}`)
+          .send(lang)
+          .expect(403);
+
+        }));
+
+        it(`403: Forbidden (bad permissions)`, testAsync(async function() {
+
+          const data = Object.assign({}, defaultData, { permissions: { owners: [`some-other-user`] } });
+          const lang = await upsert(coll, data);
+
+          await req.patch(`${v}/languages/${lang.id}`)
+          .set(`Authorization`, token)
+          .send(lang)
+          .expect(403);
+
+        }));
+
+        it(`404: Not Found`, testAsync(async function() {
+          await req.patch(`${v}/languages/bad-id`)
+          .set(`Authorization`, token)
+          .expect(404);
+        }));
+
+        it(`412: If-Match precondition not met`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({ tid: `If-Match not met` }, defaultData);
+          const lang = await upsert(coll, data);
+
+          // change data on server
+          lang.changedProperty = true;
+          await upsert(coll, lang);
+
+          // If-Match
+          await req.patch(`${v}/languages/${lang.id}`)
+          .set(`Authorization`, token)
+          .set(ifMatchHeader, lang._etag)
+          .send(lang)
+          .expect(412);
+
+        }));
+
+        it(`422: Malformed Data`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({}, defaultData, { tid: `malformed` });
+          const lang = await upsert(coll, data);
+
+          // make data malformed
+          lang.name = true;
+
+          // attempt to update data
+          await req.patch(`${v}/languages/${lang.id}`)
+          .set(`Authorization`, token)
+          .send(lang)
+          .expect(422);
+
+        }));
+
+        it(`200: updated`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({ tid: `updateLanguage` }, defaultData);
+          const langData = await upsert(coll, data);
+
+          // change data for update
+          const { id } = langData;
+          langData.changedProperty = true;
+          delete langData.id; // missing ID in body shouldn't throw an error
+
+          // update Language
+          const { body: lang, headers } = await req.patch(`${v}/languages/${id}`)
+          .set(`Authorization`, token)
+          .send(langData)
+          .expect(200)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Language attributes
+          expect(lang.type).toBe(`Language`);
+          expect(lang.tid).toBe(data.tid);
+          expect(lang.changedProperty).toBe(true);
+          expect(lang._attachments).toBeUndefined();
+          expect(lang._rid).toBeUndefined();
+          expect(lang._self).toBeUndefined();
+          expect(lang.permissions).toBeUndefined();
+          expect(lang.ttl).toBeUndefined();
+
+          // check data on server
+          const serverData = await read(langData._self);
+
+          expect(serverData.type === `Language`).toBe(true);
+          expect(serverData.tid).toBe(data.tid);
+          expect(serverData.changedProperty).toBe(true);
+          expect(serverData.ttl).toBeUndefined();
+
+        }));
+
+        it(`200: undeletes a deleted Language`, testAsync(async function() {
+
+          const data     = Object.assign({ tid: `undeleteLanguage`, ttl: 300 }, defaultData);
+          const langData = await upsert(coll, data);
+
+          langData.changedProperty = true;
+
+          // update Language
+          const { body: lang, headers } = await req.patch(`${v}/languages/${langData.id}`)
+          .set(`Authorization`, token)
+          .send(langData)
+          .expect(200)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Language attributes
+          expect(lang.type).toBe(`Language`);
+          expect(lang.tid).toBe(data.tid);
+          expect(lang.changedProperty).toBe(true);
+          expect(lang._attachments).toBeUndefined();
+          expect(lang._rid).toBeUndefined();
+          expect(lang._self).toBeUndefined();
+          expect(lang.permissions).toBeUndefined();
+          expect(lang.ttl).toBeUndefined();
+
+          // check data on server
+          const serverData = await read(langData._self);
+
+          expect(serverData.type === `Language`).toBe(true);
+          expect(serverData.tid).toBe(data.tid);
+          expect(serverData.changedProperty).toBe(true);
+          expect(serverData.ttl).toBeUndefined();
+
+        }));
+
+      });
 
     });
 
   });
 
 };
-
-// module.exports = (req, v = ``) => {
-//
-//   describe(`Languages`, function() {
-//
-//     it(`deletes Lexemes when a Language is deleted`, testAsync(async function() {
-//
-//       const lang = await upsert(coll, Object.assign({}, defaultData));
-//
-//       const lexData = {
-//         languageID:  lang.id,
-//         lemma:       {},
-//         permissions,
-//         senses:      [],
-//         test,
-//         type:        `Lexeme`,
-//       };
-//
-//       const lex = await upsert(coll, lexData);
-//
-//       await req.delete(`${v}/languages/${lang.id}`)
-//       .set(`Authorization`, token)
-//       .expect(204);
-//
-//       await timeout(500);
-//
-//       const res = await read(`${coll}/docs/${lex.id}`);
-//       expect(res.ttl).toBeDefined();
-//
-//     }));
-//
-//     it(`DELETE /languages/{language}`, testAsync(async function() {
-//
-//       const doc = await upsert(coll, Object.assign({}, defaultData));
-//
-//       await req.delete(`${v}/languages/${doc.id}`)
-//       .set(`Authorization`, token)
-//       .expect(204);
-//
-//     }));
-//
-//     it(`POST /languages`, testAsync(async function() {
-//
-//       const res = await req.post(`${v}/languages`)
-//       .set(`Authorization`, token)
-//       .send(Object.assign({ tid: `post` }, defaultData))
-//       .expect(201);
-//
-//       expect(res.body.tid).toBe(`post`);
-//
-//     }));
-//
-//     it(`PUT /languages`, testAsync(async function() {
-//
-//       const data = Object.assign({ tid: `put` }, defaultData);
-//
-//       // test create
-//       const res1 = await req.put(`${v}/languages`)
-//       .set(`Authorization`, token)
-//       .send(data)
-//       .expect(201);
-//
-//       // test upsert
-//       const res2 = await req.put(`${v}/languages`)
-//       .set(`Authorization`, token)
-//       .send(Object.assign(res1.body, { newProp: true }))
-//       .expect(201);
-//
-//       expect(typeof res2.headers[`last-modified`]).toBe(`string`);
-//       expect(res2.headers[`last-modified`]).not.toBe(`Invalid Date`);
-//       expect(res2.body.tid).toBe(data.tid);
-//       expect(res2.body.newProp).toBe(true);
-//
-//     }));
-//
-//     it(`PATCH /languages/{language}`, testAsync(async function() {
-//
-//       const data = Object.assign({
-//         notChanged: `This property should not be changed.`,
-//         tid:        `upsertOne`,
-//       }, defaultData);
-//
-//       const doc = await upsert(coll, data);
-//
-//       const res = await req.patch(`${v}/languages/${doc.id}`)
-//       .send({ tid: `upsertOneAgain` })
-//       .set(`Authorization`, token)
-//       .expect(200);
-//
-//       expect(typeof res.headers[`last-modified`]).toBe(`string`);
-//       expect(res.headers[`last-modified`]).not.toBe(`Invalid Date`);
-//       expect(res.body.notChanged).toBe(data.notChanged);
-//       expect(res.body.tid).toBe(`upsertOneAgain`);
-//
-//     }));
-//
-//
-//     it(`GET /languages/{language}`, testAsync(async function() {
-//
-//       const doc = await upsert(coll, Object.assign({ tid: `getLanguage` }, defaultData));
-//
-//       const res = await req.get(`${v}/languages/${doc.id}`)
-//       .set(`Authorization`, token)
-//       .expect(200);
-//
-//       expect(res.headers[`last-modified`]).toBeDefined();
-//       expect(res.body.tid).toBe(doc.tid);
-//
-//     }));
-//
-//   });
-//
-// };
