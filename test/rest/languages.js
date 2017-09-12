@@ -95,7 +95,7 @@ module.exports = (req, v = ``) => {
           .set(ifModifiedSinceHeader, true);
         }));
 
-        it(`200: Added`, testAsync(async function() {
+        it(`200: Success`, testAsync(async function() {
 
           // add test data
           const lang3Data = Object.assign({}, defaultData, {
@@ -214,7 +214,7 @@ module.exports = (req, v = ``) => {
 
         }));
 
-        it(`public=true`, testAsync(async function() {
+        it(`public`, testAsync(async function() {
 
           // add test data
           const privateData = Object.assign({}, defaultData, {

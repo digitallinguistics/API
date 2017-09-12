@@ -10,6 +10,7 @@ const uuid   = require('uuid/v4');
 const {
   db,
   getToken,
+  headers,
   testAsync,
 } = require('../utilities');
 
@@ -17,6 +18,12 @@ const {
   coll,
   upsert,
 } = db;
+
+const {
+  continuationHeader,
+  ifModifiedSinceHeader,
+  maxItemsHeader,
+} = headers;
 
 const languageID = uuid();
 const test       = true;
@@ -65,6 +72,71 @@ module.exports = (req, v = ``) => {
         .expect(405);
       }));
 
+      describe(`GET`, function() {
+
+        it(`400: bad languageID`, testAsync(async function() {
+          await req.get(`${v}/lexemes`)
+          .set(`Authorization`, token)
+          .query({ languageID: '' }) // NB: testing with true doesn't work here, because it results in a valid, non-empty string
+          .expect(400);
+        }));
+
+        it(`400: bad dlx-max-item-count`, testAsync(async function() {
+          await req.get(`${v}/lexemes`)
+          .set(`Authorization`, token)
+          .set(maxItemsHeader, true)
+          .expect(400);
+        }));
+
+        it(`400: bad dlx-continuation`, testAsync(async function() {
+          await req.get(`${v}/lexemes`)
+          .set(`Authorization`, token)
+          .set(continuationHeader, true)
+          .expect(400);
+        }));
+
+        it(`400: bad If-Modified-Since`, testAsync(async function() {
+          await req.get(`${v}/lexemes`)
+          .set(`Authorization`, token)
+          .set(ifModifiedSinceHeader, true)
+          .expect(400);
+        }));
+
+        it(`200: Success`, testAsync(async function() {
+
+        }));
+
+        it(`dlx-max-item-count / dlx-continuation`, testAsync(async function() {
+
+        }));
+
+        it(`If-Modified-Since`, testAsync(async function() {
+
+        }));
+
+        it(`languageID`, testAsync(async function() {
+
+          // returns only Lexemes that the user has permission to access
+
+        }));
+
+        it(`public`, testAsync(async function() {
+
+          // does not return public results with bad public value
+          // does not return private results
+
+        }));
+
+      });
+
+      describe(`POST`, function() {
+
+      });
+
+      describe(`PUT`, function() {
+
+      });
+
     });
 
     describe(`/lexemes/{lexeme}`, function() {
@@ -78,6 +150,18 @@ module.exports = (req, v = ``) => {
         .expect(405);
 
       }));
+
+      describe(`DELETE`, function() {
+
+      });
+
+      describe(`GET`, function() {
+
+      });
+
+      describe(`PATCH`, function() {
+
+      });
 
     });
 
