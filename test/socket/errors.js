@@ -12,8 +12,8 @@ const { promisify } = require('util');
 const {
   authenticate,
   db,
+  getBadToken,
   getToken,
-  jwt,
   testAsync,
 } = require('../utilities');
 
@@ -91,7 +91,7 @@ module.exports = (v = ``) => {
       const doc = await upsert(coll, data);
 
       try {
-        await emit(`get`, doc.id);
+        await emit(`getLanguage`, doc.id);
       } catch (e) {
         expect(e.status).toBe(403);
       }
@@ -100,24 +100,13 @@ module.exports = (v = ``) => {
 
     it(`403: Forbidden (bad scope)`, testAsync(async function() {
 
-      const payload = {
-        azp:   config.authClientID,
-        scope: `public`,
-      };
-
-      const opts = {
-        audience: [`https://api.digitallinguistics.io/`],
-        issuer:   `https://${config.authDomain}/`,
-        subject:  config.testUser,
-      };
-
-      const token  = await jwt.signJwt(payload, config.authSecret, opts);
-      const doc    = await upsert(coll, Object.assign({}, defaultData));
-      const client = await authenticate(v, token);
-      const emit   = promisify(client.emit).bind(client);
+      const badToken = await getBadToken();
+      const doc      = await upsert(coll, Object.assign({}, defaultData));
+      const client   = await authenticate(v, badToken);
+      const emit     = promisify(client.emit).bind(client);
 
       try {
-        await emit(`delete`, doc.id);
+        await emit(`deleteLanguage`, doc.id);
       } catch (e) {
         expect(e.status).toBe(403);
       }
@@ -138,13 +127,13 @@ module.exports = (v = ``) => {
       const doc  = await upsert(coll, Object.assign({}, defaultData));
 
       try {
-        await emit(`delete`, doc.id, opts);
+        await emit(`deleteLanguage`, doc.id, opts);
       } catch (e) {
         expect(e.status).toBe(412);
       }
 
       try {
-        await emit(`upsert`, Object.assign({}, defaultData), opts);
+        await emit(`upsertLanguage`, Object.assign({}, defaultData), opts);
       } catch (e) {
         expect(e.status).toBe(412);
       }
@@ -160,7 +149,7 @@ module.exports = (v = ``) => {
       };
 
       try {
-        await emit(`add`, `Language`, data);
+        await emit(`addLanguage`, data);
       } catch (e) {
         expect(e.status).toBe(422);
       }

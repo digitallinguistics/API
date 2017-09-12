@@ -4,6 +4,7 @@
   func-style,
   no-param-reassign,
   no-throw-literal,
+  no-underscore-dangle,
   require-jsdoc,
 */
 
@@ -55,8 +56,8 @@ function destroy(id, userID, { ifMatch } = {}) {
         parseError(err);
 
         response.setBody({
-          status:  204,
           details: `Resource with ID ${id} was successfully set to expire.`,
+          status:  204,
           type:    doc.type, // NOTE: a "type" is needed for the Socket to return an informative response
         });
 

@@ -75,7 +75,7 @@ module.exports = (req, v = ``) => {
       await Promise.all(Array(3).fill({}).map(() => upsert(coll, Object.assign({}, data))));
 
       const continuation = await new Promise((resolve, reject) => {
-        client.emit(`getAll`, `Language`, { maxItemCount: 2 }, (err, res, info) => {
+        client.emit(`getLanguages`, { maxItemCount: 2 }, (err, res, info) => {
           if (err) return reject(err);
           expect(res.length).toBe(2);
           expect(info.continuation).toBeDefined();
@@ -84,7 +84,7 @@ module.exports = (req, v = ``) => {
       });
 
       await new Promise((resolve, reject) => {
-        client.emit(`getAll`, `Language`, { continuation }, (err, res) => {
+        client.emit(`getLanguages`, { continuation }, (err, res) => {
           expect(res.length).toBeGreaterThan(0);
           if (err) reject(err);
           else resolve();
@@ -231,7 +231,7 @@ module.exports = (req, v = ``) => {
       const doc  = await upsert(coll, data);
 
       try {
-        await emit(`get`, doc.id, { ifNoneMatch: doc._etag });
+        await emit(`getLanguage`, doc.id, { ifNoneMatch: doc._etag });
       } catch (e) {
         expect(e.status).toBe(304);
       }
