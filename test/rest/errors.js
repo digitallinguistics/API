@@ -16,24 +16,8 @@ const {
   getToken,
   jwt,
   testAsync,
+  timeout,
 } = require('../utilities');
-
-const test = true;
-const type = `Language`;
-
-const permissions = {
-  contributors: [],
-  owners:       [config.testUser],
-  public:       false,
-  viewers:      [],
-};
-
-const defaultData = {
-  name: {},
-  permissions,
-  test,
-  type,
-};
 
 // The "v" parameter is a version path, e.g. "/v0", "/v1", etc.
 module.exports = (req, v = ``) => {
@@ -62,9 +46,28 @@ module.exports = (req, v = ``) => {
       .expect(404);
     }));
 
-    it(`419: Authorization Token Expired`, function() {
-      pending(`Test not yet written.`);
-    });
+    it(`419: Authorization Token Expired`, testAsync(async function() {
+
+      const payload = {
+        azp:   config.authClientID,
+        scope: `user`,
+      };
+
+      const opts = {
+        audience:  `https://api.digitallinguistics.io/`,
+        expiresIn: 1,
+        issuer:    `https://${config.authDomain}/`,
+        subject:   config.testUser,
+      };
+
+      const expiredToken = await jwt.signJwt(payload, config.authSecret, opts);
+      await timeout(1000);
+
+      await req.get(`${v}/badroute`)
+      .set(`Authorization`, `Bearer ${expiredToken}`)
+      .expect(419);
+
+    }));
 
     it(`429: Too Many Requests`, function(done) {
 
