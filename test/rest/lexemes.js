@@ -1,6 +1,7 @@
 /* eslint-disable
   func-names,
   max-nested-callbacks,
+  max-statements,
   no-magic-numbers,
   no-shadow,
   no-underscore-dangle,
@@ -29,6 +30,7 @@ const {
 
 const {
   continuationHeader,
+  ifMatchHeader,
   ifModifiedSinceHeader,
   itemCountHeader,
   lastModifiedHeader,
@@ -148,7 +150,35 @@ module.exports = (req, v = ``) => {
 
         }));
 
-        it(`200: returns Lexemes even if user doesn't have permissions for Language`, testAsync(async function() {
+        it(`200: user has permissions for Lexemes but not Language`, testAsync(async function() {
+
+          // upsert Language with another user as Owner
+          const language = Object.assign({}, langData, {
+            id: uuid(),
+            permissions: { owners: [`some-other-user`] },
+          });
+
+          const lang = await upsert(coll, language);
+
+          // upsert Lexeme with testUser as Viewer
+          const data = Object.assign({}, defaultData, {
+            languageID: lang.id,
+            permissions: {
+              owners:  [`some-other-user`],
+              viewers: [config.testUser],
+            },
+          });
+
+          const lex = await upsert(coll, data);
+
+          // get Lexemes with testUser permissions
+          const { body: lexemes } = await req.get(`${v}/lexemes`)
+          .set(`Authorization`, token)
+          .expect(200)
+          .expect(itemCountHeader, /[0-9]+/);
+
+          // test Lexeme should be included in results
+          expect(lexemes.find(lexeme => lexeme.id === lex.id)).toBeDefined();
 
         }));
 
@@ -343,7 +373,11 @@ module.exports = (req, v = ``) => {
 
         it(`403: no permissions for Language`, testAsync(async function() {
 
-          const data    = Object.assign({}, langData, { id: uuid(), permissions: { owners: [`some-other-user`] } });
+          const data = Object.assign({}, langData, {
+            id: uuid(),
+            permissions: { owners: [`some-other-user`] },
+          });
+
           const lang    = await upsert(coll, data);
           const lexData = Object.assign({}, defaultData, { languageID: lang.id });
 
@@ -380,6 +414,7 @@ module.exports = (req, v = ``) => {
 
           // check Lexeme attributes
           expect(lex.id).not.toBe(data.id);
+          expect(lex.tid).toBe(data.tid);
           expect(lex.type).toBe(`Lexeme`);
           expect(lex.languageID).toBe(langData.id);
           expect(lex._attachments).toBeUndefined();
@@ -395,6 +430,35 @@ module.exports = (req, v = ``) => {
           expect(doc.tid).toBe(data.tid);
           expect(doc.permissions.owners.includes(config.testUser)).toBe(true);
           expect(doc.ttl).toBeUndefined();
+
+        }));
+
+        it(`201: Created as Contributor to Language`, testAsync(async function() {
+
+          // add test Language with some-other-user as Owner and testUser as Contributor
+          const language = Object.assign({}, langData, {
+            id: uuid(),
+            permissions: {
+              contributors: [config.testUser],
+              owners:       [`some-other-user`],
+            },
+          });
+
+          const lang = await upsert(coll, language);
+
+          // create a Lexeme with testUser permissions
+          const data = Object.assign({}, defaultData, { languageID: lang.id });
+
+          const { body: lex } = await req.post(`${v}/lexemes`)
+          .set(`Authorization`, token)
+          .send(data)
+          .expect(201)
+          .expect(lastModifiedHeader, /.+/);
+
+          // check server data
+          const serverData = await read(`${coll}/docs/${lex.id}`);
+          expect(serverData.permissions.owners.includes(`some-other-user`));
+          expect(serverData.permissions.owners.includes(config.testUser));
 
         }));
 
@@ -423,15 +487,307 @@ module.exports = (req, v = ``) => {
 
       });
 
-      fdescribe(`PUT`, function() {
+      describe(`PUT`, function() {
 
-        it(`400: missing languageID`, function() {
+        it(`400: bad If-Match header`, testAsync(async function() {
 
-        });
+          const data = Object.assign({ tid: `bad if-match` }, defaultData);
+          const lex  = await upsert(coll, data);
 
-        it(`languageID (query)`, function() {
+          await req.put(`${v}/languages`)
+          .set(`Authorization`, token)
+          .set(ifMatchHeader, ``) // cannot use true to test this because it results in a valid String, and a 412 response
+          .send(lex)
+          .expect(400);
 
-        });
+        }));
+
+        it(`403: bad scope`, testAsync(async function() {
+
+          const badToken = await getBadToken();
+
+          await req.put(`${v}/lexemes`)
+          .set(`Authorization`, `Bearer ${badToken}`)
+          .expect(403);
+
+        }));
+
+        it(`403: bad permissions for Lexeme`, testAsync(async function() {
+
+          const permissions = { owners: [`some-other-user`] };
+
+          const language = Object.assign({}, langData, { id: uuid(), permissions });
+          const lang     = await upsert(coll, language);
+          const data     = Object.assign({}, defaultData, { languageID: lang.id, permissions });
+          const lex      = await upsert(coll, data);
+
+          await req.put(`${v}/lexemes`)
+          .set(`Authorization`, token)
+          .send(lex)
+          .expect(403);
+
+        }));
+
+        it(`404: bad languageID`, testAsync(async function() {
+
+          const data = Object.assign({}, defaultData, { languageID: `bad-id` });
+
+          await req.put(`${v}/lexemes`)
+          .set(`Authorization`, token)
+          .send(data)
+          .expect(404);
+
+        }));
+
+        it(`404: Not Found`, testAsync(async function() {
+
+          const data = Object.assign({}, defaultData, { languageID: uuid(), tid: `Not Found` });
+
+          await req.put(`${v}/lexemes`)
+          .set(`Authorization`, token)
+          .send(data)
+          .expect(404);
+
+        }));
+
+        it(`412: If-Match precondition not met`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({ tid: `ifMatch` }, defaultData);
+          const lex  = await upsert(coll, data);
+
+          // update data on server
+          lex.changedProperty = true;
+          await upsert(coll, lex);
+
+          // returns 412 if data has been updated
+          await req.put(`${v}/lexemes`)
+          .set(`Authorization`, token)
+          .set(ifMatchHeader, lex._etag)
+          .send(lex)
+          .expect(412);
+
+        }));
+
+        it(`422: Malformed data`, testAsync(async function() {
+
+          const data = Object.assign({}, defaultData, { lemma: true });
+
+          await req.post(`${v}/lexemes`)
+          .set(`Authorization`, token)
+          .send(data)
+          .expect(422);
+
+        }));
+
+        it(`201: Create`, testAsync(async function() {
+
+          const data = Object.assign({ tid: `upsertLexeme - add` }, defaultData);
+
+          const { body: lex, headers } = await req.put(`${v}/lexemes`)
+          .set(`Authorization`, token)
+          .set(ifMatchHeader, `some etag`) // If-Match header should be ignored when creating a new Lexeme
+          .send(data)
+          .expect(201)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Lexeme attributes
+          expect(lex.type).toBe(`Lexeme`);
+          expect(lex.tid).toBe(data.tid);
+          expect(lex.languageID).toBe(langData.id);
+          expect(lex._attachments).toBeUndefined();
+          expect(lex._rid).toBeUndefined();
+          expect(lex._self).toBeUndefined();
+          expect(lex.permissions).toBeUndefined();
+          expect(lex.ttl).toBeUndefined();
+
+          // check data on server
+          const doc = await read(`${coll}/docs/${lex.id}`);
+          expect(doc.tid).toBe(data.tid);
+          expect(doc.type).toBe(`Lexeme`);
+          expect(doc.permissions.owners.includes(config.testUser)).toBe(true);
+
+        }));
+
+        it(`201: Replace`, testAsync(async function() {
+
+          // add test data
+          const data    = Object.assign({ tid: `upsertLexeme - replace` }, defaultData);
+          const lexData = await upsert(coll, data);
+
+          // change data
+          lexData.newProperty = true;
+          lexData.tid         = `upsertLanguageAgain`;
+
+          // upsert changed data
+          const { body: lex, headers } = await req.put(`${v}/lexemes`)
+          .set(`Authorization`, token)
+          .send(lexData)
+          .expect(201)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Language attributes
+          expect(lex.type).toBe(`Lexeme`);
+          expect(lex.languageID).toBe(langData.id);
+          expect(lex.tid).toBe(lexData.tid);
+          expect(lex.newProperty).toBe(true);
+          expect(lex._attachments).toBeUndefined();
+          expect(lex._rid).toBeUndefined();
+          expect(lex._self).toBeUndefined();
+          expect(lex.permissions).toBeUndefined();
+          expect(lex.ttl).toBeUndefined();
+
+          // check data on server
+          const doc = await read(`${coll}/docs/${lex.id}`);
+          expect(doc.tid).toBe(lexData.tid);
+          expect(doc.newProperty).toBe(true);
+          expect(doc.type).toBe(`Lexeme`);
+          expect(doc.permissions.owners.includes(config.testUser)).toBe(true);
+
+        }));
+
+        it(`201: Undelete`, testAsync(async function() {
+
+          const data       = Object.assign({ tid: `upsertDeleted`, ttl: 300 }, defaultData);
+          const deletedLex = await upsert(coll, data);
+          delete deletedLex.ttl;
+
+          // upserting a deleted Lexeme undeletes it
+          const { body: lex, headers } = await req.put(`${v}/lexemes`)
+          .set(`Authorization`, token)
+          .send(deletedLex)
+          .expect(201)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Lexeme attributes
+          expect(lex.type).toBe(`Lexeme`);
+          expect(lex.tid).toBe(data.tid);
+          expect(lex.languageID).toBe(langData.id);
+          expect(lex._attachments).toBeUndefined();
+          expect(lex._rid).toBeUndefined();
+          expect(lex._self).toBeUndefined();
+          expect(lex.permissions).toBeUndefined();
+          expect(lex.ttl).toBeUndefined();
+
+          // check data on server
+          const serverData = await read(deletedLex._self);
+          expect(serverData.ttl).toBeUndefined();
+
+        }));
+
+        it(`201: Upsert with Contributor permissions for Language`, testAsync(async function() {
+
+          // NB: This is testing replace, not create (that's tested in POST /lexemes)
+
+          // upsert Language with another user as Owner
+          const language = Object.assign({}, langData, {
+            id: uuid(),
+            permissions: {
+              contributors: [config.testUser],
+              owners: [`some-other-user`],
+            },
+          });
+
+          const lang = await upsert(coll, language);
+
+          // upsert Lexeme with testUser as Contributor
+          const data = Object.assign({}, defaultData, {
+            languageID: lang.id,
+            permissions: {
+              contributors: [config.testUser],
+              owners:       [`some-other-user`],
+            },
+          });
+
+          const lexeme = await upsert(coll, data);
+          lexeme.changedProperty = true;
+
+          // upsert using testUser permissions
+          const { body: lex } = await req.put(`${v}/lexemes`)
+          .set(`Authorization`, token)
+          .send(lexeme)
+          .expect(201)
+          .expect(lastModifiedHeader, /.+/);
+
+          expect(lex.changedProperty).toBe(true);
+
+        }));
+
+        it(`If-Match`, testAsync(async function() {
+
+          const data = Object.assign({ tid: `ifMatch` }, defaultData);
+          const res  = await upsert(coll, data);
+
+          // returns 201 if data has not been updated
+          const { body: lex } = await req.put(`${v}/lexemes`)
+          .set(`Authorization`, token)
+          .set(ifMatchHeader, res._etag)
+          .send(res)
+          .expect(201)
+          .expect(lastModifiedHeader, /.+/);
+
+          // check Lexeme attributes
+          expect(lex.type).toBe(`Lexeme`);
+          expect(lex.tid).toBe(data.tid);
+          expect(lex.languageID).toBe(langData.id);
+          expect(lex._attachments).toBeUndefined();
+          expect(lex._rid).toBeUndefined();
+          expect(lex._self).toBeUndefined();
+          expect(lex.permissions).toBeUndefined();
+          expect(lex.ttl).toBeUndefined();
+
+        }));
+
+        it(`languageID (query)`, testAsync(async function() {
+
+          // add test data
+          const data    = Object.assign({ tid: `upsertLexeme - languageID` }, defaultData);
+          const lexData = await upsert(coll, data);
+
+          // change data
+          lexData.newProperty = true;
+          lexData.tid         = `upsertLanguageAgain`;
+          delete lexData.languageID;
+
+          // upsert changed data
+          const { body: lex, headers } = await req.put(`${v}/lexemes`)
+          .set(`Authorization`, token)
+          .query({ languageID: langData.id })
+          .send(lexData)
+          .expect(201)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Lexeme attributes
+          expect(lex.type).toBe(`Lexeme`);
+          expect(lex.languageID).toBe(langData.id);
+          expect(lex.tid).toBe(lexData.tid);
+          expect(lex.newProperty).toBe(true);
+          expect(lex._attachments).toBeUndefined();
+          expect(lex._rid).toBeUndefined();
+          expect(lex._self).toBeUndefined();
+          expect(lex.permissions).toBeUndefined();
+          expect(lex.ttl).toBeUndefined();
+
+          // check data on server
+          const doc = await read(`${coll}/docs/${lex.id}`);
+          expect(doc.tid).toBe(lexData.tid);
+          expect(doc.newProperty).toBe(true);
+          expect(doc.type).toBe(`Lexeme`);
+          expect(doc.permissions.owners.includes(config.testUser)).toBe(true);
+
+        }));
 
       });
 

@@ -350,6 +350,19 @@ module.exports = (req, v = ``) => {
 
       describe(`PUT`, function() {
 
+        it(`400: bad If-Match header`, testAsync(async function() {
+
+          const data = Object.assign({ tid: `bad if-match` }, defaultData);
+          const lang = await upsert(coll, data);
+
+          await req.put(`${v}/languages`)
+          .set(`Authorization`, token)
+          .set(ifMatchHeader, ``) // cannot use true to test this because it results in a valid String, and a 412 response
+          .send(lang)
+          .expect(400);
+
+        }));
+
         it(`403: Forbidden (bad scope)`, testAsync(async function() {
 
           const badToken = await getBadToken();
@@ -413,7 +426,7 @@ module.exports = (req, v = ``) => {
 
         }));
 
-        it(`201: missing body creates a Language`, testAsync(async function() {
+        it(`201: No body`, testAsync(async function() {
 
           const { body: lang, headers } = await req.put(`${v}/languages`)
           .set(`Authorization`, token)
@@ -438,7 +451,7 @@ module.exports = (req, v = ``) => {
 
         }));
 
-        it(`201: creates a new Language when no ID is specified`, testAsync(async function() {
+        it(`201: Create`, testAsync(async function() {
 
           const data = Object.assign({ tid: `upsertLanguage - add` }, defaultData);
 
@@ -469,7 +482,7 @@ module.exports = (req, v = ``) => {
 
         }));
 
-        it(`201: replaces a Language when an ID is specified`, testAsync(async function() {
+        it(`201: Replace`, testAsync(async function() {
 
           // add test data
           const data     = Object.assign({ tid: `upsertLanguage - replace` }, defaultData);
@@ -508,7 +521,7 @@ module.exports = (req, v = ``) => {
 
         }));
 
-        it(`201: upserts deleted Languages`, testAsync(async function() {
+        it(`201: Undelete`, testAsync(async function() {
 
           const data        = Object.assign({ tid: `upsertDeleted`, ttl: 300 }, defaultData);
           const deletedLang = await upsert(coll, data);
@@ -536,7 +549,6 @@ module.exports = (req, v = ``) => {
           // check data on server
           const serverData = await read(deletedLang._self);
           expect(serverData.ttl).toBeUndefined();
-
 
         }));
 
