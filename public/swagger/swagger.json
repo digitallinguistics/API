@@ -647,7 +647,7 @@
       "patch" : {
         "tags" : [ "Lexeme" ],
         "summary" : "Perform a partial update on a Lexeme",
-        "description" : "Perform a partial update on a Lexeme. A `languageID` must be provided, either as a query or in the Lexeme body.",
+        "description" : "Perform a partial update on a Lexeme.",
         "operationId" : "updateLexeme",
         "parameters" : [ {
           "name" : "lexemeID",
@@ -661,13 +661,6 @@
           "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
           "required" : false,
           "type" : "string"
-        }, {
-          "name" : "languageID",
-          "in" : "query",
-          "description" : "The ID of the Language to perform the operation on",
-          "required" : false,
-          "type" : "string",
-          "allowEmptyValue" : true
         } ],
         "responses" : {
           "200" : {
