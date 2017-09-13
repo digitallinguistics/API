@@ -595,6 +595,20 @@ module.exports = (req, v = ``) => {
 
       describe(`DELETE`, function() {
 
+        it(`400: bad If-Match`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({ tid: `bad If-Match` }, defaultData);
+          const lang = await upsert(coll, data);
+
+          // delete Language with bad If-Match
+          await req.delete(`${v}/languages/${lang.id}`)
+          .set(`Authorization`, token)
+          .set(ifMatchHeader, ``)
+          .expect(400);
+
+        }));
+
         it(`403: bad scope`, testAsync(async function() {
 
           const badToken = await getBadToken();

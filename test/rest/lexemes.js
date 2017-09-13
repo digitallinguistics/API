@@ -807,6 +807,119 @@ module.exports = (req, v = ``) => {
 
       describe(`DELETE`, function() {
 
+        it(`400: bad If-Match`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({ tid: `bad If-Match` }, defaultData);
+          const lex  = await upsert(coll, data);
+
+          // delete Lexeme with If-Match
+          await req.delete(`${v}/languages/${lex.id}`)
+          .set(`Authorization`, token)
+          .set(ifMatchHeader, ``)
+          .expect(400);
+
+        }));
+
+        it(`403: bad scope`, testAsync(async function() {
+
+          const badToken = await getBadToken();
+          const data     = Object.assign({ tid: `bad scope` }, defaultData);
+          const lex      = await upsert(coll, data);
+
+          await req.delete(`${v}/lexemes/${lex.id}`)
+          .set(`Authorization`, `Bearer ${badToken}`)
+          .expect(403);
+
+        }));
+
+        it(`403: Forbidden (bad permissions on Lexeme)`, testAsync(async function() {
+
+          const data = Object.assign({}, defaultData, { permissions: { owners: [`some-other-user`] } });
+          const lex  = await upsert(coll, data);
+
+          await req.delete(`${v}/lexemes/${lex.id}`)
+          .set(`Authorization`, token)
+          .expect(403);
+
+        }));
+
+        it(`404: Not Found`, testAsync(async function() {
+          await req.delete(`${v}/lexemes/bad-id`)
+          .set(`Authorization`, token)
+          .expect(404);
+        }));
+
+        it(`412: If-Match precondition not met`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({ tid: `ifMatch` }, defaultData);
+          const lex  = await upsert(coll, data);
+
+          // update data on server
+          lex.changedProperty = true;
+          await upsert(coll, lex);
+
+          // returns 412 if data has been updated
+          await req.delete(`${v}/lexemes/${lex.id}`)
+          .set(`Authorization`, token)
+          .expect(412)
+          .set(ifMatchHeader, lex._etag);
+
+        }));
+
+        it(`204: Delete Successful`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({ tid: `deleteLexeme` }, defaultData);
+          const lex  = await upsert(coll, data);
+
+          // delete Lexeme
+          await req.delete(`${v}/lexemes/${lex.id}`)
+          .set(`Authorization`, token)
+          .expect(204);
+
+          // check that Lexeme is deleted on server
+          const serverLex = await read(lex._self);
+          expect(serverLex.ttl).toBeDefined();
+
+        }));
+
+        it(`204: already deleted`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({ tid: `deleteLexeme`, ttl: 300 }, defaultData);
+          const lex  = await upsert(coll, data);
+
+          // delete Language
+          await req.delete(`${v}/lexemes/${lex.id}`)
+          .set(`Authorization`, token)
+          .expect(204);
+
+          // check data on server
+          const res = await read(lex._self);
+          expect(res.ttl).toBeDefined();
+
+        }));
+
+        it(`If-Match`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({ tid: `deleteLexeme - If-Match` }, defaultData);
+          const lex  = await upsert(coll, data);
+
+          // delete Lexeme with If-Match
+          await req.delete(`${v}/lexemes/${lex.id}`)
+          .set(`Authorization`, token)
+          .set(ifMatchHeader, lex._etag)
+          .expect(204);
+
+          // check data on server
+          const res = await read(lex._self);
+          expect(res.ttl).toBeDefined();
+
+        }));
+
       });
 
       describe(`GET`, function() {

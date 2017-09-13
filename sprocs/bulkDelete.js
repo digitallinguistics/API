@@ -66,10 +66,8 @@ function bulkDelete(IDs = [], userID) {
 
   const tasks = Array.from(ids);
 
-  tasks.reduce(async (p, id) => {
-    await p;
-    return deleteDoc(id);
-  }, Promise.resolve())
+  tasks
+  .reduce((p, id) => p.then(() => deleteDoc(id)), Promise.resolve())
   .then(() => {
     body.continuation = false;
     body.remaining = [];
