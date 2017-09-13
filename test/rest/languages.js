@@ -340,7 +340,7 @@ module.exports = (req, v = ``) => {
 
           // check data on server
           const doc = await read(`${coll}/docs/${lang.id}`);
-          expect(doc.type === `Language`).toBe(true);
+          expect(doc.type).toBe(`Language`);
           expect(doc.tid).toBe(data.tid);
           expect(doc.permissions.owners.includes(config.testUser)).toBe(true);
 
@@ -433,7 +433,7 @@ module.exports = (req, v = ``) => {
 
           // check data on server
           const doc = await read(`${coll}/docs/${lang.id}`);
-          expect(doc.type === `Language`).toBe(true);
+          expect(doc.type).toBe(`Language`);
           expect(doc.permissions.owners.includes(config.testUser)).toBe(true);
 
         }));
@@ -464,7 +464,7 @@ module.exports = (req, v = ``) => {
           // check data on server
           const doc = await read(`${coll}/docs/${lang.id}`);
           expect(doc.tid).toBe(data.tid);
-          expect(doc.type === `Language`).toBe(true);
+          expect(doc.type).toBe(`Language`);
           expect(doc.permissions.owners.includes(config.testUser)).toBe(true);
 
         }));
@@ -503,7 +503,7 @@ module.exports = (req, v = ``) => {
           const doc = await read(`${coll}/docs/${lang.id}`);
           expect(doc.tid).toBe(langData.tid);
           expect(doc.newProperty).toBe(true);
-          expect(doc.type === `Language`).toBe(true);
+          expect(doc.type).toBe(`Language`);
           expect(doc.permissions.owners.includes(config.testUser)).toBe(true);
 
         }));

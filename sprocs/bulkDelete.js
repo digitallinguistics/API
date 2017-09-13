@@ -8,14 +8,14 @@
   require-jsdoc,
 */
 
-function bulkDelete(ids = [], userID) {
+function bulkDelete(IDs = [], userID) {
 
   const { response } = __;
   const link         = __.getAltLink();
+  const ids          = new Set(IDs);
 
   const body = {
     continuation: true,
-    remaining: ids,
     status: 204,
   };
 
@@ -35,12 +35,14 @@ function bulkDelete(ids = [], userID) {
         doc.ttl = 2592000; // 30 days
 
         const accepted = __.replaceDocument(doc._self, doc, err => {
-          if (err) reject(err);
-          else resolve();
+          if (err) return reject(err);
+          ids.delete(id);
+          resolve();
         });
 
         if (!accepted) {
-          body.staus = 408;
+          body.status = 408;
+          body.remaining = Array.from(ids);
           response.setBody(body);
           reject();
         }
@@ -55,19 +57,27 @@ function bulkDelete(ids = [], userID) {
 
     if (!accepted) {
       body.status = 408;
+      body.remaining = Array.from(ids);
       response.setBody(body);
       reject();
     }
 
   });
 
-  Promise.all(ids.map(deleteDoc))
+  const tasks = Array.from(ids);
+
+  tasks.reduce(async (p, id) => {
+    await p;
+    return deleteDoc(id);
+  }, Promise.resolve())
   .then(() => {
     body.continuation = false;
+    body.remaining = [];
     response.setBody(body);
   })
   .catch(err => {
     if (err) throw new Error(err.number, `Database error.`);
+    body.remaining = Array.from(ids);
     response.setBody(body);
   });
 
