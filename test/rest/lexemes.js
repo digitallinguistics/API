@@ -495,7 +495,7 @@ module.exports = (req, v = ``) => {
           const data = Object.assign({ tid: `bad if-match` }, defaultData);
           const lex  = await upsert(coll, data);
 
-          await req.put(`${v}/languages`)
+          await req.put(`${v}/lexemes`)
           .set(`Authorization`, token)
           .set(ifMatchHeader, ``) // cannot use true to test this because it results in a valid String, and a 412 response
           .send(lex)
@@ -815,7 +815,7 @@ module.exports = (req, v = ``) => {
           const lex  = await upsert(coll, data);
 
           // delete Lexeme with If-Match
-          await req.delete(`${v}/languages/${lex.id}`)
+          await req.delete(`${v}/lexemes/${lex.id}`)
           .set(`Authorization`, token)
           .set(ifMatchHeader, ``)
           .expect(400);
