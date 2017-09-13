@@ -40,7 +40,7 @@ const {
 
 module.exports = (req, v = ``) => {
 
-  fdescribe(`Lexemes by Language`, function() {
+  describe(`Lexemes by Language`, function() {
 
     const languageID = uuid();
     let token;
