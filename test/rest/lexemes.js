@@ -1042,6 +1042,156 @@ module.exports = (req, v = ``) => {
 
       describe(`PATCH`, function() {
 
+        it(`403: bad scope`, testAsync(async function() {
+
+          const badToken = await getBadToken();
+          const data     = Object.assign({ tid: `bad scope` }, defaultData);
+          const lex      = await upsert(coll, data);
+
+          await req.patch(`${v}/lexemes/${lex.id}`)
+          .set(`Authorization`, `Bearer ${badToken}`)
+          .send(lex)
+          .expect(403);
+
+        }));
+
+        it(`403: Forbidden (bad permissions)`, testAsync(async function() {
+
+          const data = Object.assign({}, defaultData, { permissions: { owners: [`some-other-user`] } });
+          const lex  = await upsert(coll, data);
+
+          await req.patch(`${v}/lexemes/${lex.id}`)
+          .set(`Authorization`, token)
+          .send(lex)
+          .expect(403);
+
+        }));
+
+        it(`404: Not Found`, testAsync(async function() {
+          await req.patch(`${v}/lexemes/bad-id`)
+          .set(`Authorization`, token)
+          .expect(404);
+        }));
+
+        it(`412: If-Match precondition not met`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({ tid: `If-Match not met` }, defaultData);
+          const lex  = await upsert(coll, data);
+
+          // change data on server
+          lex.changedProperty = true;
+          await upsert(coll, lex);
+
+          // If-Match
+          await req.patch(`${v}/lexemes/${lex.id}`)
+          .set(`Authorization`, token)
+          .set(ifMatchHeader, lex._etag)
+          .send(lex)
+          .expect(412);
+
+        }));
+
+        it(`422: Malformed Data`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({}, defaultData, { tid: `malformed` });
+          const lex  = await upsert(coll, data);
+
+          // make data malformed
+          lex.lemma = true;
+
+          // attempt to update data
+          await req.patch(`${v}/lexemes/${lex.id}`)
+          .set(`Authorization`, token)
+          .send(lex)
+          .expect(422);
+
+        }));
+
+        it(`200: updated`, testAsync(async function() {
+
+          // add test data
+          const data   = Object.assign({ tid: `updateLexeme` }, defaultData);
+          const lexeme = await upsert(coll, data);
+
+          // change data for update
+          const { id } = lexeme;
+          lexeme.changedProperty = true;
+          lexeme.languageID      = uuid(); // change in languageID should be ignored
+          delete lexeme.id;                // missing ID in body shouldn't throw an error
+
+          // update Lexeme
+          const { body: lex, headers } = await req.patch(`${v}/lexemes/${id}`)
+          .set(`Authorization`, token)
+          .send(lexeme)
+          .expect(200)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Lexeme attributes
+          expect(lex.type).toBe(`Lexeme`);
+          expect(lex.languageID).toBe(langData.id);
+          expect(lex.changedProperty).toBe(true);
+          expect(lex.tid).toBe(data.tid);
+          expect(lex._attachments).toBeUndefined();
+          expect(lex._rid).toBeUndefined();
+          expect(lex._self).toBeUndefined();
+          expect(lex.permissions).toBeUndefined();
+          expect(lex.ttl).toBeUndefined();
+
+          // check data on server
+          const serverData = await read(lexeme._self);
+
+          expect(serverData.type).toBe(`Lexeme`);
+          expect(serverData.tid).toBe(data.tid);
+          expect(serverData.languageID).toBe(langData.id);
+          expect(serverData.changedProperty).toBe(true);
+          expect(serverData.ttl).toBeUndefined();
+
+        }));
+
+        it(`200: Undelete`, testAsync(async function() {
+
+          const data   = Object.assign({ tid: `undeleteLexeme`, ttl: 300 }, defaultData);
+          const lexeme = await upsert(coll, data);
+
+          lexeme.changedProperty = true;
+
+          // update Lexeme
+          const { body: lex, headers } = await req.patch(`${v}/lexemes/${lexeme.id}`)
+          .set(`Authorization`, token)
+          .send(lexeme)
+          .expect(200)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Lexeme attributes
+          expect(lex.type).toBe(`Lexeme`);
+          expect(lex.languageID).toBe(langData.id);
+          expect(lex.changedProperty).toBe(true);
+          expect(lex.tid).toBe(data.tid);
+          expect(lex._attachments).toBeUndefined();
+          expect(lex._rid).toBeUndefined();
+          expect(lex._self).toBeUndefined();
+          expect(lex.permissions).toBeUndefined();
+          expect(lex.ttl).toBeUndefined();
+
+          // check data on server
+          const serverData = await read(lexeme._self);
+
+          expect(serverData.type).toBe(`Lexeme`);
+          expect(serverData.languageID).toBe(langData.id);
+          expect(serverData.tid).toBe(data.tid);
+          expect(serverData.changedProperty).toBe(true);
+          expect(serverData.ttl).toBeUndefined();
+
+        }));
+
       });
 
     });

@@ -943,14 +943,14 @@ module.exports = (req, v = ``) => {
           // check data on server
           const serverData = await read(langData._self);
 
-          expect(serverData.type === `Language`).toBe(true);
+          expect(serverData.type).toBe(`Language`);
           expect(serverData.tid).toBe(data.tid);
           expect(serverData.changedProperty).toBe(true);
           expect(serverData.ttl).toBeUndefined();
 
         }));
 
-        it(`200: undeletes a deleted Language`, testAsync(async function() {
+        it(`200: Undelete`, testAsync(async function() {
 
           const data     = Object.assign({ tid: `undeleteLanguage`, ttl: 300 }, defaultData);
           const langData = await upsert(coll, data);
@@ -980,7 +980,7 @@ module.exports = (req, v = ``) => {
           // check data on server
           const serverData = await read(langData._self);
 
-          expect(serverData.type === `Language`).toBe(true);
+          expect(serverData.type).toBe(`Language`);
           expect(serverData.tid).toBe(data.tid);
           expect(serverData.changedProperty).toBe(true);
           expect(serverData.ttl).toBeUndefined();
