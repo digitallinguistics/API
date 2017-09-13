@@ -741,6 +741,20 @@ module.exports = (req, v = ``) => {
 
         }));
 
+        it(`400: bad If-None-Match`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({ tid: `304: Not Modified` }, defaultData);
+          const lang = await upsert(coll, data);
+
+          // If-None-Match
+          await req.get(`${v}/languages/${lang.id}`)
+          .set(`Authorization`, token)
+          .set(ifNoneMatchHeader, ``)
+          .expect(400);
+
+        }));
+
         it(`403: Forbidden (bad permissions)`, testAsync(async function() {
 
           const data = Object.assign({}, defaultData, { permissions: { owners: [`some-other-user`] } });

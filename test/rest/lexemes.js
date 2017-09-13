@@ -32,6 +32,7 @@ const {
   continuationHeader,
   ifMatchHeader,
   ifModifiedSinceHeader,
+  ifNoneMatchHeader,
   itemCountHeader,
   lastModifiedHeader,
   maxItemsHeader,
@@ -923,6 +924,119 @@ module.exports = (req, v = ``) => {
       });
 
       describe(`GET`, function() {
+
+        it(`304: Not Modified`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({ tid: `304: Not Modified` }, defaultData);
+          const lex = await upsert(coll, data);
+
+          // If-None-Match
+          await req.get(`${v}/lexemes/${lex.id}`)
+          .set(`Authorization`, token)
+          .set(ifNoneMatchHeader, lex._etag)
+          .expect(304);
+
+        }));
+
+        it(`400: bad If-None-Match`, testAsync(async function() {
+
+          // add test data
+          const data = Object.assign({ tid: `304: Not Modified` }, defaultData);
+          const lex = await upsert(coll, data);
+
+          // If-None-Match
+          await req.get(`${v}/lexemes/${lex.id}`)
+          .set(`Authorization`, token)
+          .set(ifNoneMatchHeader, ``)
+          .expect(400);
+
+        }));
+
+        it(`403: Forbidden (bad permissions)`, testAsync(async function() {
+
+          const data = Object.assign({}, defaultData, { permissions: { owners: [`some-other-user`] } });
+          const lex  = await upsert(coll, data);
+
+          await req.get(`${v}/lexemes/${lex.id}`)
+          .set(`Authorization`, token)
+          .expect(403);
+
+        }));
+
+        it(`404: Not Found`, testAsync(async function() {
+          await req.get(`${v}/lexemes/bad-id`)
+          .set(`Authorization`, token)
+          .expect(404);
+        }));
+
+        it(`410: gone`, testAsync(async function() {
+
+          const data = Object.assign({ tid: `deletedLang`, ttl: 300 }, defaultData);
+          const lex  = await upsert(coll, data);
+
+          await req.get(`${v}/lexemes/${lex.id}`)
+          .set(`Authorization`, token)
+          .expect(410);
+
+        }));
+
+        it(`200: Success`, testAsync(async function() {
+
+          const data   = Object.assign({ tid: `getLexeme` }, defaultData);
+          const lexeme = await upsert(coll, data);
+
+          const { body: lex, headers } = await req.get(`${v}/lexemes/${lexeme.id}`)
+          .set(`Authorization`, token)
+          .expect(200)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Lexeme attributes
+          expect(lex.type).toBe(`Lexeme`);
+          expect(lex.languageID).toBe(langData.id);
+          expect(lex.tid).toBe(data.tid);
+          expect(lex._attachments).toBeUndefined();
+          expect(lex._rid).toBeUndefined();
+          expect(lex._self).toBeUndefined();
+          expect(lex.permissions).toBeUndefined();
+          expect(lex.ttl).toBeUndefined();
+
+        }));
+
+        it(`200: retrieves public items`, testAsync(async function() {
+
+          const data = Object.assign({}, defaultData, {
+            permissions: {
+              owners: [`some-other-user`],
+              public: true,
+            },
+            tid: `public item`,
+          });
+
+          const lexeme = await upsert(coll, data);
+
+          const { body: lex, headers } = await req.get(`${v}/lexemes/${lexeme.id}`)
+          .set(`Authorization`, token)
+          .expect(200)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Lexeme attributes
+          expect(lex.type).toBe(`Lexeme`);
+          expect(lex.languageID).toBe(langData.id);
+          expect(lex.tid).toBe(data.tid);
+          expect(lex._attachments).toBeUndefined();
+          expect(lex._rid).toBeUndefined();
+          expect(lex._self).toBeUndefined();
+          expect(lex.permissions).toBeUndefined();
+          expect(lex.ttl).toBeUndefined();
+
+        }));
 
       });
 
