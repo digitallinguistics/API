@@ -10,6 +10,8 @@
 const config = require('../../lib/config');
 const uuid   = require('uuid/v4');
 
+const test = true;
+
 const {
   db,
   getBadToken,
@@ -33,43 +35,41 @@ const {
   maxItemsHeader,
 } = headers;
 
-const languageID = uuid();
-const test       = true;
-
-const permissions = {
-  contributors: [],
-  owners:       [config.testUser],
-  public:       false,
-  viewers:      [],
-};
-
-const defaultData = {
-  languageID,
-  lemma: {},
-  permissions,
-  senses: [],
-  test,
-  type: `Lexeme`,
-};
-
-const langData = {
-  id: languageID,
-  name: {},
-  permissions,
-  test,
-  type: `Language`,
-};
-
 module.exports = (req, v = ``) => {
 
   describe(`Lexemes`, function() {
 
+    const languageID = uuid();
     let token;
+
+    const permissions = {
+      contributors: [],
+      owners:       [config.testUser],
+      public:       false,
+      viewers:      [],
+    };
+
+    const defaultData = {
+      languageID,
+      lemma: {},
+      permissions,
+      senses: [],
+      test,
+      type: `Lexeme`,
+    };
+
+    const langData = {
+      id: languageID,
+      name: {},
+      permissions,
+      test,
+      type: `Language`,
+    };
 
     beforeAll(testAsync(async function() {
       const res = await getToken();
       token = `Bearer ${res}`;
-      await upsert(coll, langData);
+      await upsert(coll, Object.assign({}, langData));
     }));
 
     describe(`/lexemes`, function() {
@@ -140,11 +140,15 @@ module.exports = (req, v = ``) => {
 
           // check that test data is included in the results
           expect(lexemes.length).toBeGreaterThan(1);
-          expect(lexemes.some(lex => lex.id === lex1.id && lex.tid === lex1.tid)).toBe(true);
-          expect(lexemes.some(lex => lex.id === lex2.id && lex.tid === lex2.tid)).toBe(true);
+          expect(lexemes.find(lex => lex.id === lex1.id && lex.tid === lex1.tid)).toBeDefined();
+          expect(lexemes.find(lex => lex.id === lex2.id && lex.tid === lex2.tid)).toBeDefined();
 
           // only items that the user has permission to view should be included in the results
-          expect(lexemes.some(lex => lex.id === lex3.id && lex.tid === lex3.tid)).toBe(false);
+          expect(lexemes.find(lex => lex.id === lex3.id && lex.tid === lex3.tid)).toBeUndefined();
+
+        }));
+
+        it(`200: returns Lexemes even if user doesn't have permissions for Language`, testAsync(async function() {
 
         }));
 
@@ -255,7 +259,15 @@ module.exports = (req, v = ``) => {
         it(`public`, testAsync(async function() {
 
           // add test data
+          const language = Object.assign({}, langData, {
+            id: uuid(),
+            permissions: { owners: [`some-other-user`] },
+          });
+
+          const lang = await upsert(coll, language);
+
           const privateData = Object.assign({}, defaultData, {
+            languageID: lang.id,
             permissions: {
               owners: [`some-other-user`],
               public: false,
@@ -264,6 +276,7 @@ module.exports = (req, v = ``) => {
           });
 
           const publicData  = Object.assign({}, defaultData, {
+            languageID: lang.id,
             permissions: {
               owners: [`some-other-user`],
               public: true,
@@ -311,7 +324,7 @@ module.exports = (req, v = ``) => {
 
       describe(`POST`, function() {
 
-        fit(`400: missing languageID`, testAsync(async function() {
+        it(`400: missing languageID`, testAsync(async function() {
           await req.post(`${v}/lexemes`)
           .set(`Authorization`, token)
           .send({})
@@ -330,7 +343,7 @@ module.exports = (req, v = ``) => {
 
         it(`403: no permissions for Language`, testAsync(async function() {
 
-          const data    = Object.assign({}, langData, { permissions: { owners: [`some-other-user`] } });
+          const data    = Object.assign({}, langData, { id: uuid(), permissions: { owners: [`some-other-user`] } });
           const lang    = await upsert(coll, data);
           const lexData = Object.assign({}, defaultData, { languageID: lang.id });
 
@@ -338,17 +351,6 @@ module.exports = (req, v = ``) => {
           .set(`Authorization`, token)
           .send(lexData)
           .expect(403);
-
-        }));
-
-        it(`404: Language doesn't exist`, testAsync(async function() {
-
-          const data = Object.assign({}, defaultData, { languageID: uuid() });
-
-          await req.post(`${v}/lexemes`)
-          .set(`Authorization`, token)
-          .send(data)
-          .expect(404);
 
         }));
 
@@ -365,18 +367,19 @@ module.exports = (req, v = ``) => {
 
         it(`201: Created`, testAsync(async function() {
 
-          const data = Object.assign({ tid: `addLexeme` }, defaultData);
+          const data = Object.assign({}, defaultData, { id: uuid(), tid: `addLexeme` });
 
           const { body: lex, headers } = await req.post(`${v}/lexemes`)
           .set(`Authorization`, token)
           .send(data)
-          .expect(422)
+          .expect(201)
           .expect(lastModifiedHeader, /.+/);
 
           // Last-Modified header should be a valid date string
           expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
 
           // check Lexeme attributes
+          expect(lex.id).not.toBe(data.id);
           expect(lex.type).toBe(`Lexeme`);
           expect(lex.languageID).toBe(langData.id);
           expect(lex._attachments).toBeUndefined();
@@ -401,7 +404,7 @@ module.exports = (req, v = ``) => {
           const { body: lex, headers } = await req.post(`${v}/lexemes`)
           .set(`Authorization`, token)
           .query({ languageID: langData.id })
-          .expect(422)
+          .expect(201)
           .expect(lastModifiedHeader, /.+/);
 
           // Last-Modified header should be a valid date string
@@ -420,7 +423,7 @@ module.exports = (req, v = ``) => {
 
       });
 
-      describe(`PUT`, function() {
+      fdescribe(`PUT`, function() {
 
         it(`400: missing languageID`, function() {
 
