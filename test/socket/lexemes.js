@@ -284,6 +284,48 @@ module.exports = (v = ``) => {
 
     describe(`upsertLexeme`, function() {
 
+      // NOTE: Various tests for upsert resulting in a create operation are tested in addLexeme rather than here
+
+      it(`400: bad options`, testAsync(async function() {
+        // test
+      }));
+
+      it(`400: bad ifMatch`, testAsync(async function() {
+        // test
+      }));
+
+      it(`403: bad scope`, testAsync(async function() {
+        // test
+      }));
+
+      it(`403: bad permissions for Lexeme`, testAsync(async function() {
+        // test
+      }));
+
+      it(`404: Lexeme not found`, testAsync(async function() {
+        // test
+      }));
+
+      it(`412: ifMatch precondition failed`, testAsync(async function() {
+        // test
+      }));
+
+      it(`422: Malformed data`, testAsync(async function() {
+        // test
+      }));
+
+      it(`201: Create`, testAsync(async function() {
+        // test
+      }));
+
+      it(`201: Replace`, testAsync(async function() {
+        // test
+      }));
+
+      it(`201: Undelete`, testAsync(async function() {
+        // test
+      }));
+
     });
 
   });
