@@ -146,6 +146,46 @@ module.exports = (v = ``) => {
 
     describe(`getLexeme`, function() {
 
+      it(`304: Not Modified`, testAsync(async function() {
+        // test
+      }));
+
+      it(`400: bad options`, testAsync(async function() {
+        // test
+      }));
+
+      it(`400: bad ifNoneMatch`, testAsync(async function() {
+        // test
+      }));
+
+      it(`403: bad permissions for Lexeme`, testAsync(async function() {
+        // test
+      }));
+
+      it(`404: Lexeme Not Found`, testAsync(async function() {
+        // test
+      }));
+
+      it(`410: Gone`, testAsync(async function() {
+        // test
+      }));
+
+      it(`200: Success (owner Lexeme)`, testAsync(async function() {
+        // test
+      }));
+
+      it(`200: Success (public Lexeme)`, testAsync(async function() {
+        // test
+      }));
+
+      it(`200: Success (viewer Lexeme)`, testAsync(async function() {
+        // test
+      }));
+
+      it(`ifNoneMatch`, testAsync(async function() {
+        // test
+      }));
+
     });
 
     describe(`getLexemes`, function() {
