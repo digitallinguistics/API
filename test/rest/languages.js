@@ -772,7 +772,7 @@ module.exports = (req, v = ``) => {
           .expect(404);
         }));
 
-        it(`410: gone`, testAsync(async function() {
+        it(`410: Gone`, testAsync(async function() {
 
           const data = Object.assign({ tid: `deletedLang`, ttl: 300 }, defaultData);
           const lang = await upsert(coll, data);

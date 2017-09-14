@@ -67,32 +67,6 @@ module.exports = (req, v = ``) => {
       client.emit(`authenticate`, { token }, done);
     });
 
-    it(`maxItemCount`, testAsync(async function() {
-
-      const data = Object.assign({}, defaultData);
-      Reflect.deleteProperty(data, `ttl`);
-
-      await Promise.all(Array(3).fill({}).map(() => upsert(coll, Object.assign({}, data))));
-
-      const continuation = await new Promise((resolve, reject) => {
-        client.emit(`getLanguages`, { maxItemCount: 2 }, (err, res, info) => {
-          if (err) return reject(err);
-          expect(res.length).toBe(2);
-          expect(info.continuation).toBeDefined();
-          resolve(info.continuation);
-        });
-      });
-
-      await new Promise((resolve, reject) => {
-        client.emit(`getLanguages`, { continuation }, (err, res) => {
-          expect(res.length).toBeGreaterThan(0);
-          if (err) reject(err);
-          else resolve();
-        });
-      });
-
-    }), 10000);
-
     it(`receives deleted data (REST)`, testAsync(async function() {
 
       const client = await authenticate(v, token);
@@ -222,19 +196,6 @@ module.exports = (req, v = ``) => {
         emit(`upsertLanguage`, data),
 
       ]);
-
-    }));
-
-    it(`304: Not Modified`, testAsync(async function() {
-
-      const data = Object.assign({}, defaultData);
-      const doc  = await upsert(coll, data);
-
-      try {
-        await emit(`getLanguage`, doc.id, { ifNoneMatch: doc._etag });
-      } catch (e) {
-        expect(e.status).toBe(304);
-      }
 
     }));
 
