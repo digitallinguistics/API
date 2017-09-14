@@ -119,7 +119,7 @@ module.exports = (v = ``) => {
 
     describe(`getLanguage`, function() {
 
-      it(`304: Not Modified`, testAsync(async function() {
+      it(`304: Not Modified (ifNoneMatch)`, testAsync(async function() {
         // body...
       }));
 
@@ -185,6 +185,10 @@ module.exports = (v = ``) => {
         // includes private results where user is Viewer but not Owner/Contributor
       }));
 
+      it(`ifModifiedSince`, testAsync(async function() {
+        // test
+      }));
+
     });
 
     describe(`updateLanguage`, function() {
@@ -229,9 +233,53 @@ module.exports = (v = ``) => {
         // test
       }));
 
+      it(`ifMatch`, testAsync(async function() {
+        // test
+      }));
+
     });
 
     describe(`upsertLanguage`, function() {
+
+      it(`bad options`, testAsync(async function() {
+        // test
+      }));
+
+      it(`400: bad ifMatch`, testAsync(async function() {
+        // test
+      }));
+
+      it(`403: Unauthorized (bad permissions)`, testAsync(async function() {
+        // test
+      }));
+
+      it(`404: Not Found`, testAsync(async function() {
+        // test
+      }));
+
+      it(`412: ifMatch precondition failed`, testAsync(async function() {
+        // test
+      }));
+
+      it(`422: Malformed Data`, testAsync(async function() {
+        // test
+      }));
+
+      it(`201: Create`, testAsync(async function() {
+        // missing body
+      }));
+
+      it(`201: Replace`, testAsync(async function() {
+        // test
+      }));
+
+      it(`201: Undelete`, testAsync(async function() {
+        // test
+      }));
+
+      it(`ifMatch`, testAsync(async function() {
+        // test
+      }));
 
     });
 
