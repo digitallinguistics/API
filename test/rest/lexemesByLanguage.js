@@ -1108,7 +1108,45 @@ module.exports = (req, v = ``) => {
         }));
 
         it(`If-Match`, testAsync(async function() {
-          // test
+
+          // add test data
+          const data   = Object.assign({ tid: `updateLexeme` }, defaultData);
+          const lexeme = await upsert(coll, data);
+
+          // change data for update
+          lexeme.changedProperty = true;
+
+          // update Lexeme with If-Match header
+          const { body: lex, headers } = await req.patch(`${v}/languages/${languageID}/lexemes/${lexeme.id}`)
+          .set(`Authorization`, token)
+          .set(ifMatchHeader, lexeme._etag)
+          .send(lexeme)
+          .expect(200)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Lexeme attributes
+          expect(lex.type).toBe(`Lexeme`);
+          expect(lex.languageID).toBe(langData.id);
+          expect(lex.changedProperty).toBe(true);
+          expect(lex.tid).toBe(data.tid);
+          expect(lex._attachments).toBeUndefined();
+          expect(lex._rid).toBeUndefined();
+          expect(lex._self).toBeUndefined();
+          expect(lex.permissions).toBeUndefined();
+          expect(lex.ttl).toBeUndefined();
+
+          // check data on server
+          const serverData = await read(lexeme._self);
+
+          expect(serverData.type).toBe(`Lexeme`);
+          expect(serverData.tid).toBe(data.tid);
+          expect(serverData.languageID).toBe(langData.id);
+          expect(serverData.changedProperty).toBe(true);
+          expect(serverData.ttl).toBeUndefined();
+
         }));
 
       });

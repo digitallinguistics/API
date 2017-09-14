@@ -132,7 +132,7 @@ module.exports = (req, v = ``) => {
           .expect(200)
           .expect(itemCountHeader, /[0-9]+/);
 
-          // check Language attributes
+          // check Lexeme attributes
           expect(lexemes.every(lex => lex.type === `Lexeme`
             && typeof lex._attachments === `undefined`
             && typeof lex._rid === `undefined`
@@ -198,7 +198,7 @@ module.exports = (req, v = ``) => {
           .expect(itemCountHeader, /[0-9]+/)
           .expect(continuationHeader, /.+/);
 
-          // check Language attributes
+          // check Lexeme attributes
           expect(res.body.every(lex => lex.type === `Lexeme`
             && typeof lex._attachments === `undefined`
             && typeof lex._rid === `undefined`
@@ -219,7 +219,7 @@ module.exports = (req, v = ``) => {
 
           expect(lexemes.length).toBeGreaterThan(0);
 
-          // check Language attributes
+          // check Lexeme attributes
           expect(lexemes.every(lex => lex.type === `Lexeme`
             && typeof lex._attachments === `undefined`
             && typeof lex._rid === `undefined`
@@ -335,7 +335,7 @@ module.exports = (req, v = ``) => {
           .expect(200)
           .expect(itemCountHeader, /[0-9]+/);
 
-          // check Language attributes
+          // check Lexeme attributes
           expect(lexemes.every(lex => lex.type === `Lexeme`
             && typeof lex._attachments === `undefined`
             && typeof lex._rid === `undefined`
@@ -633,7 +633,7 @@ module.exports = (req, v = ``) => {
           // Last-Modified header should be a valid date string
           expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
 
-          // check Language attributes
+          // check Lexeme attributes
           expect(lex.type).toBe(`Lexeme`);
           expect(lex.languageID).toBe(langData.id);
           expect(lex.tid).toBe(lexData.tid);

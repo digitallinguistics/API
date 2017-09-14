@@ -1,7 +1,10 @@
 /* eslint-disable
   func-names,
   max-nested-callbacks,
+  no-shadow,
+  no-underscore-dangle,
   prefer-arrow-callback,
+  sort-keys,
 */
 
 const config = require('../../lib/config');
@@ -10,11 +13,16 @@ const uuid   = require('uuid/v4');
 const {
   authenticate,
   db,
+  getBadToken,
   getToken,
   testAsync,
 } = require('../utilities');
 
-const { coll, upsert } = db;
+const {
+  coll,
+  read,
+  upsert,
+} = db;
 
 const languageID = uuid();
 const test       = true;
@@ -62,40 +70,150 @@ module.exports = (v = ``) => {
 
     describe(`addLexeme`, function() {
 
-      it(`400: bad options`, testAsync(async function() {
-        // test
-      }));
+      // NOTE: Cannot check for bad options because of how the options argument is retrieved
 
       it(`400: missing languageID`, testAsync(async function() {
-        // test
+
+        const data = Object.assign({ tid: `missing languageID` }, defaultData);
+        delete data.languageID;
+
+        try {
+          const { res } = await emit(`addLexeme`, data);
+          fail(res);
+        } catch (e) {
+          expect(e.status).toBe(400);
+        }
+
       }));
 
       it(`400: bad languageID`, testAsync(async function() {
-        // test
+
+        const data = Object.assign({}, defaultData, { languageID: true, tid: `bad languageID` });
+
+        try {
+          const { res } = await emit(`addLexeme`, data);
+          fail(res);
+        } catch (e) {
+          expect(e.status).toBe(400);
+        }
+
       }));
 
       it(`403: bad scope`, testAsync(async function() {
-        // test
+
+        const badToken = await getBadToken();
+        const client   = await authenticate(v, badToken);
+        const emit     = client.emitAsync;
+        const data     = Object.assign({ tid: `bad scope` }, defaultData);
+
+        try {
+          const { res } = await emit(`addLexeme`, data);
+          fail(res);
+        } catch (e) {
+          expect(e.status).toBe(403);
+        }
+
       }));
 
       it(`403: bad permissions on Language`, testAsync(async function() {
-        // test
+
+        const langData = Object.assign({}, lang, {
+          permissions: { owners: [`some-other-user`] },
+        });
+        delete langData.id;
+        const language = await upsert(coll, langData);
+
+        const data = Object.assign({}, defaultData, { languageID: language.id, tid: `bad permissions on Language` });
+
+        try {
+          const { res } = await emit(`addLexeme`, data);
+          fail(res);
+        } catch (e) {
+          expect(e.status).toBe(403);
+        }
+
       }));
 
       it(`404: Language not found`, testAsync(async function() {
-        // test
+
+        const data = Object.assign({}, defaultData, { languageID: uuid(), tid: `Language not found` });
+
+        try {
+          const { res } = await emit(`addLexeme`, data);
+          fail(res);
+        } catch (e) {
+          expect(e.status).toBe(404);
+        }
+
       }));
 
       it(`422: Malformed data`, testAsync(async function() {
-        // test
+
+        const data = Object.assign({}, defaultData, { tid: `malformed data`, lemma: true });
+
+        try {
+          const { res } = await emit(`addLexeme`, data);
+          fail(res);
+        } catch (e) {
+          expect(e.status).toBe(422);
+        }
+
       }));
 
       it(`201: Created (body provided)`, testAsync(async function() {
-        // test
+
+        const data          = Object.assign({ id: uuid(), tid: `created (body provided)` }, defaultData);
+        const { res, info } = await emit(`addLexeme`, data);
+
+        // check info
+        expect(info.status).toBe(201);
+        expect(Number.isInteger(Date.parse(info.lastModified))).toBe(true);
+
+        // check Lexeme data
+        expect(res.id).not.toBe(data.id);
+        expect(res.tid).toBe(data.tid);
+        expect(res.type).toBe(`Lexeme`);
+        expect(res.languageID).toBe(lang.id);
+        expect(res._attachments).toBeUndefined();
+        expect(res._rid).toBeUndefined();
+        expect(res._self).toBeUndefined();
+        expect(res.permissions).toBeUndefined();
+        expect(res.ttl).toBeUndefined();
+
+        // check server data
+        const doc = await read(`${coll}/docs/${res.id}`);
+        expect(doc.type).toBe(`Lexeme`);
+        expect(doc.languageID).toBe(lang.id);
+        expect(doc.tid).toBe(data.tid);
+        expect(doc.permissions.owners.includes(config.testUser)).toBe(true);
+        expect(doc.ttl).toBeUndefined();
+
       }));
 
       it(`201: Created (body missing)`, testAsync(async function() {
-        // test
+
+        const { res, info } = await emit(`addLexeme`, { languageID: lang.id });
+
+        // check info
+        expect(info.status).toBe(201);
+        expect(Number.isInteger(Date.parse(info.lastModified))).toBe(true);
+
+        // check Lexeme data
+        expect(res.type).toBe(`Lexeme`);
+        expect(res.languageID).toBe(lang.id);
+        expect(res._attachments).toBeUndefined();
+        expect(res._rid).toBeUndefined();
+        expect(res._self).toBeUndefined();
+        expect(res.permissions).toBeUndefined();
+        expect(res.ttl).toBeUndefined();
+
+        // check server data
+        const doc = await read(`${coll}/docs/${res.id}`);
+        expect(doc.type).toBe(`Lexeme`);
+        expect(doc.languageID).toBe(lang.id);
+        expect(doc.permissions.owners.includes(config.testUser)).toBe(true);
+        expect(doc.ttl).toBeUndefined();
+
       }));
 
     });
