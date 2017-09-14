@@ -190,6 +190,44 @@ module.exports = (v = ``) => {
 
     describe(`getLexemes`, function() {
 
+      it(`400: bad options`, testAsync(async function() {
+        // test
+      }));
+
+      it(`400: bad continuation`, testAsync(async function() {
+        // test
+      }));
+
+      it(`400: bad ifModifiedSince`, testAsync(async function() {
+        // test
+      }));
+
+      it(`400: bad languageID`, testAsync(async function() {
+        // test
+      }));
+
+      it(`400: bad maxItemCount`, testAsync(async function() {
+        // test
+      }));
+
+      it(`400: bad public option`, testAsync(async function() {
+        // test
+      }));
+
+      it(`200: Success`, testAsync(async function() {
+        // private lexeme not included
+        // public lexeme not included
+        // viewer lexeme included
+        // owner lexeme included
+      }));
+
+      it(`public option`, testAsync(async function() {
+        // private lexeme not included
+        // public lexeme included
+        // viewer lexeme included
+        // owner lexeme included
+      }));
+
     });
 
     describe(`updateLexeme`, function() {
