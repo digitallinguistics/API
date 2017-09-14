@@ -1,16 +1,19 @@
 /* eslint-disable
   func-names,
   max-nested-callbacks,
+  no-shadow,
   no-underscore-dangle,
   prefer-arrow-callback,
   sort-keys,
 */
 
 const config = require('../../lib/config');
+const uuid   = require('uuid/v4');
 
 const {
   authenticate,
   db,
+  getBadToken,
   getToken,
   testAsync,
 } = require('../utilities');
@@ -20,6 +23,8 @@ const {
   read,
   upsert,
 } = db;
+
+const test = true;
 
 const permissions = {
   contributors: [],
@@ -31,47 +36,88 @@ const permissions = {
 const defaultData = {
   name: {},
   permissions,
-  test: true,
+  test,
   type: `Language`,
 };
 
 module.exports = (v = ``) => {
 
-  fdescribe(`Languages`, function() {
+  describe(`Languages`, function() {
 
     let client;
     let emit;
     let token;
 
     beforeAll(testAsync(async function() {
-
       token  = await getToken();
       client = await authenticate(v, token);
-
-      emit = (...args) => new Promise((resolve, reject) => {
-        client.emit(...args, (err, res, info) => {
-          if (err) return reject(err);
-          resolve({ res, info });
-        });
-      });
-
+      emit   = client.emitAsync;
+      client.on(`error`, console.error);
     }));
 
     describe(`addLanguage`, function() {
 
       it(`403: Unauthorized (bad scope)`, testAsync(async function() {
 
+        const badToken = await getBadToken();
+        const client   = await authenticate(v, badToken);
+        const emit     = client.emitAsync;
+
+        try {
+          await emit(`addLanguage`);
+          fail();
+        } catch (e) {
+          expect(e.status).toBe(403);
+        }
+
       }));
 
       it(`422: Malformed Data`, testAsync(async function() {
 
+        const data = Object.assign({}, defaultData, { name: true });
+
+        try {
+          await emit(`addLanguage`, data);
+          fail();
+        } catch (e) {
+          expect(e.status).toBe(422);
+        }
+
       }));
 
       it(`201: Created`, testAsync(async function() {
-        // provided ID is ignored
+
+        const data = Object.assign({ id: uuid(), tid: `addLanguage` }, defaultData);
+        const { res: lang, info } = await emit(`addLanguage`, data);
+
+        expect(info.status).toBe(201);
+        expect(Number.isInteger(Date.parse(info.lastModified))).toBe(true);
+
+        // check Language attributes
+        expect(lang.id).not.toBe(data.id); // any provided ID should be deleted
+        expect(lang.type).toBe(`Language`);
+        expect(lang._attachments).toBeUndefined();
+        expect(lang._rid).toBeUndefined();
+        expect(lang._self).toBeUndefined();
+        expect(lang.permissions).toBeUndefined();
+        expect(lang.ttl).toBeUndefined();
+
       }));
 
       it(`201: Created (missing body)`, testAsync(async function() {
+
+        const { res: lang, info } = await emit(`addLanguage`);
+
+        expect(info.status).toBe(201);
+        expect(Number.isInteger(Date.parse(info.lastModified))).toBe(true);
+
+        // check Language attributes
+        expect(lang.type).toBe(`Language`);
+        expect(lang._attachments).toBeUndefined();
+        expect(lang._rid).toBeUndefined();
+        expect(lang._self).toBeUndefined();
+        expect(lang.permissions).toBeUndefined();
+        expect(lang.ttl).toBeUndefined();
 
       }));
 
@@ -80,38 +126,155 @@ module.exports = (v = ``) => {
     describe(`deleteLanguage`, function() {
 
       it(`400: bad options`, testAsync(async function() {
-        // test
+
+        const data = Object.assign({}, defaultData);
+        const lang = await upsert(coll, data);
+
+        try {
+          await emit(`deleteLanguage`, lang.id, true);
+          fail();
+        } catch (e) {
+          expect(e.status).toBe(400);
+        }
+
       }));
 
       it(`400: bad ifMatch`, testAsync(async function() {
 
+        const data = Object.assign({}, defaultData);
+        const lang = await upsert(coll, data);
+
+        try {
+          await emit(`deleteLanguage`, lang.id, { ifMatch: true });
+          fail();
+        } catch (e) {
+          expect(e.status).toBe(400);
+        }
+
       }));
 
-      it(`400: bad languageID`, testAsync(async function() {
+      it(`403: Unauthorized (bad scope)`, testAsync(async function() {
+
+        const badToken = await getBadToken();
+        const client   = await authenticate(v, badToken);
+        const emit     = client.emitAsync;
+        const data     = Object.assign({}, defaultData);
+        const lang     = await upsert(coll, data);
+
+        try {
+          await emit(`deleteLanguage`, lang.id);
+          fail();
+        } catch (e) {
+          expect(e.status).toBe(403);
+        }
 
       }));
 
       it(`403: Unauthorized (bad permissions)`, testAsync(async function() {
 
+        const data = Object.assign({}, defaultData, {
+          permissions: { owners: [`some-other-user`] },
+        });
+        const lang = await upsert(coll, data);
+
+        try {
+          await emit(`deleteLanguage`, lang.id);
+          fail();
+        } catch (e) {
+          expect(e.status).toBe(403);
+        }
+
       }));
 
       it(`404: Not Found`, testAsync(async function() {
-
+        try {
+          await emit(`deleteLanguage`, `bad-id`);
+          fail();
+        } catch (e) {
+          expect(e.status).toBe(404);
+        }
       }));
 
       it(`412: ifMatch precondition failed`, testAsync(async function() {
 
+        // add test data
+        const data = Object.assign({ tid: `ifMatch` }, defaultData);
+        const lang = await upsert(coll, data);
+
+        // update data on server
+        lang.changedProperty = true;
+        await upsert(coll, lang);
+
+        try {
+          await emit(`deleteLanguage`, lang.id, { ifMatch: lang._etag });
+          fail();
+        } catch (e) {
+          expect(e.status).toBe(412);
+        }
+
       }));
 
       it(`204: Deleted`, testAsync(async function() {
-        // associated Lexeme is also deleted
+
+        // add test Language
+        const data = Object.assign({ tid: `deleteLanguage` }, defaultData);
+        const lang = await upsert(coll, data);
+
+        // add test Lexeme
+        const lexeme = {
+          languageID: lang.id,
+          lemma: {},
+          permissions,
+          senses: [],
+          test,
+          type: `Lexeme`,
+        };
+
+        const lex = await upsert(coll, lexeme);
+
+        // delete Language
+        const { info } = await emit(`deleteLanguage`, lang.id);
+
+        // check response
+        expect(info.status).toBe(204);
+
+        // check that Language is deleted on server
+        const serverLang = await read(lang._self);
+        expect(serverLang.ttl).toBeDefined();
+
+        // check that associated Lexeme is deleted on server
+        const serverLex = await read(lex._self);
+        expect(serverLex.ttl).toBeDefined();
+
       }));
 
       it(`204: Deleted (already deleted item)`, testAsync(async function() {
 
+        // add test Language
+        const data = Object.assign({ tid: `deleteLanguage`, ttl: 300 }, defaultData);
+        const lang = await upsert(coll, data);
+
+        // redelete Language
+        await emit(`deleteLanguage`, lang.id);
+
+        // check data on server
+        const res = await read(lang._self);
+        expect(res.ttl).toBeDefined();
+
       }));
 
       it(`ifMatch`, testAsync(async function() {
+
+        // add test Language
+        const data = Object.assign({ tid: `deleteLanguage - If-Match` }, defaultData);
+        const lang = await upsert(coll, data);
+
+        // delete Language using ifMatch option
+        await emit(`deleteLanguage`, lang.id, { ifMatch: lang._etag });
+
+        // check data on server
+        const res = await read(lang._self);
+        expect(res.ttl).toBeDefined();
 
       }));
 
@@ -205,6 +368,10 @@ module.exports = (v = ``) => {
         // body...
       }));
 
+      it(`403: Unauthorized (bad scope)`, testAsync(async function() {
+        const badToken = await getBadToken();
+      }));
+
       it(`403: Unauthorized (bad permissions)`, testAsync(async function() {
         // test
       }));
@@ -247,6 +414,10 @@ module.exports = (v = ``) => {
 
       it(`400: bad ifMatch`, testAsync(async function() {
         // test
+      }));
+
+      it(`403: Unauthorized (bad scope)`, testAsync(async function() {
+        const badToken = await getBadToken();
       }));
 
       it(`403: Unauthorized (bad permissions)`, testAsync(async function() {
