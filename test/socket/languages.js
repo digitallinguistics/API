@@ -283,39 +283,149 @@ module.exports = (v = ``) => {
     describe(`getLanguage`, function() {
 
       it(`304: Not Modified (ifNoneMatch)`, testAsync(async function() {
-        // body...
+
+        // add test data
+        const data = Object.assign({ tid: `304: Not Modified` }, defaultData);
+        const lang = await upsert(coll, data);
+
+        try {
+          await emit(`getLanguage`, lang.id, { ifNoneMatch: lang._etag });
+          fail();
+        } catch (e) {
+          expect(e.status).toBe(304);
+        }
+
       }));
 
       it(`400: bad options`, testAsync(async function() {
-        // test
+
+        const data = Object.assign({ tid: `bad options` }, defaultData);
+        const lang = await upsert(coll, data);
+
+        try {
+          await emit(`getLanguage`, lang.id, true);
+          fail();
+        } catch (e) {
+          expect(e.status).toBe(400);
+        }
+
       }));
 
       it(`400: bad languageID`, testAsync(async function() {
-        // body...
+        try {
+          await emit(`getLanguage`, ``);
+          fail();
+        } catch (e) {
+          expect(e.status).toBe(400);
+        }
       }));
 
       it(`400: bad ifNoneMatch`, testAsync(async function() {
-        // body...
+
+        const data = Object.assign({}, defaultData);
+        const lang = await upsert(coll, data);
+
+        try {
+          await emit(`getLanguage`, lang.id, { ifNoneMatch: true });
+          fail();
+        } catch (e) {
+          expect(e.status).toBe(400);
+        }
+
       }));
 
       it(`403: Unauthorized (bad permissions)`, testAsync(async function() {
-        // body...
+
+        const data = Object.assign({}, defaultData, {
+          permissions: { owners: [`some-other-user`] },
+        });
+        const lang = await upsert(coll, data);
+
+        try {
+          await emit(`getLanguage`, lang.id);
+          fail();
+        } catch (e) {
+          expect(e.status).toBe(403);
+        }
+
       }));
 
       it(`404: Not Found`, testAsync(async function() {
-        // body...
+        try {
+          await emit(`getLanguage`, `bad-id`);
+          fail();
+        } catch (e) {
+          expect(e.status).toBe(404);
+        }
       }));
 
       it(`410: Gone`, testAsync(async function() {
-        // body...
+
+        const data = Object.assign({ tid: `deletedLang`, ttl: 300 }, defaultData);
+        const lang = await upsert(coll, data);
+
+        try {
+          await emit(`getLanguage`, lang.id);
+          fail();
+        } catch (e) {
+          expect(e.status).toBe(410);
+        }
+
       }));
 
       it(`200: Success`, testAsync(async function() {
-        // body...
+
+        // add test Language
+        const data = Object.assign({ tid: `getLanguage` }, defaultData);
+        const lang = await upsert(coll, data);
+
+        // get Language
+        const { res, info } = await emit(`getLanguage`, lang.id);
+
+        // check info
+        expect(info.status).toBe(200);
+        expect(Number.isInteger(Date.parse(info.lastModified))).toBe(true);
+
+        // check Language attributes
+        expect(res.type).toBe(`Language`);
+        expect(res.tid).toBe(data.tid);
+        expect(res._attachments).toBeUndefined();
+        expect(res._rid).toBeUndefined();
+        expect(res._self).toBeUndefined();
+        expect(res.permissions).toBeUndefined();
+        expect(res.ttl).toBeUndefined();
+
       }));
 
       it(`200: Success (public Language)`, testAsync(async function() {
-        // body...
+
+        // add public Language for another user
+        const data = Object.assign({}, defaultData, {
+          permissions: {
+            owners: [`some-other-user`],
+            public: true,
+          },
+          tid: `public item`,
+        });
+
+        const lang = await upsert(coll, data);
+
+        // get Language
+        const { res, info } = await emit(`getLanguage`, lang.id);
+
+        // check info
+        expect(info.status).toBe(200);
+        expect(Number.isInteger(Date.parse(info.lastModified))).toBe(true);
+
+        // check Language attributes
+        expect(res.type).toBe(`Language`);
+        expect(res.tid).toBe(data.tid);
+        expect(res._attachments).toBeUndefined();
+        expect(res._rid).toBeUndefined();
+        expect(res._self).toBeUndefined();
+        expect(res.permissions).toBeUndefined();
+        expect(res.ttl).toBeUndefined();
+
       }));
 
     });
