@@ -62,6 +62,38 @@ module.exports = (v = ``) => {
 
     describe(`addLexeme`, function() {
 
+      it(`400: missing languageID`, testAsync(async function() {
+        // test
+      }));
+
+      it(`400: bad languageID`, testAsync(async function() {
+        // test
+      }));
+
+      it(`403: bad scope`, testAsync(async function() {
+        // test
+      }));
+
+      it(`403: bad permissions on Language`, testAsync(async function() {
+        // test
+      }));
+
+      it(`404: Language not found`, testAsync(async function() {
+        // test
+      }));
+
+      it(`422: Malformed data`, testAsync(async function() {
+        // test
+      }));
+
+      it(`201: Created (body provided)`, testAsync(async function() {
+        // test
+      }));
+
+      it(`201: Created (body missing)`, testAsync(async function() {
+        // test
+      }));
+
     });
 
     describe(`deleteLexeme`, function() {
