@@ -48,7 +48,7 @@
           "required" : false,
           "type" : "string"
         }, {
-          "name" : "maxItems",
+          "name" : "maxItemCount",
           "in" : "header",
           "description" : "The `dlx-max-item-count` header is used to limit the number of results to a certain amount at a time (by default all results will be returned). If there are more results to be returned, a continuation token will also be sent in the `dlx-continuation` header.",
           "required" : false,
@@ -266,7 +266,7 @@
           "required" : false,
           "type" : "string"
         }, {
-          "name" : "maxItems",
+          "name" : "maxItemCount",
           "in" : "header",
           "description" : "The `dlx-max-item-count` header is used to limit the number of results to a certain amount at a time (by default all results will be returned). If there are more results to be returned, a continuation token will also be sent in the `dlx-continuation` header.",
           "required" : false,
@@ -490,7 +490,7 @@
           "type" : "string",
           "allowEmptyValue" : true
         }, {
-          "name" : "maxItems",
+          "name" : "maxItemCount",
           "in" : "header",
           "description" : "The `dlx-max-item-count` header is used to limit the number of results to a certain amount at a time (by default all results will be returned). If there are more results to be returned, a continuation token will also be sent in the `dlx-continuation` header.",
           "required" : false,
@@ -759,8 +759,8 @@
       "required" : true,
       "type" : "string"
     },
-    "maxItems" : {
-      "name" : "maxItems",
+    "maxItemCount" : {
+      "name" : "maxItemCount",
       "in" : "header",
       "description" : "The `dlx-max-item-count` header is used to limit the number of results to a certain amount at a time (by default all results will be returned). If there are more results to be returned, a continuation token will also be sent in the `dlx-continuation` header.",
       "required" : false,
