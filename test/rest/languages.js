@@ -95,6 +95,40 @@ module.exports = (req, v = ``) => {
           .set(ifModifiedSinceHeader, true);
         }));
 
+        it(`400: bad public option`, testAsync(async function() {
+
+          // add test data
+          const privateData = Object.assign({}, defaultData, {
+            permissions: {
+              owners: [`some-other-user`],
+              public: false,
+            },
+            tid: `privateData`,
+          });
+
+          const publicData  = Object.assign({}, defaultData, {
+            permissions: {
+              owners: [`some-other-user`],
+              public: true,
+            },
+            tid: `publicData`,
+          });
+
+          const privateLang = await upsert(coll, privateData);
+          const publicLang  = await upsert(coll, publicData);
+
+          // bad public value does not return public results
+          const { body: badLangs } = await req.get(`${v}/languages`)
+          .set(`Authorization`, token)
+          .query({ public: `yes` })
+          .expect(200)
+          .expect(itemCountHeader, /[0-9]+/);
+
+          expect(badLangs.find(lang => lang.id === publicLang.id)).toBeUndefined();
+          expect(badLangs.find(lang => lang.id === privateLang.id)).toBeUndefined();
+
+        }));
+
         it(`200: Success`, testAsync(async function() {
 
           // add test data
@@ -235,16 +269,6 @@ module.exports = (req, v = ``) => {
 
           const privateLang = await upsert(coll, privateData);
           const publicLang  = await upsert(coll, publicData);
-
-          // bad public value does not return public results
-          const { body: badLangs } = await req.get(`${v}/languages`)
-          .set(`Authorization`, token)
-          .query({ public: `yes` })
-          .expect(200)
-          .expect(itemCountHeader, /[0-9]+/);
-
-          expect(badLangs.find(lang => lang.id === publicLang.id)).toBeUndefined();
-          expect(badLangs.find(lang => lang.id === privateLang.id)).toBeUndefined();
 
           // request public items
           const { body: langs } = await req.get(`${v}/languages`)

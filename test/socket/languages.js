@@ -79,6 +79,10 @@ module.exports = (v = ``) => {
 
     describe(`deleteLanguage`, function() {
 
+      it(`400: bad options`, testAsync(async function() {
+        // test
+      }));
+
       it(`400: bad ifMatch`, testAsync(async function() {
 
       }));
@@ -119,6 +123,10 @@ module.exports = (v = ``) => {
         // body...
       }));
 
+      it(`400: bad options`, testAsync(async function() {
+        // test
+      }));
+
       it(`400: bad languageID`, testAsync(async function() {
         // body...
       }));
@@ -151,9 +159,75 @@ module.exports = (v = ``) => {
 
     describe(`getLanguages`, function() {
 
+      it(`bad options`, testAsync(async function() {
+        // test
+      }));
+
+      it(`400: bad continuation`, testAsync(async function() {
+        // body...
+      }));
+
+      it(`400: bad ifModifiedSince`, testAsync(async function() {
+        // body...
+      }));
+
+      it(`400: bad maxItems`, testAsync(async function() {
+        // body...
+      }));
+
+      it(`400: bad public option`, testAsync(async function() {
+        // body...
+      }));
+
+      it(`200: Success`, testAsync(async function() {
+        // does not include public results
+        // does not include private results
+        // includes private results where user is Viewer but not Owner/Contributor
+      }));
+
     });
 
     describe(`updateLanguage`, function() {
+
+      it(`400: bad options`, testAsync(async function() {
+        // test
+      }));
+
+      it(`400: bad ifMatch`, testAsync(async function() {
+        // body...
+      }));
+
+      it(`400: missing languageID`, testAsync(async function() {
+        // body...
+      }));
+
+      it(`403: Unauthorized (bad permissions)`, testAsync(async function() {
+        // test
+      }));
+
+      it(`404: NotFound`, testAsync(async function() {
+        // test
+      }));
+
+      it(`412: ifMatch precondition failed`, testAsync(async function() {
+        // test
+      }));
+
+      it(`422: Malformed data`, testAsync(async function() {
+        // test
+      }));
+
+      it(`200: Updated`, testAsync(async function() {
+        // test
+      }));
+
+      it(`200: Undeleted`, testAsync(async function() {
+        // test
+      }));
+
+      it(`200: Updated (missing body)`, testAsync(async function() {
+        // test
+      }));
 
     });
 
