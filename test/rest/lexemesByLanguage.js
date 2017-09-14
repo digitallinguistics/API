@@ -35,7 +35,7 @@ const {
   ifNoneMatchHeader,
   itemCountHeader,
   lastModifiedHeader,
-  maxItemsHeader,
+  maxItemCountHeader,
 } = headers;
 
 module.exports = (req, v = ``) => {
@@ -88,7 +88,7 @@ module.exports = (req, v = ``) => {
         it(`400: bad dlx-max-item-count`, testAsync(async function() {
           await req.get(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, token)
-          .set(maxItemsHeader, true)
+          .set(maxItemCountHeader, true)
           .expect(400);
         }));
 
@@ -189,7 +189,7 @@ module.exports = (req, v = ``) => {
           // dlx-max-item-count
           const res = await req.get(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, token)
-          .set(maxItemsHeader, 2)
+          .set(maxItemCountHeader, 2)
           .expect(200)
           .expect(itemCountHeader, /[0-9]+/)
           .expect(continuationHeader, /.+/);
@@ -943,6 +943,19 @@ module.exports = (req, v = ``) => {
       });
 
       describe(`PATCH`, function() {
+
+        it(`400: bad If-Match`, testAsync(async function() {
+
+          const data = Object.assign({ tid: `bad If-Match` }, defaultData);
+          const lex  = await upsert(coll, data);
+
+          await req.patch(`${v}/languages/${languageID}/lexemes/${lex.id}`)
+          .set(`Authorization`, token)
+          .set(ifMatchHeader, ``)
+          .send(lex)
+          .expect(400);
+
+        }));
 
         it(`403: bad scope`, testAsync(async function() {
 

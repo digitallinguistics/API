@@ -5,5 +5,5 @@ module.exports = {
   ifNoneMatchHeader:     `if-none-match`,
   itemCountHeader:       `dlx-item-count`,
   lastModifiedHeader:    `last-modified`,
-  maxItemsHeader:        `dlx-max-item-count`,
+  maxItemCountHeader:    `dlx-max-item-count`,
 };

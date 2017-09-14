@@ -5,6 +5,7 @@
 */
 
 const config = require('../../lib/config');
+const uuid   = require('uuid/v4');
 
 const {
   authenticate,
@@ -74,10 +75,10 @@ module.exports = (v = ``) => {
       expect(res.tid).toBe(data.tid);
 
       // add Lexeme with Language that does not exist
-      const lex1 = Object.assign({}, defaultData);
+      const lex1 = Object.assign({}, defaultData, { languageID: uuid() });
 
       try {
-        const { info } = await emit(`addLexeme`, lex1, { languageID: `678910` });
+        const { info } = await emit(`addLexeme`, lex1);
         expect(info.status).toBe(404);
       } catch (e) {
         expect(e.status).toBe(404);
