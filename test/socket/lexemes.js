@@ -62,6 +62,10 @@ module.exports = (v = ``) => {
 
     describe(`addLexeme`, function() {
 
+      it(`400: bad options`, testAsync(async function() {
+        // test
+      }));
+
       it(`400: missing languageID`, testAsync(async function() {
         // test
       }));
@@ -97,6 +101,46 @@ module.exports = (v = ``) => {
     });
 
     describe(`deleteLexeme`, function() {
+
+      it(`400: bad options`, testAsync(async function() {
+        // test
+      }));
+
+      it(`400: bad ID`, testAsync(async function() {
+        // test
+      }));
+
+      it(`400: bad ifMatch`, testAsync(async function() {
+        // test
+      }));
+
+      it(`403: bad scope`, testAsync(async function() {
+        // test
+      }));
+
+      it(`403: bad permissions on Lexeme`, testAsync(async function() {
+        // test
+      }));
+
+      it(`404: Lexeme not found`, testAsync(async function() {
+        // test
+      }));
+
+      it(`412: ifMatch precondition failed`, testAsync(async function() {
+        // test
+      }));
+
+      it(`204: Deleted`, testAsync(async function() {
+        // test
+      }));
+
+      it(`204: Redeleted`, testAsync(async function() {
+        // test
+      }));
+
+      it(`ifMatch`, testAsync(async function() {
+        // test
+      }));
 
     });
 
