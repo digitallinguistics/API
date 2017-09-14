@@ -232,6 +232,54 @@ module.exports = (v = ``) => {
 
     describe(`updateLexeme`, function() {
 
+      it(`missing ID`, testAsync(async function() {
+        // test
+      }));
+
+      it(`400: bad ID`, testAsync(async function() {
+        // test
+      }));
+
+      it(`400: bad ifMatch`, testAsync(async function() {
+        // test
+      }));
+
+      it(`403: bad scope`, testAsync(async function() {
+        // test
+      }));
+
+      it(`404: Lexeme not found`, testAsync(async function() {
+        // test
+      }));
+
+      it(`403: bad permissions for Lexeme`, testAsync(async function() {
+        // test
+      }));
+
+      it(`412: ifMatch precondition failed`, testAsync(async function() {
+        // test
+      }));
+
+      it(`422: Malformed data`, testAsync(async function() {
+        // test
+      }));
+
+      it(`200: Update`, testAsync(async function() {
+        // test
+      }));
+
+      it(`200: Undelete`, testAsync(async function() {
+        // test
+      }));
+
+      it(`200: No languageID`, testAsync(async function() {
+        // update handlers to retrieve item if no languageID is provided
+      }));
+
+      it(`ifMatch option`, testAsync(async function() {
+        // test
+      }));
+
     });
 
     describe(`upsertLexeme`, function() {
