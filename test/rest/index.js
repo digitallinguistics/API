@@ -4,10 +4,11 @@
   prefer-arrow-callback,
 */
 
-const errors    = require('./errors');
-const general   = require('./general');
-const languages = require('./languages');
-const lexemes   = require('./lexemes');
+const errors            = require('./errors');
+const general           = require('./general');
+const languages         = require('./languages');
+const lexemes           = require('./lexemes');
+const lexemesByLanguage = require('./lexemesByLanguage');
 
 module.exports = req => {
 
@@ -24,6 +25,9 @@ module.exports = req => {
 
     lexemes(req);
     lexemes(req, `/v0`);
+
+    lexemesByLanguage(req);
+    lexemesByLanguage(req, `/v0`);
 
   });
 

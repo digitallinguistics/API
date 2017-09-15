@@ -2,7 +2,7 @@
   "swagger" : "2.0",
   "info" : {
     "description" : "The Digital Linguistics (DLx) REST API",
-    "version" : "0.2.0",
+    "version" : "0.3.0",
     "title" : "DLx",
     "contact" : {
       "name" : "Daniel W. Hieber",
@@ -42,7 +42,13 @@
           "required" : false,
           "type" : "string"
         }, {
-          "name" : "maxItems",
+          "name" : "ifModifiedSince",
+          "in" : "header",
+          "description" : "The `If-Modified-Since` header is used to retrieve only results modified since a given time. The value of this header must be a valid date string.",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "maxItemCount",
           "in" : "header",
           "description" : "The `dlx-max-item-count` header is used to limit the number of results to a certain amount at a time (by default all results will be returned). If there are more results to be returned, a continuation token will also be sent in the `dlx-continuation` header.",
           "required" : false,
@@ -85,7 +91,7 @@
           "description" : "A database resource to upsert",
           "required" : true,
           "schema" : {
-            "$ref" : "#/definitions/Document"
+            "type" : "object"
           }
         } ],
         "responses" : {
@@ -111,7 +117,7 @@
           "description" : "A database resource to upsert",
           "required" : true,
           "schema" : {
-            "$ref" : "#/definitions/Document"
+            "type" : "object"
           }
         }, {
           "name" : "ifMatch",
@@ -214,7 +220,7 @@
           "description" : "A database resource to upsert",
           "required" : true,
           "schema" : {
-            "$ref" : "#/definitions/Document"
+            "type" : "object"
           }
         }, {
           "name" : "ifMatch",
@@ -238,10 +244,9 @@
     },
     "/languages/{languageID}/lexemes" : {
       "get" : {
-        "tags" : [ "Lexeme" ],
-        "summary" : "Get all lexemes",
-        "description" : "Retrieves all the Lexemes for a Language that the authenticated user or client has permission to access.",
-        "operationId" : "getLexemes",
+        "tags" : [ "Language", "Lexeme" ],
+        "summary" : "Get all Lexemes for a Language",
+        "operationId" : "getLexemesByLanguage",
         "parameters" : [ {
           "name" : "languageID",
           "in" : "path",
@@ -255,7 +260,237 @@
           "required" : false,
           "type" : "string"
         }, {
-          "name" : "maxItems",
+          "name" : "ifModifiedSince",
+          "in" : "header",
+          "description" : "The `If-Modified-Since` header is used to retrieve only results modified since a given time. The value of this header must be a valid date string.",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "maxItemCount",
+          "in" : "header",
+          "description" : "The `dlx-max-item-count` header is used to limit the number of results to a certain amount at a time (by default all results will be returned). If there are more results to be returned, a continuation token will also be sent in the `dlx-continuation` header.",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "public",
+          "in" : "query",
+          "description" : "Set this parameter to `true` to include all publicly-accessible resources, not just those that the user is listed as an Owner, Contributor, or Viewer for.",
+          "required" : false,
+          "type" : "string",
+          "default" : "false"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200: Operation successful.",
+            "headers" : {
+              "dlx-continuation" : {
+                "type" : "string",
+                "description" : "A continuation token for retrieving more results"
+              },
+              "dlx-item-count" : {
+                "type" : "string",
+                "description" : "The number of items returned in the response"
+              },
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Language", "Lexeme" ],
+        "summary" : "Add a new Lexeme to a Language",
+        "operationId" : "addLexemeByLanguage",
+        "parameters" : [ {
+          "name" : "languageID",
+          "in" : "path",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "201: The resource was created successfully.",
+            "headers" : {
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Language", "Lexeme" ],
+        "summary" : "Upsert (add or replace) a Lexeme",
+        "operationId" : "upsertLexemeByLanguage",
+        "parameters" : [ {
+          "name" : "languageID",
+          "in" : "path",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "ifMatch",
+          "in" : "header",
+          "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "201: Upsert successful.",
+            "headers" : {
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/languages/{languageID}/lexemes/{lexemeID}" : {
+      "get" : {
+        "tags" : [ "Language", "Lexeme" ],
+        "summary" : "Get a Lexeme by ID",
+        "operationId" : "getLexemeByLanguage",
+        "parameters" : [ {
+          "name" : "languageID",
+          "in" : "path",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "lexemeID",
+          "in" : "path",
+          "description" : "The ID of the Lexeme to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "ifNoneMatch",
+          "in" : "header",
+          "description" : "If `If-None-Match` header is used with GET requests to check whether you already have the most up-to-date version of the resource, and therefore do not need the resource sent again. The value of the `If-None-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to reduce bandwidth.",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200: Operation successful.",
+            "headers" : {
+              "dlx-continuation" : {
+                "type" : "string",
+                "description" : "A continuation token for retrieving more results"
+              },
+              "dlx-item-count" : {
+                "type" : "string",
+                "description" : "The number of items returned in the response"
+              },
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
+          },
+          "304" : {
+            "description" : "304: Not modified."
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Language", "Lexeme" ],
+        "summary" : "Delete a Lexeme by ID",
+        "operationId" : "deleteLexemeByLanguage",
+        "parameters" : [ {
+          "name" : "languageID",
+          "in" : "path",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "lexemeID",
+          "in" : "path",
+          "description" : "The ID of the Lexeme to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "ifMatch",
+          "in" : "header",
+          "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "204: Delete operation successful."
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Lexeme" ],
+        "summary" : "Perform a partial update on a Lexeme",
+        "operationId" : "updateLexemeByLanguage",
+        "parameters" : [ {
+          "name" : "languageID",
+          "in" : "path",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "lexemeID",
+          "in" : "path",
+          "description" : "The ID of the Lexeme to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "ifMatch",
+          "in" : "header",
+          "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200: Update successful.",
+            "headers" : {
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lexemes" : {
+      "get" : {
+        "tags" : [ "Lexeme" ],
+        "summary" : "Get all Lexemes",
+        "description" : "Retrieve all Lexemes that the authenticated user has permission to access. Include a `languageID` query parameter to limit results to Lexemes from a particular Language.",
+        "operationId" : "getLexemes",
+        "parameters" : [ {
+          "name" : "continuation",
+          "in" : "header",
+          "description" : "The `dlx-continuation` header is used to send a continuation token with the request, when retrieving the next page of results.",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "ifModifiedSince",
+          "in" : "header",
+          "description" : "The `If-Modified-Since` header is used to retrieve only results modified since a given time. The value of this header must be a valid date string.",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "languageID",
+          "in" : "query",
+          "description" : "The ID of the Language to perform the operation on",
+          "required" : false,
+          "type" : "string",
+          "allowEmptyValue" : true
+        }, {
+          "name" : "maxItemCount",
           "in" : "header",
           "description" : "The `dlx-max-item-count` header is used to limit the number of results to a certain amount at a time (by default all results will be returned). If there are more results to be returned, a continuation token will also be sent in the `dlx-continuation` header.",
           "required" : false,
@@ -291,21 +526,15 @@
       "post" : {
         "tags" : [ "Lexeme" ],
         "summary" : "Add a new Lexeme",
+        "description" : "Add a new Lexeme. A `languageID` must be provided either as a query parameter, or as an attribute on the Lexeme body.",
         "operationId" : "addLexeme",
         "parameters" : [ {
           "name" : "languageID",
-          "in" : "path",
+          "in" : "query",
           "description" : "The ID of the Language to perform the operation on",
-          "required" : true,
-          "type" : "string"
-        }, {
-          "in" : "body",
-          "name" : "body",
-          "description" : "A database resource to upsert",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/definitions/Document"
-          }
+          "required" : false,
+          "type" : "string",
+          "allowEmptyValue" : true
         } ],
         "responses" : {
           "201" : {
@@ -321,23 +550,87 @@
       },
       "put" : {
         "tags" : [ "Lexeme" ],
-        "summary" : "Upsert (create or replace) a Lexeme",
-        "description" : "Creates a Lexeme for the the Language if it does not yet exist (i.e. if the resource does not yet have an `id` property), or replaces the existing Lexeme if it does. Note that this replaces the *entire* Lexeme. It is not a partial update.",
+        "summary" : "Upsert (add or replace) a Lexeme",
+        "description" : "Upsert (add or replace) a Lexeme. A `languageID` must be provided either as a query parameter, or as an attribute on the Lexeme body.",
         "operationId" : "upsertLexeme",
         "parameters" : [ {
+          "name" : "ifMatch",
+          "in" : "header",
+          "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
+          "required" : false,
+          "type" : "string"
+        }, {
           "name" : "languageID",
-          "in" : "path",
+          "in" : "query",
           "description" : "The ID of the Language to perform the operation on",
+          "required" : false,
+          "type" : "string",
+          "allowEmptyValue" : true
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "201: Upsert successful.",
+            "headers" : {
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lexemes/{lexemeID}" : {
+      "get" : {
+        "tags" : [ "Lexeme" ],
+        "summary" : "Get a Lexeme by ID",
+        "operationId" : "getLexeme",
+        "parameters" : [ {
+          "name" : "lexemeID",
+          "in" : "path",
+          "description" : "The ID of the Lexeme to perform the operation on",
           "required" : true,
           "type" : "string"
         }, {
-          "in" : "body",
-          "name" : "body",
-          "description" : "A database resource to upsert",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/definitions/Document"
+          "name" : "ifNoneMatch",
+          "in" : "header",
+          "description" : "If `If-None-Match` header is used with GET requests to check whether you already have the most up-to-date version of the resource, and therefore do not need the resource sent again. The value of the `If-None-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to reduce bandwidth.",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200: Operation successful.",
+            "headers" : {
+              "dlx-continuation" : {
+                "type" : "string",
+                "description" : "A continuation token for retrieving more results"
+              },
+              "dlx-item-count" : {
+                "type" : "string",
+                "description" : "The number of items returned in the response"
+              },
+              "Last-Modified" : {
+                "type" : "string",
+                "description" : "The time that the item was last modified"
+              }
+            }
+          },
+          "304" : {
+            "description" : "304: Not modified."
           }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Lexeme" ],
+        "summary" : "Delete a Lexeme by ID",
+        "operationId" : "deleteLexeme",
+        "parameters" : [ {
+          "name" : "lexemeID",
+          "in" : "path",
+          "description" : "The ID of the Lexeme to perform the operation on",
+          "required" : true,
+          "type" : "string"
         }, {
           "name" : "ifMatch",
           "in" : "header",
@@ -346,8 +639,32 @@
           "type" : "string"
         } ],
         "responses" : {
-          "201" : {
-            "description" : "201: Upsert successful.",
+          "204" : {
+            "description" : "204: Delete operation successful."
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Lexeme" ],
+        "summary" : "Perform a partial update on a Lexeme",
+        "description" : "Perform a partial update on a Lexeme.",
+        "operationId" : "updateLexeme",
+        "parameters" : [ {
+          "name" : "lexemeID",
+          "in" : "path",
+          "description" : "The ID of the Lexeme to perform the operation on",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "ifMatch",
+          "in" : "header",
+          "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200: Update successful.",
             "headers" : {
               "Last-Modified" : {
                 "type" : "string",
@@ -367,22 +684,7 @@
       "in" : "header"
     }
   },
-  "definitions" : {
-    "Document" : {
-      "type" : "object",
-      "required" : [ "type" ],
-      "properties" : {
-        "id" : {
-          "type" : "string"
-        },
-        "type" : {
-          "type" : "string"
-        }
-      },
-      "title" : "Document",
-      "description" : "A document in the DLx database"
-    }
-  },
+  "definitions" : { },
   "parameters" : {
     "body" : {
       "in" : "body",
@@ -390,7 +692,7 @@
       "description" : "A database resource to upsert",
       "required" : true,
       "schema" : {
-        "$ref" : "#/definitions/Document"
+        "type" : "object"
       }
     },
     "continuation" : {
@@ -404,6 +706,13 @@
       "name" : "ifMatch",
       "in" : "header",
       "description" : "The `If-Match` header is used with PUT and DELETE requests to check whether you have the most up-to-date version of the resource before updating or deleting it. The value of the `If-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to avoid data conflicts.",
+      "required" : false,
+      "type" : "string"
+    },
+    "ifModifiedSince" : {
+      "name" : "ifModifiedSince",
+      "in" : "header",
+      "description" : "The `If-Modified-Since` header is used to retrieve only results modified since a given time. The value of this header must be a valid date string.",
       "required" : false,
       "type" : "string"
     },
@@ -421,8 +730,37 @@
       "required" : true,
       "type" : "string"
     },
-    "maxItems" : {
-      "name" : "maxItems",
+    "languageIDProp" : {
+      "in" : "body",
+      "name" : "languageID",
+      "description" : "The ID of the Language to perform the operation on",
+      "required" : false,
+      "schema" : {
+        "required" : [ "languageID" ],
+        "properties" : {
+          "languageID" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "languageIDQuery" : {
+      "name" : "languageID",
+      "in" : "query",
+      "description" : "The ID of the Language to perform the operation on",
+      "required" : false,
+      "type" : "string",
+      "allowEmptyValue" : true
+    },
+    "lexemeID" : {
+      "name" : "lexemeID",
+      "in" : "path",
+      "description" : "The ID of the Lexeme to perform the operation on",
+      "required" : true,
+      "type" : "string"
+    },
+    "maxItemCount" : {
+      "name" : "maxItemCount",
       "in" : "header",
       "description" : "The `dlx-max-item-count` header is used to limit the number of results to a certain amount at a time (by default all results will be returned). If there are more results to be returned, a continuation token will also be sent in the `dlx-continuation` header.",
       "required" : false,

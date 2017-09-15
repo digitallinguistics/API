@@ -2,6 +2,7 @@
 
 /* eslint-disable
   func-style,
+  no-param-reassign,
   require-jsdoc,
 */
 
@@ -37,7 +38,13 @@ function get(id, userID, options) {
 
     if (doc.ttl) throw new Error(410, `Resource with ID ${doc.id} no longer exists.`);
 
-    const p = doc.permissions;
+    // ensure that permissions are correctly formatted, and set to their defaults if not
+    doc.permissions = doc.permissions instanceof Object ? doc.permissions : {};
+    const p         = doc.permissions;
+    p.contributors  = Array.isArray(p.contributors) ? p.contributors : [];
+    p.owners        = Array.isArray(p.owners) ? p.owners : [];
+    p.viewers       = Array.isArray(p.viewers) ? p.viewers : [];
+    p.public        = `public` in p ? p.public : false;
 
     if (!(
       p.public === true

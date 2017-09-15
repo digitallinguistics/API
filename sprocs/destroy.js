@@ -4,6 +4,7 @@
   func-style,
   no-param-reassign,
   no-throw-literal,
+  no-underscore-dangle,
   require-jsdoc,
 */
 
@@ -34,7 +35,15 @@ function destroy(id, userID, { ifMatch } = {}) {
 
     parseError(err);
 
-    if (doc.ttl) throw new Error(410, `Resource with ID ${doc.id} no longer exists.`);
+    // NOTE: Do not return a 410 response if TTL is already set - just update it
+
+    // ensure that permissions are correctly formatted, and set to their defaults if not
+    doc.permissions = doc.permissions instanceof Object ? doc.permissions : {};
+    const p         = doc.permissions;
+    p.contributors  = Array.isArray(p.contributors) ? p.contributors : [];
+    p.owners        = Array.isArray(p.owners) ? p.owners : [];
+    p.viewers       = Array.isArray(p.viewers) ? p.viewers : [];
+    p.public        = `public` in p ? p.public : false;
 
     if (doc.permissions.owners.includes(userID)) {
 
@@ -47,8 +56,8 @@ function destroy(id, userID, { ifMatch } = {}) {
         parseError(err);
 
         response.setBody({
-          status:  204,
           details: `Resource with ID ${id} was successfully set to expire.`,
+          status:  204,
           type:    doc.type, // NOTE: a "type" is needed for the Socket to return an informative response
         });
 

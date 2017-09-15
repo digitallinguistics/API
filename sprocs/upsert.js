@@ -12,6 +12,13 @@ function upsert(data = {}, userID, { ifMatch } = {}) {
   const { response } = __;
   const link = __.getAltLink();
 
+  const defaultPermissions = {
+    contributors: [],
+    owners:       [userID],
+    public:       false,
+    viewers:      [],
+  };
+
   const parseError = err => {
 
     if (!err) return;
@@ -30,13 +37,21 @@ function upsert(data = {}, userID, { ifMatch } = {}) {
 
   };
 
+  delete data.ttl; // users cannot set their own TTL; also undeletes a document if it is upserted again
+
   if (data.id) {
 
     const accepted = __.readDocument(`${link}/docs/${data.id}`, (err, doc) => {
 
       parseError(err);
 
-      if (doc.ttl) throw new Error(410, `Resource with ID ${doc.id} no longer exists.`);
+      // ensure that permissions are correctly formatted, and set to their defaults if not
+      doc.permissions = doc.permissions instanceof Object ? doc.permissions : {};
+      const p         = doc.permissions;
+      p.contributors  = Array.isArray(p.contributors) ? p.contributors : [];
+      p.owners        = Array.isArray(p.owners) ? p.owners : [];
+      p.viewers       = Array.isArray(p.viewers) ? p.viewers : [];
+      p.public        = `public` in p ? p.public : false;
 
       if (doc.permissions.owners.includes(userID) || doc.permissions.contributors.includes(userID)) {
 
@@ -64,12 +79,7 @@ function upsert(data = {}, userID, { ifMatch } = {}) {
 
   } else {
 
-    data.permissions = {
-      contributors: [],
-      owners:       [userID],
-      public:       false,
-      viewers:      [],
-    };
+    data.permissions = defaultPermissions;
 
     const accepted = __.createDocument(link, data, (err, res) => {
       parseError(err);

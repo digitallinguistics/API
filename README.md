@@ -230,6 +230,7 @@ Status | Description
 405    | Method not allowed
 408    | Request timeout
 409    | Data conflict
+410    | Item already deleted
 412    | Precondition Failed
 413    | Payload too large
 419    | Authorization token expired

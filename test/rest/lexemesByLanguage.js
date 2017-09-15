@@ -40,7 +40,7 @@ const {
 
 module.exports = (req, v = ``) => {
 
-  describe(`Lexemes`, function() {
+  describe(`Lexemes by Language`, function() {
 
     const languageID = uuid();
     let token;
@@ -75,39 +75,32 @@ module.exports = (req, v = ``) => {
       await upsert(coll, Object.assign({}, langData));
     }));
 
-    describe(`/lexemes`, function() {
+    describe(`/languages/:language/lexemes`, function() {
 
       it(`405: Method Not Allowed`, testAsync(async function() {
-        await req.delete(`${v}/lexemes`)
+        await req.delete(`${v}/languages/${languageID}/lexemes`)
         .set(`Authorization`, token)
         .expect(405);
       }));
 
       describe(`GET`, function() {
 
-        it(`400: bad languageID`, testAsync(async function() {
-          await req.get(`${v}/lexemes`)
-          .set(`Authorization`, token)
-          .query({ languageID: '' }) // NB: testing with true doesn't work here, because it results in a valid, non-empty string
-          .expect(400);
-        }));
-
         it(`400: bad dlx-max-item-count`, testAsync(async function() {
-          await req.get(`${v}/lexemes`)
+          await req.get(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, token)
           .set(maxItemCountHeader, true)
           .expect(400);
         }));
 
         it(`400: bad dlx-continuation`, testAsync(async function() {
-          await req.get(`${v}/lexemes`)
+          await req.get(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, token)
           .set(continuationHeader, true)
           .expect(400);
         }));
 
         it(`400: bad If-Modified-Since`, testAsync(async function() {
-          await req.get(`${v}/lexemes`)
+          await req.get(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, token)
           .set(ifModifiedSinceHeader, true)
           .expect(400);
@@ -126,13 +119,13 @@ module.exports = (req, v = ``) => {
           const lex3 = await upsert(coll, lex3Data);
 
           // get Lexemes
-          const { body: lexemes } = await req.get(`${v}/lexemes`)
+          const { body: lexemes } = await req.get(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, token)
           .send({}) // including body should not throw an error
           .expect(200)
           .expect(itemCountHeader, /[0-9]+/);
 
-          // check Lexeme attributes
+          // check Language attributes
           expect(lexemes.every(lex => lex.type === `Lexeme`
             && typeof lex._attachments === `undefined`
             && typeof lex._rid === `undefined`
@@ -148,6 +141,9 @@ module.exports = (req, v = ``) => {
 
           // only items that the user has permission to view should be included in the results
           expect(lexemes.find(lex => lex.id === lex3.id && lex.tid === lex3.tid)).toBeUndefined();
+
+          // only items for this Language are included
+          expect(lexemes.every(lex => lex.languageID === langData.id)).toBe(true);
 
         }));
 
@@ -173,7 +169,7 @@ module.exports = (req, v = ``) => {
           const lex = await upsert(coll, data);
 
           // get Lexemes with testUser permissions
-          const { body: lexemes } = await req.get(`${v}/lexemes`)
+          const { body: lexemes } = await req.get(`${v}/languages/${lang.id}/lexemes`)
           .set(`Authorization`, token)
           .expect(200)
           .expect(itemCountHeader, /[0-9]+/);
@@ -191,14 +187,14 @@ module.exports = (req, v = ``) => {
           await upsert(coll, Object.assign({ tid: `getLexemes-continuation3` }, defaultData));
 
           // dlx-max-item-count
-          const res = await req.get(`${v}/lexemes`)
+          const res = await req.get(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, token)
           .set(maxItemCountHeader, 2)
           .expect(200)
           .expect(itemCountHeader, /[0-9]+/)
           .expect(continuationHeader, /.+/);
 
-          // check Lexeme attributes
+          // check Language attributes
           expect(res.body.every(lex => lex.type === `Lexeme`
             && typeof lex._attachments === `undefined`
             && typeof lex._rid === `undefined`
@@ -211,7 +207,7 @@ module.exports = (req, v = ``) => {
           expect(res.body.length).toBe(2);
 
           // dlx-continuation
-          const { body: lexemes } = await req.get(`${v}/lexemes`)
+          const { body: lexemes } = await req.get(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, token)
           .set(continuationHeader, res.headers[continuationHeader])
           .expect(200)
@@ -219,7 +215,7 @@ module.exports = (req, v = ``) => {
 
           expect(lexemes.length).toBeGreaterThan(0);
 
-          // check Lexeme attributes
+          // check Language attributes
           expect(lexemes.every(lex => lex.type === `Lexeme`
             && typeof lex._attachments === `undefined`
             && typeof lex._rid === `undefined`
@@ -243,7 +239,7 @@ module.exports = (req, v = ``) => {
           // If-Modified-Since
           const ifModifiedSince = new Date((lex1._ts * 1000) + 1000); // add 1s to timestamp of modifiedBefore
 
-          const { body: lexemes } = await req.get(`${v}/lexemes`)
+          const { body: lexemes } = await req.get(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, token)
           .set(ifModifiedSinceHeader, ifModifiedSince)
           .expect(200)
@@ -261,29 +257,6 @@ module.exports = (req, v = ``) => {
           // only results modified after If-Modified-Since are returned
           expect(lexemes.some(lex => lex.id === lex1.id)).toBe(false);
           expect(lexemes.some(lex => lex.id === lex2.id)).toBe(true);
-
-        }));
-
-        it(`languageID`, testAsync(async function() {
-
-          // add test data
-          const lang     = await upsert(coll, Object.assign({}, langData, { id: uuid() }));
-          const lexData1 = Object.assign({}, defaultData, { languageID: lang.id });
-          const lexData2 = Object.assign({}, defaultData);
-
-          const lex1 = await upsert(coll, lexData1);
-          const lex2 = await upsert(coll, lexData2);
-
-          // get Lexemes for Language
-          const { body: lexemes } = await req.get(`${v}/lexemes`)
-          .set(`Authorization`, token)
-          .query({ languageID: lang.id })
-          .expect(200)
-          .expect(itemCountHeader, /[0-9]+/);
-
-          // returns only Lexemes that the user has permission to access
-          expect(lexemes.find(lex => lex.id === lex1.id)).toBeDefined();
-          expect(lexemes.find(lex => lex.id === lex2.id)).toBeUndefined();
 
         }));
 
@@ -319,7 +292,7 @@ module.exports = (req, v = ``) => {
           const publicLex  = await upsert(coll, publicData);
 
           // bad public value does not return public results
-          const { body: badLexemes } = await req.get(`${v}/lexemes`)
+          const { body: badLexemes } = await req.get(`${v}/languages/${lang.id}/lexemes`)
           .set(`Authorization`, token)
           .query({ public: `yes` })
           .expect(200)
@@ -329,13 +302,13 @@ module.exports = (req, v = ``) => {
           expect(badLexemes.find(lang => lang.id === privateLex.id)).toBeUndefined();
 
           // request public items
-          const { body: lexemes } = await req.get(`${v}/lexemes`)
+          const { body: lexemes } = await req.get(`${v}/languages/${lang.id}/lexemes`)
           .set(`Authorization`, token)
           .query({ public: true })
           .expect(200)
           .expect(itemCountHeader, /[0-9]+/);
 
-          // check Lexeme attributes
+          // check Language attributes
           expect(lexemes.every(lex => lex.type === `Lexeme`
             && typeof lex._attachments === `undefined`
             && typeof lex._rid === `undefined`
@@ -355,18 +328,11 @@ module.exports = (req, v = ``) => {
 
       describe(`POST`, function() {
 
-        it(`400: missing languageID`, testAsync(async function() {
-          await req.post(`${v}/lexemes`)
-          .set(`Authorization`, token)
-          .send({})
-          .expect(400);
-        }));
-
         it(`403: bad scope`, testAsync(async function() {
 
           const badToken = await getBadToken();
 
-          await req.post(`${v}/lexemes`)
+          await req.post(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, `Bearer ${badToken}`)
           .expect(403);
 
@@ -382,7 +348,7 @@ module.exports = (req, v = ``) => {
           const lang    = await upsert(coll, data);
           const lexData = Object.assign({}, defaultData, { languageID: lang.id });
 
-          await req.post(`${v}/lexemes`)
+          await req.post(`${v}/languages/${lang.id}/lexemes`)
           .set(`Authorization`, token)
           .send(lexData)
           .expect(403);
@@ -393,7 +359,7 @@ module.exports = (req, v = ``) => {
 
           const data = Object.assign({}, defaultData, { lemma: true });
 
-          await req.post(`${v}/lexemes`)
+          await req.post(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, token)
           .send(data)
           .expect(422);
@@ -404,7 +370,7 @@ module.exports = (req, v = ``) => {
 
           const data = Object.assign({}, defaultData, { id: uuid(), tid: `addLexeme` });
 
-          const { body: lex, headers } = await req.post(`${v}/lexemes`)
+          const { body: lex, headers } = await req.post(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, token)
           .send(data)
           .expect(201)
@@ -450,7 +416,7 @@ module.exports = (req, v = ``) => {
           // create a Lexeme with testUser permissions
           const data = Object.assign({}, defaultData, { languageID: lang.id });
 
-          const { body: lex } = await req.post(`${v}/lexemes`)
+          const { body: lex } = await req.post(`${v}/languages/${lang.id}/lexemes`)
           .set(`Authorization`, token)
           .send(data)
           .expect(201)
@@ -460,29 +426,6 @@ module.exports = (req, v = ``) => {
           const serverData = await read(`${coll}/docs/${lex.id}`);
           expect(serverData.permissions.owners.includes(`some-other-user`));
           expect(serverData.permissions.owners.includes(config.testUser));
-
-        }));
-
-        it(`languageID (query)`, testAsync(async function() {
-
-          // missing body creates a new Lexeme
-          const { body: lex, headers } = await req.post(`${v}/lexemes`)
-          .set(`Authorization`, token)
-          .query({ languageID: langData.id })
-          .expect(201)
-          .expect(lastModifiedHeader, /.+/);
-
-          // Last-Modified header should be a valid date string
-          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
-
-          // check Lexeme attributes
-          expect(lex.type).toBe(`Lexeme`);
-          expect(lex.languageID).toBe(langData.id);
-          expect(lex._attachments).toBeUndefined();
-          expect(lex._rid).toBeUndefined();
-          expect(lex._self).toBeUndefined();
-          expect(lex.permissions).toBeUndefined();
-          expect(lex.ttl).toBeUndefined();
 
         }));
 
@@ -507,7 +450,7 @@ module.exports = (req, v = ``) => {
 
           const badToken = await getBadToken();
 
-          await req.put(`${v}/lexemes`)
+          await req.put(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, `Bearer ${badToken}`)
           .expect(403);
 
@@ -522,7 +465,7 @@ module.exports = (req, v = ``) => {
           const data     = Object.assign({}, defaultData, { languageID: lang.id, permissions });
           const lex      = await upsert(coll, data);
 
-          await req.put(`${v}/lexemes`)
+          await req.put(`${v}/languages/${lang.id}/lexemes`)
           .set(`Authorization`, token)
           .send(lex)
           .expect(403);
@@ -531,9 +474,9 @@ module.exports = (req, v = ``) => {
 
         it(`404: bad languageID`, testAsync(async function() {
 
-          const data = Object.assign({}, defaultData, { languageID: `bad-id` });
+          const data = Object.assign({}, defaultData);
 
-          await req.put(`${v}/lexemes`)
+          await req.put(`${v}/languages/bad-id/lexemes`)
           .set(`Authorization`, token)
           .send(data)
           .expect(404);
@@ -542,9 +485,10 @@ module.exports = (req, v = ``) => {
 
         it(`404: Not Found`, testAsync(async function() {
 
-          const data = Object.assign({}, defaultData, { languageID: uuid(), tid: `Not Found` });
+          const languageID = uuid();
+          const data       = Object.assign({}, defaultData, { languageID, tid: `Not Found` });
 
-          await req.put(`${v}/lexemes`)
+          await req.put(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, token)
           .send(data)
           .expect(404);
@@ -562,7 +506,7 @@ module.exports = (req, v = ``) => {
           await upsert(coll, lex);
 
           // returns 412 if data has been updated
-          await req.put(`${v}/lexemes`)
+          await req.put(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, token)
           .set(ifMatchHeader, lex._etag)
           .send(lex)
@@ -574,7 +518,7 @@ module.exports = (req, v = ``) => {
 
           const data = Object.assign({}, defaultData, { lemma: true });
 
-          await req.post(`${v}/lexemes`)
+          await req.post(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, token)
           .send(data)
           .expect(422);
@@ -585,7 +529,7 @@ module.exports = (req, v = ``) => {
 
           const data = Object.assign({ tid: `upsertLexeme - add` }, defaultData);
 
-          const { body: lex, headers } = await req.put(`${v}/lexemes`)
+          const { body: lex, headers } = await req.put(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, token)
           .set(ifMatchHeader, `some etag`) // If-Match header should be ignored when creating a new Lexeme
           .send(data)
@@ -624,7 +568,7 @@ module.exports = (req, v = ``) => {
           lexData.tid         = `upsertLanguageAgain`;
 
           // upsert changed data
-          const { body: lex, headers } = await req.put(`${v}/lexemes`)
+          const { body: lex, headers } = await req.put(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, token)
           .send(lexData)
           .expect(201)
@@ -633,7 +577,7 @@ module.exports = (req, v = ``) => {
           // Last-Modified header should be a valid date string
           expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
 
-          // check Lexeme attributes
+          // check Language attributes
           expect(lex.type).toBe(`Lexeme`);
           expect(lex.languageID).toBe(langData.id);
           expect(lex.tid).toBe(lexData.tid);
@@ -660,7 +604,7 @@ module.exports = (req, v = ``) => {
           delete deletedLex.ttl;
 
           // upserting a deleted Lexeme undeletes it
-          const { body: lex, headers } = await req.put(`${v}/lexemes`)
+          const { body: lex, headers } = await req.put(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, token)
           .send(deletedLex)
           .expect(201)
@@ -687,7 +631,7 @@ module.exports = (req, v = ``) => {
 
         it(`201: Upsert with Contributor permissions for Language`, testAsync(async function() {
 
-          // NB: This is testing replace, not create (that's tested in POST /lexemes)
+          // NB: This is testing replace, not create (that's tested in POST /languages/${languageID}/lexemes)
 
           // upsert Language with another user as Owner
           const language = Object.assign({}, langData, {
@@ -713,7 +657,7 @@ module.exports = (req, v = ``) => {
           lexeme.changedProperty = true;
 
           // upsert using testUser permissions
-          const { body: lex } = await req.put(`${v}/lexemes`)
+          const { body: lex } = await req.put(`${v}/languages/${lang.id}/lexemes`)
           .set(`Authorization`, token)
           .send(lexeme)
           .expect(201)
@@ -729,7 +673,7 @@ module.exports = (req, v = ``) => {
           const res  = await upsert(coll, data);
 
           // returns 201 if data has not been updated
-          const { body: lex } = await req.put(`${v}/lexemes`)
+          const { body: lex } = await req.put(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, token)
           .set(ifMatchHeader, res._etag)
           .send(res)
@@ -748,59 +692,17 @@ module.exports = (req, v = ``) => {
 
         }));
 
-        it(`languageID (query)`, testAsync(async function() {
-
-          // add test data
-          const data    = Object.assign({ tid: `upsertLexeme - languageID` }, defaultData);
-          const lexData = await upsert(coll, data);
-
-          // change data
-          lexData.newProperty = true;
-          lexData.tid         = `upsertLanguageAgain`;
-          delete lexData.languageID;
-
-          // upsert changed data
-          const { body: lex, headers } = await req.put(`${v}/lexemes`)
-          .set(`Authorization`, token)
-          .query({ languageID: langData.id })
-          .send(lexData)
-          .expect(201)
-          .expect(lastModifiedHeader, /.+/);
-
-          // Last-Modified header should be a valid date string
-          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
-
-          // check Lexeme attributes
-          expect(lex.type).toBe(`Lexeme`);
-          expect(lex.languageID).toBe(langData.id);
-          expect(lex.tid).toBe(lexData.tid);
-          expect(lex.newProperty).toBe(true);
-          expect(lex._attachments).toBeUndefined();
-          expect(lex._rid).toBeUndefined();
-          expect(lex._self).toBeUndefined();
-          expect(lex.permissions).toBeUndefined();
-          expect(lex.ttl).toBeUndefined();
-
-          // check data on server
-          const doc = await read(`${coll}/docs/${lex.id}`);
-          expect(doc.tid).toBe(lexData.tid);
-          expect(doc.newProperty).toBe(true);
-          expect(doc.type).toBe(`Lexeme`);
-          expect(doc.permissions.owners.includes(config.testUser)).toBe(true);
-
-        }));
-
       });
 
     });
 
-    describe(`/lexemes/{lexeme}`, function() {
+    describe(`/languages/${languageID}/lexemes/{lexeme}`, function() {
 
       it(`405: Method Not Allowed`, testAsync(async function() {
 
         const lex = await upsert(coll, defaultData);
 
-        await req.post(`${v}/lexemes/${lex.id}`)
+        await req.post(`${v}/languages/${languageID}/lexemes/${lex.id}`)
         .set(`Authorization`, token)
         .expect(405);
 
@@ -815,7 +717,7 @@ module.exports = (req, v = ``) => {
           const lex  = await upsert(coll, data);
 
           // delete Lexeme with If-Match
-          await req.delete(`${v}/lexemes/${lex.id}`)
+          await req.delete(`${v}/languages/${languageID}/lexemes/${lex.id}`)
           .set(`Authorization`, token)
           .set(ifMatchHeader, ``)
           .expect(400);
@@ -828,7 +730,7 @@ module.exports = (req, v = ``) => {
           const data     = Object.assign({ tid: `bad scope` }, defaultData);
           const lex      = await upsert(coll, data);
 
-          await req.delete(`${v}/lexemes/${lex.id}`)
+          await req.delete(`${v}/languages/${languageID}/lexemes/${lex.id}`)
           .set(`Authorization`, `Bearer ${badToken}`)
           .expect(403);
 
@@ -839,14 +741,14 @@ module.exports = (req, v = ``) => {
           const data = Object.assign({}, defaultData, { permissions: { owners: [`some-other-user`] } });
           const lex  = await upsert(coll, data);
 
-          await req.delete(`${v}/lexemes/${lex.id}`)
+          await req.delete(`${v}/languages/${languageID}/lexemes/${lex.id}`)
           .set(`Authorization`, token)
           .expect(403);
 
         }));
 
         it(`404: Not Found`, testAsync(async function() {
-          await req.delete(`${v}/lexemes/bad-id`)
+          await req.delete(`${v}/languages/${languageID}/lexemes/bad-id`)
           .set(`Authorization`, token)
           .expect(404);
         }));
@@ -862,7 +764,7 @@ module.exports = (req, v = ``) => {
           await upsert(coll, lex);
 
           // returns 412 if data has been updated
-          await req.delete(`${v}/lexemes/${lex.id}`)
+          await req.delete(`${v}/languages/${languageID}/lexemes/${lex.id}`)
           .set(`Authorization`, token)
           .expect(412)
           .set(ifMatchHeader, lex._etag);
@@ -876,7 +778,7 @@ module.exports = (req, v = ``) => {
           const lex  = await upsert(coll, data);
 
           // delete Lexeme
-          await req.delete(`${v}/lexemes/${lex.id}`)
+          await req.delete(`${v}/languages/${languageID}/lexemes/${lex.id}`)
           .set(`Authorization`, token)
           .expect(204);
 
@@ -893,7 +795,7 @@ module.exports = (req, v = ``) => {
           const lex  = await upsert(coll, data);
 
           // delete Language
-          await req.delete(`${v}/lexemes/${lex.id}`)
+          await req.delete(`${v}/languages/${languageID}/lexemes/${lex.id}`)
           .set(`Authorization`, token)
           .expect(204);
 
@@ -910,7 +812,7 @@ module.exports = (req, v = ``) => {
           const lex  = await upsert(coll, data);
 
           // delete Lexeme with If-Match
-          await req.delete(`${v}/lexemes/${lex.id}`)
+          await req.delete(`${v}/languages/${languageID}/lexemes/${lex.id}`)
           .set(`Authorization`, token)
           .set(ifMatchHeader, lex._etag)
           .expect(204);
@@ -932,7 +834,7 @@ module.exports = (req, v = ``) => {
           const lex = await upsert(coll, data);
 
           // If-None-Match
-          await req.get(`${v}/lexemes/${lex.id}`)
+          await req.get(`${v}/languages/${languageID}/lexemes/${lex.id}`)
           .set(`Authorization`, token)
           .set(ifNoneMatchHeader, lex._etag)
           .expect(304);
@@ -946,7 +848,7 @@ module.exports = (req, v = ``) => {
           const lex = await upsert(coll, data);
 
           // If-None-Match
-          await req.get(`${v}/lexemes/${lex.id}`)
+          await req.get(`${v}/languages/${languageID}/lexemes/${lex.id}`)
           .set(`Authorization`, token)
           .set(ifNoneMatchHeader, ``)
           .expect(400);
@@ -958,14 +860,14 @@ module.exports = (req, v = ``) => {
           const data = Object.assign({}, defaultData, { permissions: { owners: [`some-other-user`] } });
           const lex  = await upsert(coll, data);
 
-          await req.get(`${v}/lexemes/${lex.id}`)
+          await req.get(`${v}/languages/${languageID}/lexemes/${lex.id}`)
           .set(`Authorization`, token)
           .expect(403);
 
         }));
 
         it(`404: Not Found`, testAsync(async function() {
-          await req.get(`${v}/lexemes/bad-id`)
+          await req.get(`${v}/languages/${languageID}/lexemes/bad-id`)
           .set(`Authorization`, token)
           .expect(404);
         }));
@@ -975,7 +877,7 @@ module.exports = (req, v = ``) => {
           const data = Object.assign({ tid: `deletedLang`, ttl: 300 }, defaultData);
           const lex  = await upsert(coll, data);
 
-          await req.get(`${v}/lexemes/${lex.id}`)
+          await req.get(`${v}/languages/${languageID}/lexemes/${lex.id}`)
           .set(`Authorization`, token)
           .expect(410);
 
@@ -986,7 +888,7 @@ module.exports = (req, v = ``) => {
           const data   = Object.assign({ tid: `getLexeme` }, defaultData);
           const lexeme = await upsert(coll, data);
 
-          const { body: lex, headers } = await req.get(`${v}/lexemes/${lexeme.id}`)
+          const { body: lex, headers } = await req.get(`${v}/languages/${languageID}/lexemes/${lexeme.id}`)
           .set(`Authorization`, token)
           .expect(200)
           .expect(lastModifiedHeader, /.+/);
@@ -1018,7 +920,7 @@ module.exports = (req, v = ``) => {
 
           const lexeme = await upsert(coll, data);
 
-          const { body: lex, headers } = await req.get(`${v}/lexemes/${lexeme.id}`)
+          const { body: lex, headers } = await req.get(`${v}/languages/${languageID}/lexemes/${lexeme.id}`)
           .set(`Authorization`, token)
           .expect(200)
           .expect(lastModifiedHeader, /.+/);
@@ -1047,7 +949,7 @@ module.exports = (req, v = ``) => {
           const data = Object.assign({ tid: `bad If-Match` }, defaultData);
           const lex  = await upsert(coll, data);
 
-          await req.patch(`${v}/lexemes/${lex.id}`)
+          await req.patch(`${v}/languages/${languageID}/lexemes/${lex.id}`)
           .set(`Authorization`, token)
           .set(ifMatchHeader, ``)
           .send(lex)
@@ -1061,7 +963,7 @@ module.exports = (req, v = ``) => {
           const data     = Object.assign({ tid: `bad scope` }, defaultData);
           const lex      = await upsert(coll, data);
 
-          await req.patch(`${v}/lexemes/${lex.id}`)
+          await req.patch(`${v}/languages/${languageID}/lexemes/${lex.id}`)
           .set(`Authorization`, `Bearer ${badToken}`)
           .send(lex)
           .expect(403);
@@ -1073,7 +975,7 @@ module.exports = (req, v = ``) => {
           const data = Object.assign({}, defaultData, { permissions: { owners: [`some-other-user`] } });
           const lex  = await upsert(coll, data);
 
-          await req.patch(`${v}/lexemes/${lex.id}`)
+          await req.patch(`${v}/languages/${languageID}/lexemes/${lex.id}`)
           .set(`Authorization`, token)
           .send(lex)
           .expect(403);
@@ -1081,7 +983,7 @@ module.exports = (req, v = ``) => {
         }));
 
         it(`404: Not Found`, testAsync(async function() {
-          await req.patch(`${v}/lexemes/bad-id`)
+          await req.patch(`${v}/languages/${languageID}/lexemes/bad-id`)
           .set(`Authorization`, token)
           .expect(404);
         }));
@@ -1097,7 +999,7 @@ module.exports = (req, v = ``) => {
           await upsert(coll, lex);
 
           // If-Match
-          await req.patch(`${v}/lexemes/${lex.id}`)
+          await req.patch(`${v}/languages/${languageID}/lexemes/${lex.id}`)
           .set(`Authorization`, token)
           .set(ifMatchHeader, lex._etag)
           .send(lex)
@@ -1115,7 +1017,7 @@ module.exports = (req, v = ``) => {
           lex.lemma = true;
 
           // attempt to update data
-          await req.patch(`${v}/lexemes/${lex.id}`)
+          await req.patch(`${v}/languages/${languageID}/lexemes/${lex.id}`)
           .set(`Authorization`, token)
           .send(lex)
           .expect(422);
@@ -1135,7 +1037,7 @@ module.exports = (req, v = ``) => {
           delete lexeme.id;                // missing ID in body shouldn't throw an error
 
           // update Lexeme
-          const { body: lex, headers } = await req.patch(`${v}/lexemes/${id}`)
+          const { body: lex, headers } = await req.patch(`${v}/languages/${languageID}/lexemes/${id}`)
           .set(`Authorization`, token)
           .send(lexeme)
           .expect(200)
@@ -1174,7 +1076,7 @@ module.exports = (req, v = ``) => {
           lexeme.changedProperty = true;
 
           // update Lexeme
-          const { body: lex, headers } = await req.patch(`${v}/lexemes/${lexeme.id}`)
+          const { body: lex, headers } = await req.patch(`${v}/languages/${languageID}/lexemes/${lexeme.id}`)
           .set(`Authorization`, token)
           .send(lexeme)
           .expect(200)
@@ -1200,6 +1102,48 @@ module.exports = (req, v = ``) => {
           expect(serverData.type).toBe(`Lexeme`);
           expect(serverData.languageID).toBe(langData.id);
           expect(serverData.tid).toBe(data.tid);
+          expect(serverData.changedProperty).toBe(true);
+          expect(serverData.ttl).toBeUndefined();
+
+        }));
+
+        it(`If-Match`, testAsync(async function() {
+
+          // add test data
+          const data   = Object.assign({ tid: `updateLexeme` }, defaultData);
+          const lexeme = await upsert(coll, data);
+
+          // change data for update
+          lexeme.changedProperty = true;
+
+          // update Lexeme with If-Match header
+          const { body: lex, headers } = await req.patch(`${v}/languages/${languageID}/lexemes/${lexeme.id}`)
+          .set(`Authorization`, token)
+          .set(ifMatchHeader, lexeme._etag)
+          .send(lexeme)
+          .expect(200)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Lexeme attributes
+          expect(lex.type).toBe(`Lexeme`);
+          expect(lex.languageID).toBe(langData.id);
+          expect(lex.changedProperty).toBe(true);
+          expect(lex.tid).toBe(data.tid);
+          expect(lex._attachments).toBeUndefined();
+          expect(lex._rid).toBeUndefined();
+          expect(lex._self).toBeUndefined();
+          expect(lex.permissions).toBeUndefined();
+          expect(lex.ttl).toBeUndefined();
+
+          // check data on server
+          const serverData = await read(lexeme._self);
+
+          expect(serverData.type).toBe(`Lexeme`);
+          expect(serverData.tid).toBe(data.tid);
+          expect(serverData.languageID).toBe(langData.id);
           expect(serverData.changedProperty).toBe(true);
           expect(serverData.ttl).toBeUndefined();
 

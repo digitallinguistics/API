@@ -13,34 +13,11 @@ const config = require('../../lib/config');
 const http   = require('http');
 
 const {
-  db,
   getToken,
   jwt,
   testAsync,
+  timeout,
 } = require('../utilities');
-
-const {
-  coll,
-  upsert,
-} = db;
-
-const test = true;
-const ttl  = 500;
-const type = `Language`;
-
-const permissions = {
-  contributors: [],
-  owners:       [config.testUser],
-  public:       false,
-  viewers:      [],
-};
-
-const defaultData = {
-  name: {},
-  permissions,
-  test,
-  type,
-};
 
 // The "v" parameter is a version path, e.g. "/v0", "/v1", etc.
 module.exports = (req, v = ``) => {
@@ -53,7 +30,7 @@ module.exports = (req, v = ``) => {
       token = await getToken();
     }));
 
-    it(`401: credentials_required`, testAsync(async function() {
+    it(`401: Unauthorized`, testAsync(async function() {
 
       const res = await req.get(`${v}/languages`)
       .expect(401);
@@ -63,119 +40,36 @@ module.exports = (req, v = ``) => {
 
     }));
 
-    it(`403: Forbidden`, testAsync(async function() {
-
-      const lang = {
-        name: {},
-        permissions: {
-          contributors: [],
-          owners:  [],
-          public:  false,
-          viewers: [],
-        },
-        test,
-        type,
-      };
-
-      const doc = await upsert(coll, lang);
-
-      await req.get(`${v}/languages/${doc.id}`)
-      .set(`Authorization`, `Bearer ${token}`)
-      .expect(403);
-
-    }));
-
-    it(`403: Forbidden (scope)`, testAsync(async function() {
-
-      const payload = {
-        azp:   config.authClientID,
-        scope: `public`,
-      };
-
-      const opts = {
-        audience: [`https://api.digitallinguistics.io/`],
-        issuer:   `https://${config.authDomain}/`,
-        subject:  config.testUser,
-      };
-
-      const token = await jwt.signJwt(payload, config.authSecret, opts);
-
-      await req.put(`${v}/languages`)
-      .set(`Authorization`, `Bearer ${token}`)
-      .send(defaultData)
-      .expect(403);
-
-    }));
-
     it(`404: No Route`, testAsync(async function() {
       await req.get(`${v}/badroute`)
       .set(`Authorization`, `Bearer ${token}`)
       .expect(404);
     }));
 
-    it(`404: Not Found`, testAsync(async function() {
+    it(`419: Authorization Token Expired`, testAsync(async function() {
 
-      const { body } = await req.get(`${v}/languages/does-not-exist-1`)
-      .set(`Authorization`, `Bearer ${token}`)
-      .expect(404);
-
-      expect(body.error_description.includes(`ID`)).toBe(true);
-
-    }));
-
-    it(`404: Not Found (DELETE + If-Match)`, testAsync(async function() {
-      await req.delete(`${v}/languages/does-not-exist-2`)
-      .set(`Authorization`, `Bearer ${token}`)
-      .set(`If-Match`, `fake-if-match-header`)
-      .expect(404);
-    }));
-
-    it(`405: Method Not Allowed`, testAsync(async function() {
-      await req.patch(`${v}/languages`)
-      .set(`Authorization`, `Bearer ${token}`)
-      .expect(405);
-    }));
-
-    it(`409: Data Conflict`, function() {
-      pending(`It's currently not possible to trigger a 409 error. The .create() method deletes any provided ID.`);
-    });
-
-    it(`412: Precondition Failed`, testAsync(async function() {
-
-      const doc = await upsert(coll, defaultData);
-
-      const res = await req.put(`${v}/languages`)
-      .set(`Authorization`, `Bearer ${token}`)
-      .set(`If-Match`, `bad-etag`)
-      .send(doc)
-      .expect(412);
-
-      expect(res.body.error_description.includes(`ID`)).toBe(true);
-
-      await req.delete(`${v}/languages/${doc.id}`)
-      .set(`Authorization`, `Bearer ${token}`)
-      .set(`If-Match`, `bad-etag`)
-      .expect(412);
-
-    }));
-
-    it(`422: Malformed Data`, testAsync(async function() {
-
-      const lang = {
-        name: true,
-        test,
-        ttl,
-        type,
+      const payload = {
+        azp:   config.authClientID,
+        scope: `user`,
       };
 
-      await req.put(`${v}/languages`)
-      .set(`Authorization`, `Bearer ${token}`)
-      .send(lang)
-      .expect(422);
+      const opts = {
+        audience:  `https://api.digitallinguistics.io/`,
+        expiresIn: 1,
+        issuer:    `https://${config.authDomain}/`,
+        subject:   config.testUser,
+      };
+
+      const expiredToken = await jwt.signJwt(payload, config.authSecret, opts);
+      await timeout(1000);
+
+      await req.get(`${v}/badroute`)
+      .set(`Authorization`, `Bearer ${expiredToken}`)
+      .expect(419);
 
     }));
 
-    it(`429: rate limit`, function(done) {
+    it(`429: Too Many Requests`, function(done) {
 
       pending(`Only run this test as needed.`);
 
