@@ -96,7 +96,7 @@ module.exports = (v = ``) => {
         expect(Number.isInteger(Date.parse(info.lastModified))).toBe(true);
 
         // check Language attributes
-        expect(lang.id).not.toBe(data.id); // any provided ID should be deleted
+        expect(lang.id).toBe(data.id); // any provided ID should be deleted
         expect(lang.type).toBe(`Language`);
         expect(lang._attachments).toBeUndefined();
         expect(lang._rid).toBeUndefined();

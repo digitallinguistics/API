@@ -171,7 +171,7 @@ module.exports = (v = ``) => {
         expect(Number.isInteger(Date.parse(info.lastModified))).toBe(true);
 
         // check Lexeme data
-        expect(res.id).not.toBe(data.id);
+        expect(res.id).toBe(data.id);
         expect(res.tid).toBe(data.tid);
         expect(res.type).toBe(`Lexeme`);
         expect(res.languageID).toBe(lang.id);

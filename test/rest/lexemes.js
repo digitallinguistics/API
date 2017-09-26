@@ -414,7 +414,7 @@ module.exports = (req, v = ``) => {
           expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
 
           // check Lexeme attributes
-          expect(lex.id).not.toBe(data.id);
+          expect(lex.id).toBe(data.id);
           expect(lex.tid).toBe(data.tid);
           expect(lex.type).toBe(`Lexeme`);
           expect(lex.languageID).toBe(langData.id);
