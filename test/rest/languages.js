@@ -74,6 +74,7 @@ module.exports = (req, v = ``) => {
 
       describe(`GET`, function() {
 
+        let deletedLang; // a Language that has been deleted
         let privateLang; // private Language owned by another user
         let publicLang;  // public Language owned by another user
         let viewerLang;  // Language owned by another user, but testUser is Viewer
@@ -81,14 +82,19 @@ module.exports = (req, v = ``) => {
 
         beforeAll(testAsync(async function() {
 
-          const privateLangData = Object.assign({}, defaultData, {
+          deletedLang = Object.assign({}, defaultData, {
+            tid: `deletedLang`,
+            ttl: 300,
+          });
+
+          privateLang = Object.assign({}, defaultData, {
             permissions: Object.assign({}, permissions, {
               owners: [`some-other-user`],
             }),
             tid: `privateData`,
           });
 
-          const publicLangData = Object.assign({}, defaultData, {
+          publicLang = Object.assign({}, defaultData, {
             permissions: Object.assign({}, permissions, {
               owners: [`some-other-user`],
               public: true,
@@ -96,7 +102,7 @@ module.exports = (req, v = ``) => {
             tid: `publicData`,
           });
 
-          const viewerLangData = Object.assign({}, defaultData, {
+          viewerLang = Object.assign({}, defaultData, {
             permissions: Object.assign({}, permissions, {
               owners:  [`some-other-user`],
               viewers: [config.testUser],
@@ -104,12 +110,13 @@ module.exports = (req, v = ``) => {
             tid: `viewerData`,
           });
 
-          const ownerLangData = Object.assign({}, defaultData);
+          ownerLang = Object.assign({}, defaultData);
 
-          privateLang = await upsert(coll, privateLangData);
-          publicLang  = await upsert(coll, publicLangData);
-          viewerLang  = await upsert(coll, viewerLangData);
-          ownerLang   = await upsert(coll, ownerLangData);
+          deletedLang = await upsert(coll, deletedLang);
+          privateLang = await upsert(coll, privateLang);
+          publicLang  = await upsert(coll, publicLang);
+          viewerLang  = await upsert(coll, viewerLang);
+          ownerLang   = await upsert(coll, ownerLang);
 
         }));
 
@@ -178,7 +185,7 @@ module.exports = (req, v = ``) => {
 
         }));
 
-        it(`dlx-max-item-count / continuation`, testAsync(async function() {
+        it(`200: dlx-max-item-count / continuation`, testAsync(async function() {
 
           // add test data
           await upsert(coll, Object.assign({ tid: `getLanguages-continuation1` }, defaultData));
@@ -225,7 +232,7 @@ module.exports = (req, v = ``) => {
 
         }));
 
-        it(`If-Modified-Since`, testAsync(async function() {
+        it(`200: If-Modified-Since`, testAsync(async function() {
 
           // add test data
           const modifiedBefore = Object.assign({ tid: `modifiedBefore` }, defaultData);
@@ -259,7 +266,7 @@ module.exports = (req, v = ``) => {
 
         }));
 
-        it(`public`, testAsync(async function() {
+        it(`200: public`, testAsync(async function() {
 
           // request public items
           const { body: langs } = await req.get(`${v}/languages`)
@@ -281,6 +288,28 @@ module.exports = (req, v = ``) => {
           expect(langs.find(lang => lang.id === publicLang.id)).toBeDefined();
           // private items are not included in response
           expect(langs.find(lang => lang.id === privateLang.id)).toBeUndefined();
+
+        }));
+
+        it(`200: deleted`, testAsync(async function() {
+
+          // request languages
+          const { body: langs } = await req.get(`${v}/languages`)
+          .set(`Authorization`, token)
+          .query({ deleted: true })
+          .expect(200)
+          .expect(itemCountHeader, /[0-9]+/);
+
+          // check Language attributes
+          expect(langs.every(lang => lang.type === `Language`
+            && typeof lang._attachments === `undefined`
+            && typeof lang._rid === `undefined`
+            && typeof lang._self === `undefined`
+            && typeof lang.permissions === `undefined`
+          )).toBe(true);
+
+          // deleted items are included in response
+          expect(langs.find(lang => lang.id === deletedLang.id)).toBeDefined();
 
         }));
 
@@ -842,6 +871,35 @@ module.exports = (req, v = ``) => {
           expect(lang._self).toBeUndefined();
           expect(lang.permissions).toBeUndefined();
           expect(lang.ttl).toBeUndefined();
+
+        }));
+
+        it(`200: deleted`, testAsync(async function() {
+
+          let data = Object.assign({}, defaultData, {
+            tid: `deleted item`,
+            ttl: 300,
+          });
+
+          data = await upsert(coll, data);
+
+          const { body: lang, headers } = await req.get(`${v}/languages/${data.id}`)
+          .set(`Authorization`, token)
+          .query({ deleted: true })
+          .expect(200)
+          .expect(lastModifiedHeader, /.+/);
+
+          // Last-Modified header should be a valid date string
+          expect(Number.isInteger(Date.parse(headers[lastModifiedHeader]))).toBe(true);
+
+          // check Language attributes
+          expect(lang.type).toBe(`Language`);
+          expect(lang.tid).toBe(data.tid);
+          expect(lang._attachments).toBeUndefined();
+          expect(lang._rid).toBeUndefined();
+          expect(lang._self).toBeUndefined();
+          expect(lang.permissions).toBeUndefined();
+          expect(lang.ttl).toBeDefined();
 
         }));
 

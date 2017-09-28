@@ -179,7 +179,7 @@ module.exports = (req, v = ``) => {
 
         }));
 
-        it(`dlx-max-item-count / dlx-continuation`, testAsync(async function() {
+        it(`200: dlx-max-item-count / dlx-continuation`, testAsync(async function() {
 
           // add test data
           await upsert(coll, Object.assign({ tid: `getLexemes-continuation1` }, defaultData));
@@ -226,7 +226,7 @@ module.exports = (req, v = ``) => {
 
         }));
 
-        it(`If-Modified-Since`, testAsync(async function() {
+        it(`200: If-Modified-Since`, testAsync(async function() {
 
           // add test data
           const modifiedBefore = Object.assign({ tid: `modifiedBefore` }, defaultData);
@@ -260,7 +260,7 @@ module.exports = (req, v = ``) => {
 
         }));
 
-        it(`public`, testAsync(async function() {
+        it(`200: public`, testAsync(async function() {
 
           // add test data
           const language = Object.assign({}, langData, {
@@ -321,6 +321,31 @@ module.exports = (req, v = ``) => {
           expect(lexemes.find(lang => lang.id === publicLex.id)).toBeDefined();
           // private items are not included in response
           expect(lexemes.find(lang => lang.id === privateLex.id)).toBeUndefined();
+
+        }));
+
+        it(`200: deleted`, testAsync(async function() {
+
+          let lex = Object.assign({ tid: `get deleted Lexemes`, ttl: 300 }, defaultData);
+          lex = await upsert(coll, lex);
+
+          // request public items
+          const { body: lexemes } = await req.get(`${v}/languages/${languageID}/lexemes`)
+          .set(`Authorization`, token)
+          .query({ deleted: true })
+          .expect(200)
+          .expect(itemCountHeader, /[0-9]+/);
+
+          // check Lexeme attributes
+          expect(lexemes.every(lex => lex.type === `Lexeme`
+            && typeof lex._attachments === `undefined`
+            && typeof lex._rid === `undefined`
+            && typeof lex._self === `undefined`
+            && typeof lex.permissions === `undefined`
+          )).toBe(true);
+
+          // deleted items are included in response
+          expect(lexemes.find(lexeme => lexeme.id === lex.id)).toBeDefined();
 
         }));
 
@@ -927,6 +952,29 @@ module.exports = (req, v = ``) => {
           expect(lex._self).toBeUndefined();
           expect(lex.permissions).toBeUndefined();
           expect(lex.ttl).toBeUndefined();
+
+        }));
+
+        it(`200: deleted`, testAsync(async function() {
+
+          let lexeme = Object.assign({ tid: `deleted Lexeme`, ttl: 300 }, defaultData);
+          lexeme = await upsert(coll, lexeme);
+
+          const { body: lex } = await req.get(`${v}/languages/${languageID}/lexemes/${lexeme.id}`)
+          .set(`Authorization`, token)
+          .query({ deleted: true })
+          .expect(200)
+          .expect(lastModifiedHeader, /.+/);
+
+          // check Lexeme attributes
+          expect(lex.type).toBe(`Lexeme`);
+          expect(lex.languageID).toBe(langData.id);
+          expect(lex.tid).toBe(lexeme.tid);
+          expect(lex._attachments).toBeUndefined();
+          expect(lex._rid).toBeUndefined();
+          expect(lex._self).toBeUndefined();
+          expect(lex.permissions).toBeUndefined();
+          expect(lex.ttl).toBeDefined();
 
         }));
 

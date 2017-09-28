@@ -430,10 +430,35 @@ module.exports = (v = ``) => {
 
       }));
 
+      it(`200: Success (deleted Language)`, testAsync(async function() {
+
+        // add deleted Language
+        let lang = Object.assign({ tid: `deleted Language`, ttl: 300 }, defaultData);
+        lang     = await upsert(coll, lang);
+
+        // get Language
+        const { res, info } = await emit(`getLanguage`, lang.id, { deleted: true });
+
+        // check info
+        expect(info.status).toBe(200);
+        expect(Number.isInteger(Date.parse(info.lastModified))).toBe(true);
+
+        // check Language attributes
+        expect(res.type).toBe(`Language`);
+        expect(res.tid).toBe(lang.tid);
+        expect(res._attachments).toBeUndefined();
+        expect(res._rid).toBeUndefined();
+        expect(res._self).toBeUndefined();
+        expect(res.permissions).toBeUndefined();
+        expect(res.ttl).toBeDefined();
+
+      }));
+
     });
 
     describe(`getLanguages`, function() {
 
+      let deletedLang; // a Language that has already been deleted
       let privateLang; // private Language owned by another user
       let publicLang;  // public Language owned by another user
       let viewerLang;  // Language owned by another user, but testUser is Viewer
@@ -441,7 +466,9 @@ module.exports = (v = ``) => {
 
       beforeAll(testAsync(async function() {
 
-        const privateLangData = Object.assign({}, defaultData, {
+        deletedLang = Object.assign({ tid: `deletedLang`, ttl: 300 }, defaultData);
+
+        privateLang = Object.assign({}, defaultData, {
           permissions: Object.assign({}, permissions, {
             owners: [`some-other-user`],
             public: false,
@@ -449,7 +476,7 @@ module.exports = (v = ``) => {
           tid: `privateData`,
         });
 
-        const publicLangData = Object.assign({}, defaultData, {
+        publicLang = Object.assign({}, defaultData, {
           permissions: Object.assign({}, permissions, {
             owners: [`some-other-user`],
             public: true,
@@ -457,7 +484,7 @@ module.exports = (v = ``) => {
           tid: `publicData`,
         });
 
-        const viewerLangData = Object.assign({}, defaultData, {
+        viewerLang = Object.assign({}, defaultData, {
           permissions: Object.assign({}, permissions, {
             owners:  [`some-other-user`],
             viewers: [config.testUser],
@@ -466,12 +493,13 @@ module.exports = (v = ``) => {
           tid: `viewerData`,
         });
 
-        const ownerLangData = Object.assign({}, defaultData);
+        ownerLang = Object.assign({}, defaultData);
 
-        privateLang = await upsert(coll, privateLangData);
-        publicLang  = await upsert(coll, publicLangData);
-        viewerLang  = await upsert(coll, viewerLangData);
-        ownerLang   = await upsert(coll, ownerLangData);
+        deletedLang = await upsert(coll, deletedLang);
+        privateLang = await upsert(coll, privateLang);
+        publicLang  = await upsert(coll, publicLang);
+        viewerLang  = await upsert(coll, viewerLang);
+        ownerLang   = await upsert(coll, ownerLang);
 
       }));
 
@@ -537,7 +565,7 @@ module.exports = (v = ``) => {
 
       }));
 
-      it(`ifModifiedSince`, testAsync(async function() {
+      it(`200: ifModifiedSince`, testAsync(async function() {
 
         // add test Languages with wait time between them
         const beforeData = Object.assign({ tid: `modifiedBefore` }, defaultData);
@@ -572,7 +600,7 @@ module.exports = (v = ``) => {
 
       }));
 
-      it(`maxItemCount / continuation`, testAsync(async function() {
+      it(`200: maxItemCount / continuation`, testAsync(async function() {
 
         // get Languages with maxItemCount
         const { res: firstSet, info } = await emit(`getLanguages`, { maxItemCount: 2 });
@@ -602,7 +630,7 @@ module.exports = (v = ``) => {
 
       }));
 
-      it(`public option`, testAsync(async function() {
+      it(`200: public option`, testAsync(async function() {
 
         // get public Languages
         const { res: langs, info } = await emit(`getLanguages`, { public: true });
@@ -616,6 +644,24 @@ module.exports = (v = ``) => {
         expect(langs.find(lang => lang.id === publicLang.id)).toBeDefined();
         expect(langs.find(lang => lang.id === viewerLang.id)).toBeDefined();
         expect(langs.find(lang => lang.id === ownerLang.id)).toBeDefined();
+
+      }));
+
+      it(`200: deleted option`, testAsync(async function() {
+
+        // get public Languages
+        const { res: langs, info } = await emit(`getLanguages`, { deleted: true });
+
+        // check info
+        expect(info.status).toBe(200);
+        expect(info.itemCount).toBeGreaterThan(0);
+
+        // check Languages
+        expect(langs.find(lang => lang.id === privateLang.id)).toBeUndefined();
+        expect(langs.find(lang => lang.id === publicLang.id)).toBeUndefined();
+        expect(langs.find(lang => lang.id === viewerLang.id)).toBeDefined();
+        expect(langs.find(lang => lang.id === ownerLang.id)).toBeDefined();
+        expect(langs.find(lang => lang.id === deletedLang.id)).toBeDefined();
 
       }));
 

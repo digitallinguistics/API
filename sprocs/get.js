@@ -36,7 +36,7 @@ function get(id, userID, options) {
 
     parseError(err);
 
-    if (doc.ttl) throw new Error(410, `Resource with ID ${doc.id} no longer exists.`);
+    if (doc.ttl && !options.deleted) throw new Error(410, `Resource with ID ${doc.id} no longer exists.`);
 
     // ensure that permissions are correctly formatted, and set to their defaults if not
     doc.permissions = doc.permissions instanceof Object ? doc.permissions : {};

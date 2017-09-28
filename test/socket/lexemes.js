@@ -545,7 +545,7 @@ module.exports = (v = ``) => {
 
       }));
 
-      it(`ifNoneMatch`, testAsync(async function() {
+      it(`200: ifNoneMatch`, testAsync(async function() {
 
         // add test Lexeme
         const data = Object.assign({ tid: `ifNoneMatch` }, defaultData);
@@ -574,11 +574,37 @@ module.exports = (v = ``) => {
 
       }));
 
+      it(`200: Success (deleted Lexeme)`, testAsync(async function() {
+
+        // add deleted Lexeme
+        let lex = Object.assign({ tid: `deleted Lexeme`, ttl: 300 }, defaultData);
+        lex     = await upsert(coll, lex);
+
+        // get Lexeme
+        const { res, info } = await emit(`getLexeme`, lex.id, { deleted: true });
+
+        // check info
+        expect(info.status).toBe(200);
+        expect(Number.isInteger(Date.parse(info.lastModified))).toBe(true);
+
+        // check Lexeme attributes
+        expect(res.type).toBe(`Lexeme`);
+        expect(res.tid).toBe(lex.tid);
+        expect(res._attachments).toBeUndefined();
+        expect(res._rid).toBeUndefined();
+        expect(res._self).toBeUndefined();
+        expect(res.permissions).toBeUndefined();
+        expect(res.ttl).toBeDefined();
+
+      }));
+
     });
 
     describe(`getLexemes`, function() {
 
-      const privateData = Object.assign({}, defaultData, {
+      let deletedLex = Object.assign({ tid: `deleted Lexeme`, ttl: 300 }, defaultData);
+
+      let privateLex = Object.assign({}, defaultData, {
         tid: `privateData`,
         permissions: Object.assign({}, permissions, {
           owners: [`some-other-user`],
@@ -586,7 +612,7 @@ module.exports = (v = ``) => {
         }),
       });
 
-      const publicData = Object.assign({}, defaultData, {
+      let publicLex = Object.assign({}, defaultData, {
         tid: `publicData`,
         permissions: Object.assign({}, permissions, {
           owners: [`some-other-user`],
@@ -594,7 +620,7 @@ module.exports = (v = ``) => {
         }),
       });
 
-      const viewerData = Object.assign({}, defaultData, {
+      let viewerLex = Object.assign({}, defaultData, {
         tid: `viewerData`,
         permissions: Object.assign({}, permissions, {
           owners:  [`some-other-user`],
@@ -603,18 +629,14 @@ module.exports = (v = ``) => {
         }),
       });
 
-      const ownerData = Object.assign({ tid: `ownerData` }, defaultData);
-
-      let privateLex;
-      let publicLex;
-      let viewerLex;
-      let ownerLex;
+      let ownerLex = Object.assign({ tid: `ownerData` }, defaultData);
 
       beforeAll(testAsync(async function() {
-        privateLex = await upsert(coll, privateData);
-        publicLex = await upsert(coll, publicData);
-        viewerLex = await upsert(coll, viewerData);
-        ownerLex = await upsert(coll, ownerData);
+        deletedLex = await upsert(coll, deletedLex);
+        privateLex = await upsert(coll, privateLex);
+        publicLex  = await upsert(coll, publicLex);
+        viewerLex  = await upsert(coll, viewerLex);
+        ownerLex   = await upsert(coll, ownerLex);
       }));
 
       it(`400: bad options`, testAsync(async function() {
@@ -699,7 +721,7 @@ module.exports = (v = ``) => {
 
       }));
 
-      it(`public option`, testAsync(async function() {
+      it(`200: public option`, testAsync(async function() {
 
         const { res, info } = await emit(`getLexemes`, { public: true });
 
@@ -727,7 +749,7 @@ module.exports = (v = ``) => {
 
       }));
 
-      it(`languageID option`, testAsync(async function() {
+      it(`200: languageID option`, testAsync(async function() {
 
         let lang = {
           id: uuid(),
@@ -764,6 +786,30 @@ module.exports = (v = ``) => {
 
         expect(res.find(lex => lex.id === lex1.id)).toBeDefined();
         expect(res.find(lex => lex.id === lex2.id)).toBeDefined();
+
+      }));
+
+      it(`200: deleted option`, testAsync(async function() {
+
+        // get Lexemes
+        const { res, info } = await emit(`getLexemes`, { deleted: true });
+
+        // check info
+        expect(info.status).toBe(200);
+        expect(info.itemCount).toBeGreaterThan(0);
+
+        // check Lexemes
+        expect(res.every(lex => lex.type === `Lexeme`
+          && lex.languageID === lang.id
+          && typeof lex._attachments === `undefined`
+          && typeof lex._rid === `undefined`
+          && typeof lex._self === `undefined`
+          && typeof lex.permissions === `undefined`
+        ));
+
+        const deleted = res.find(lex => lex.id === deletedLex.id);
+        expect(deleted).toBeDefined();
+        expect(deleted.ttl).toBeDefined();
 
       }));
 
