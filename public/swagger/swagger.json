@@ -44,7 +44,7 @@
         }, {
           "name" : "deleted",
           "in" : "query",
-          "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database.",
+          "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database. Otherwise requests for a resource marked for deletion will return a 410 error.",
           "required" : false,
           "type" : "boolean",
           "default" : false
@@ -160,7 +160,7 @@
         }, {
           "name" : "deleted",
           "in" : "query",
-          "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database.",
+          "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database. Otherwise requests for a resource marked for deletion will return a 410 error.",
           "required" : false,
           "type" : "boolean",
           "default" : false
@@ -276,7 +276,7 @@
         }, {
           "name" : "deleted",
           "in" : "query",
-          "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database.",
+          "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database. Otherwise requests for a resource marked for deletion will return a 410 error.",
           "required" : false,
           "type" : "boolean",
           "default" : false
@@ -393,7 +393,7 @@
         }, {
           "name" : "deleted",
           "in" : "query",
-          "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database.",
+          "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database. Otherwise requests for a resource marked for deletion will return a 410 error.",
           "required" : false,
           "type" : "boolean",
           "default" : false
@@ -507,7 +507,7 @@
         }, {
           "name" : "deleted",
           "in" : "query",
-          "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database.",
+          "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database. Otherwise requests for a resource marked for deletion will return a 410 error.",
           "required" : false,
           "type" : "boolean",
           "default" : false
@@ -629,7 +629,7 @@
         }, {
           "name" : "deleted",
           "in" : "query",
-          "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database.",
+          "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database. Otherwise requests for a resource marked for deletion will return a 410 error.",
           "required" : false,
           "type" : "boolean",
           "default" : false
@@ -747,7 +747,7 @@
     "deleted" : {
       "name" : "deleted",
       "in" : "query",
-      "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database.",
+      "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database. Otherwise requests for a resource marked for deletion will return a 410 error.",
       "required" : false,
       "type" : "boolean",
       "default" : false
