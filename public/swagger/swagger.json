@@ -2,7 +2,7 @@
   "swagger" : "2.0",
   "info" : {
     "description" : "The Digital Linguistics (DLx) REST API",
-    "version" : "0.3.0",
+    "version" : "0.3.1",
     "title" : "DLx",
     "contact" : {
       "name" : "Daniel W. Hieber",
@@ -41,6 +41,13 @@
           "description" : "The `dlx-continuation` header is used to send a continuation token with the request, when retrieving the next page of results.",
           "required" : false,
           "type" : "string"
+        }, {
+          "name" : "deleted",
+          "in" : "query",
+          "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database.",
+          "required" : false,
+          "type" : "boolean",
+          "default" : false
         }, {
           "name" : "ifModifiedSince",
           "in" : "header",
@@ -151,6 +158,13 @@
           "required" : true,
           "type" : "string"
         }, {
+          "name" : "deleted",
+          "in" : "query",
+          "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database.",
+          "required" : false,
+          "type" : "boolean",
+          "default" : false
+        }, {
           "name" : "ifNoneMatch",
           "in" : "header",
           "description" : "If `If-None-Match` header is used with GET requests to check whether you already have the most up-to-date version of the resource, and therefore do not need the resource sent again. The value of the `If-None-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to reduce bandwidth.",
@@ -259,6 +273,13 @@
           "description" : "The `dlx-continuation` header is used to send a continuation token with the request, when retrieving the next page of results.",
           "required" : false,
           "type" : "string"
+        }, {
+          "name" : "deleted",
+          "in" : "query",
+          "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database.",
+          "required" : false,
+          "type" : "boolean",
+          "default" : false
         }, {
           "name" : "ifModifiedSince",
           "in" : "header",
@@ -370,6 +391,13 @@
           "required" : true,
           "type" : "string"
         }, {
+          "name" : "deleted",
+          "in" : "query",
+          "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database.",
+          "required" : false,
+          "type" : "boolean",
+          "default" : false
+        }, {
           "name" : "ifNoneMatch",
           "in" : "header",
           "description" : "If `If-None-Match` header is used with GET requests to check whether you already have the most up-to-date version of the resource, and therefore do not need the resource sent again. The value of the `If-None-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to reduce bandwidth.",
@@ -476,6 +504,13 @@
           "description" : "The `dlx-continuation` header is used to send a continuation token with the request, when retrieving the next page of results.",
           "required" : false,
           "type" : "string"
+        }, {
+          "name" : "deleted",
+          "in" : "query",
+          "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database.",
+          "required" : false,
+          "type" : "boolean",
+          "default" : false
         }, {
           "name" : "ifModifiedSince",
           "in" : "header",
@@ -592,6 +627,13 @@
           "required" : true,
           "type" : "string"
         }, {
+          "name" : "deleted",
+          "in" : "query",
+          "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database.",
+          "required" : false,
+          "type" : "boolean",
+          "default" : false
+        }, {
           "name" : "ifNoneMatch",
           "in" : "header",
           "description" : "If `If-None-Match` header is used with GET requests to check whether you already have the most up-to-date version of the resource, and therefore do not need the resource sent again. The value of the `If-None-Match` header is the ETag (`_etag`) property of the resource. It is recommended that your application use this header whenever possible to reduce bandwidth.",
@@ -701,6 +743,14 @@
       "description" : "The `dlx-continuation` header is used to send a continuation token with the request, when retrieving the next page of results.",
       "required" : false,
       "type" : "string"
+    },
+    "deleted" : {
+      "name" : "deleted",
+      "in" : "query",
+      "description" : "Setting the `deleted` option to `true` will return results that have been marked for deletion, but not yet deleted from the database.",
+      "required" : false,
+      "type" : "boolean",
+      "default" : false
     },
     "ifMatch" : {
       "name" : "ifMatch",
