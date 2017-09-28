@@ -175,7 +175,7 @@ module.exports = (v = ``) => {
       it(`403: Unauthorized (bad permissions)`, testAsync(async function() {
 
         const data = Object.assign({}, defaultData, {
-          permissions: { owners: [`some-other-user`] },
+          permissions: Object.assign({}, permissions, { owners: [`some-other-user`] }),
         });
         const lang = await upsert(coll, data);
 
@@ -339,7 +339,7 @@ module.exports = (v = ``) => {
       it(`403: Unauthorized (bad permissions)`, testAsync(async function() {
 
         const data = Object.assign({}, defaultData, {
-          permissions: { owners: [`some-other-user`] },
+          permissions: Object.assign({}, permissions, { owners: [`some-other-user`] }),
         });
         const lang = await upsert(coll, data);
 
@@ -403,10 +403,10 @@ module.exports = (v = ``) => {
 
         // add public Language for another user
         const data = Object.assign({}, defaultData, {
-          permissions: {
+          permissions: Object.assign({}, permissions, {
             owners: [`some-other-user`],
             public: true,
-          },
+          }),
           tid: `public item`,
         });
 
@@ -442,27 +442,27 @@ module.exports = (v = ``) => {
       beforeAll(testAsync(async function() {
 
         const privateLangData = Object.assign({}, defaultData, {
-          permissions: {
+          permissions: Object.assign({}, permissions, {
             owners: [`some-other-user`],
             public: false,
-          },
+          }),
           tid: `privateData`,
         });
 
         const publicLangData = Object.assign({}, defaultData, {
-          permissions: {
+          permissions: Object.assign({}, permissions, {
             owners: [`some-other-user`],
             public: true,
-          },
+          }),
           tid: `publicData`,
         });
 
         const viewerLangData = Object.assign({}, defaultData, {
-          permissions: {
+          permissions: Object.assign({}, permissions, {
             owners:  [`some-other-user`],
             viewers: [config.testUser],
             public:  false,
-          },
+          }),
           tid: `viewerData`,
         });
 
@@ -672,7 +672,7 @@ module.exports = (v = ``) => {
 
         const data = Object.assign({}, defaultData, {
           tid: `bad permissions`,
-          permissions: { owners: [`some-other-user`] },
+          permissions: Object.assign({}, permissions, { owners: [`some-other-user`] }),
         });
         const lang = await upsert(coll, data);
 
@@ -882,7 +882,7 @@ module.exports = (v = ``) => {
 
         const data = Object.assign({}, defaultData, {
           tid: `bad permissions`,
-          permissions: { owners: [`some-other-user`] },
+          permissions: Object.assign({}, permissions, { owners: [`some-other-user`] }),
         });
 
         const lang = await upsert(coll, data);
@@ -892,19 +892,6 @@ module.exports = (v = ``) => {
           fail(res);
         } catch (e) {
           expect(e.status).toBe(403);
-        }
-
-      }));
-
-      it(`404: Not Found`, testAsync(async function() {
-
-        const data = Object.assign({ id: uuid(), tid: `not found` }, defaultData);
-
-        try {
-          const { res } = await emit(`upsertLanguage`, data);
-          fail(res);
-        } catch (e) {
-          expect(e.status).toBe(404);
         }
 
       }));

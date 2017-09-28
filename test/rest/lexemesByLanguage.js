@@ -110,7 +110,7 @@ module.exports = (req, v = ``) => {
 
           // add test data
           const lex3Data = Object.assign({}, defaultData, {
-            permissions: { owners: [`some-other-user`] },
+            permissions: Object.assign({}, permissions, { owners: [`some-other-user`] }),
             tid: `getLexemes3`,
           });
 
@@ -152,7 +152,7 @@ module.exports = (req, v = ``) => {
           // upsert Language with another user as Owner
           const language = Object.assign({}, langData, {
             id: uuid(),
-            permissions: { owners: [`some-other-user`] },
+            permissions: Object.assign({}, permissions, { owners: [`some-other-user`] }),
           });
 
           const lang = await upsert(coll, language);
@@ -160,10 +160,10 @@ module.exports = (req, v = ``) => {
           // upsert Lexeme with testUser as Viewer
           const data = Object.assign({}, defaultData, {
             languageID: lang.id,
-            permissions: {
+            permissions: Object.assign({}, permissions, {
               owners:  [`some-other-user`],
               viewers: [config.testUser],
-            },
+            }),
           });
 
           const lex = await upsert(coll, data);
@@ -265,26 +265,26 @@ module.exports = (req, v = ``) => {
           // add test data
           const language = Object.assign({}, langData, {
             id: uuid(),
-            permissions: { owners: [`some-other-user`] },
+            permissions: Object.assign({}, permissions, { owners: [`some-other-user`] }),
           });
 
           const lang = await upsert(coll, language);
 
           const privateData = Object.assign({}, defaultData, {
             languageID: lang.id,
-            permissions: {
+            permissions: Object.assign({}, permissions, {
               owners: [`some-other-user`],
               public: false,
-            },
+            }),
             tid: `privateData`,
           });
 
           const publicData  = Object.assign({}, defaultData, {
             languageID: lang.id,
-            permissions: {
+            permissions: Object.assign({}, permissions, {
               owners: [`some-other-user`],
               public: true,
-            },
+            }),
             tid: `publicData`,
           });
 
@@ -342,7 +342,7 @@ module.exports = (req, v = ``) => {
 
           const data = Object.assign({}, langData, {
             id: uuid(),
-            permissions: { owners: [`some-other-user`] },
+            permissions: Object.assign({}, permissions, { owners: [`some-other-user`] }),
           });
 
           const lang    = await upsert(coll, data);
@@ -405,10 +405,10 @@ module.exports = (req, v = ``) => {
           // add test Language with some-other-user as Owner and testUser as Contributor
           const language = Object.assign({}, langData, {
             id: uuid(),
-            permissions: {
+            permissions: Object.assign({}, permissions, {
               contributors: [config.testUser],
               owners:       [`some-other-user`],
-            },
+            }),
           });
 
           const lang = await upsert(coll, language);
@@ -458,11 +458,11 @@ module.exports = (req, v = ``) => {
 
         it(`403: bad permissions for Lexeme`, testAsync(async function() {
 
-          const permissions = { owners: [`some-other-user`] };
+          const p = Object.assign({}, permissions, { owners: [`some-other-user`] });
 
-          const language = Object.assign({}, langData, { id: uuid(), permissions });
+          const language = Object.assign({}, langData, { id: uuid(), permissions: p });
           const lang     = await upsert(coll, language);
-          const data     = Object.assign({}, defaultData, { languageID: lang.id, permissions });
+          const data     = Object.assign({}, defaultData, { languageID: lang.id, permissions: p });
           const lex      = await upsert(coll, data);
 
           await req.put(`${v}/languages/${lang.id}/lexemes`)
@@ -477,18 +477,6 @@ module.exports = (req, v = ``) => {
           const data = Object.assign({}, defaultData);
 
           await req.put(`${v}/languages/bad-id/lexemes`)
-          .set(`Authorization`, token)
-          .send(data)
-          .expect(404);
-
-        }));
-
-        it(`404: Not Found`, testAsync(async function() {
-
-          const languageID = uuid();
-          const data       = Object.assign({}, defaultData, { languageID, tid: `Not Found` });
-
-          await req.put(`${v}/languages/${languageID}/lexemes`)
           .set(`Authorization`, token)
           .send(data)
           .expect(404);
@@ -636,10 +624,10 @@ module.exports = (req, v = ``) => {
           // upsert Language with another user as Owner
           const language = Object.assign({}, langData, {
             id: uuid(),
-            permissions: {
+            permissions: Object.assign({}, permissions, {
               contributors: [config.testUser],
               owners: [`some-other-user`],
-            },
+            }),
           });
 
           const lang = await upsert(coll, language);
@@ -647,10 +635,10 @@ module.exports = (req, v = ``) => {
           // upsert Lexeme with testUser as Contributor
           const data = Object.assign({}, defaultData, {
             languageID: lang.id,
-            permissions: {
+            permissions: Object.assign({}, permissions, {
               contributors: [config.testUser],
               owners:       [`some-other-user`],
-            },
+            }),
           });
 
           const lexeme = await upsert(coll, data);
@@ -738,7 +726,8 @@ module.exports = (req, v = ``) => {
 
         it(`403: Forbidden (bad permissions on Lexeme)`, testAsync(async function() {
 
-          const data = Object.assign({}, defaultData, { permissions: { owners: [`some-other-user`] } });
+          const p = Object.assign({}, permissions, { owners: [`some-other-user`] });
+          const data = Object.assign({}, defaultData, { permissions: p });
           const lex  = await upsert(coll, data);
 
           await req.delete(`${v}/languages/${languageID}/lexemes/${lex.id}`)
@@ -857,7 +846,8 @@ module.exports = (req, v = ``) => {
 
         it(`403: Forbidden (bad permissions)`, testAsync(async function() {
 
-          const data = Object.assign({}, defaultData, { permissions: { owners: [`some-other-user`] } });
+          const p    = Object.assign({}, permissions, { owners: [`some-other-user`] });
+          const data = Object.assign({}, defaultData, { permissions: p });
           const lex  = await upsert(coll, data);
 
           await req.get(`${v}/languages/${languageID}/lexemes/${lex.id}`)
@@ -911,10 +901,10 @@ module.exports = (req, v = ``) => {
         it(`200: retrieves public items`, testAsync(async function() {
 
           const data = Object.assign({}, defaultData, {
-            permissions: {
+            permissions: Object.assign({}, permissions, {
               owners: [`some-other-user`],
               public: true,
-            },
+            }),
             tid: `public item`,
           });
 
@@ -972,7 +962,8 @@ module.exports = (req, v = ``) => {
 
         it(`403: Forbidden (bad permissions)`, testAsync(async function() {
 
-          const data = Object.assign({}, defaultData, { permissions: { owners: [`some-other-user`] } });
+          const p    = Object.assign({}, permissions, { owners: [`some-other-user`] });
+          const data = Object.assign({}, defaultData, { permissions: p });
           const lex  = await upsert(coll, data);
 
           await req.patch(`${v}/languages/${languageID}/lexemes/${lex.id}`)

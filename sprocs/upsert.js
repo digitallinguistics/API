@@ -3,14 +3,16 @@
 /* eslint-disable
   func-style,
   no-param-reassign,
+  no-shadow,
   no-throw-literal,
+  no-underscore-dangle,
   require-jsdoc,
 */
 
 function upsert(data = {}, userID, { ifMatch } = {}) {
 
   const { response } = __;
-  const link = __.getAltLink();
+  const link         = __.getAltLink();
 
   const defaultPermissions = {
     contributors: [],
@@ -18,6 +20,9 @@ function upsert(data = {}, userID, { ifMatch } = {}) {
     public:       false,
     viewers:      [],
   };
+
+  const isContributor = item => item.permissions.owners.includes(userID)
+    || item.permissions.contributors.includes(userID);
 
   const parseError = err => {
 
@@ -27,8 +32,6 @@ function upsert(data = {}, userID, { ifMatch } = {}) {
       case 400:
       case 403:
         throw new Error(500, `Unknown database error.`);
-      case 404:
-        throw new Error(404, `Resource with ID ${data.id} does not exist.`);
       case 412:
         throw new Error(412, `Precondition not met for resource with ID ${data.id}.`);
       default:
@@ -37,47 +40,7 @@ function upsert(data = {}, userID, { ifMatch } = {}) {
 
   };
 
-  delete data.ttl; // users cannot set their own TTL; also undeletes a document if it is upserted again
-
-  if (data.id) {
-
-    const accepted = __.readDocument(`${link}/docs/${data.id}`, (err, doc) => {
-
-      parseError(err);
-
-      // ensure that permissions are correctly formatted, and set to their defaults if not
-      doc.permissions = doc.permissions instanceof Object ? doc.permissions : {};
-      const p         = doc.permissions;
-      p.contributors  = Array.isArray(p.contributors) ? p.contributors : [];
-      p.owners        = Array.isArray(p.owners) ? p.owners : [];
-      p.viewers       = Array.isArray(p.viewers) ? p.viewers : [];
-      p.public        = `public` in p ? p.public : false;
-
-      if (doc.permissions.owners.includes(userID) || doc.permissions.contributors.includes(userID)) {
-
-        const opts             = {};
-        if (ifMatch) opts.etag = ifMatch;
-        data.permissions       = doc.permissions;
-
-        const accepted = __.replaceDocument(doc._self, data, opts, (err, res) => {
-          parseError(err);
-          if (!res._ts) res._ts = new Date() / 1000 | 0;
-          response.setBody(res);
-        });
-
-        if (!accepted) throw new Error(408, `Timeout upserting resource.`);
-
-      } else {
-
-        throw new Error(403, `User does not have permissions to upsert the resource with ID ${doc.id}.`);
-
-      }
-
-    });
-
-    if (!accepted) throw new Error(408, `Timeout reading resource for upsert.`);
-
-  } else {
+  const createDoc = () => {
 
     data.permissions = defaultPermissions;
 
@@ -88,6 +51,43 @@ function upsert(data = {}, userID, { ifMatch } = {}) {
 
     if (!accepted) throw new Error(408, `Timeout upserting resource.`);
 
-  }
+  };
+
+  const upsertDoc = doc => {
+
+    // checks that user has permission to change this data
+    if (!isContributor(doc)) {
+      throw new Error(403, `User does not have permissions to upsert the resource with ID ${doc.id}.`);
+    }
+
+    // set ifMatch option and permissions
+    const opts             = {};
+    if (ifMatch) opts.etag = ifMatch;
+    data.permissions       = doc.permissions;
+
+    const accepted = __.replaceDocument(doc._self, data, opts, (err, res) => {
+      parseError(err);
+      if (!res._ts) res._ts = Math.floor(new Date() / 1000);
+      response.setBody(res);
+    });
+
+    if (!accepted) throw new Error(408, `Timeout upserting resource.`);
+
+  };
+
+  // users cannot set their own TTL; also undeletes a document if it is upserted again
+  delete data.ttl;
+
+  // create document if there is no ID already provided
+  if (!data.id) createDoc();
+
+  // if ID is provided, attempt to retrieve doc, and create doc if it cannot be found
+  const accepted = __.readDocument(`${link}/docs/${data.id}`, (err, doc) => {
+    if (err && err.number === 404) createDoc();
+    else if (err) parseError(err);
+    else upsertDoc(doc);
+  });
+
+  if (!accepted) throw new Error(408, `Timeout reading resource for upsert.`);
 
 }

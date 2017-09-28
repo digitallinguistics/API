@@ -82,27 +82,25 @@ module.exports = (req, v = ``) => {
         beforeAll(testAsync(async function() {
 
           const privateLangData = Object.assign({}, defaultData, {
-            permissions: {
+            permissions: Object.assign({}, permissions, {
               owners: [`some-other-user`],
-              public: false,
-            },
+            }),
             tid: `privateData`,
           });
 
           const publicLangData = Object.assign({}, defaultData, {
-            permissions: {
+            permissions: Object.assign({}, permissions, {
               owners: [`some-other-user`],
               public: true,
-            },
+            }),
             tid: `publicData`,
           });
 
           const viewerLangData = Object.assign({}, defaultData, {
-            permissions: {
+            permissions: Object.assign({}, permissions, {
               owners:  [`some-other-user`],
-              public:  false,
               viewers: [config.testUser],
-            },
+            }),
             tid: `viewerData`,
           });
 
@@ -392,24 +390,14 @@ module.exports = (req, v = ``) => {
 
         it(`403: Forbidden (bad permissions)`, testAsync(async function() {
 
-          const data = Object.assign({}, defaultData, { permissions: { owners: [`some-other-user`] } });
+          const p = Object.assign({}, permissions, { owners: [`some-other-user`] });
+          const data = Object.assign({}, defaultData, { permissions: p });
           const lang = await upsert(coll, data);
 
           await req.put(`${v}/languages`)
           .set(`Authorization`, token)
           .send(lang)
           .expect(403);
-
-        }));
-
-        it(`404: Not Found`, testAsync(async function() {
-
-          const data = Object.assign({ id: uuid() }, defaultData);
-
-          await req.put(`${v}/languages`)
-          .set(`Authorization`, token)
-          .send(data)
-          .expect(404);
 
         }));
 
@@ -640,7 +628,8 @@ module.exports = (req, v = ``) => {
 
         it(`403: Forbidden (bad permissions)`, testAsync(async function() {
 
-          const data = Object.assign({}, defaultData, { permissions: { owners: [`some-other-user`] } });
+          const p = Object.assign({}, permissions, { owners: [`some-other-user`] });
+          const data = Object.assign({}, defaultData, { permissions: p });
           const lang = await upsert(coll, data);
 
           await req.delete(`${v}/languages/${lang.id}`)
@@ -774,7 +763,8 @@ module.exports = (req, v = ``) => {
 
         it(`403: Forbidden (bad permissions)`, testAsync(async function() {
 
-          const data = Object.assign({}, defaultData, { permissions: { owners: [`some-other-user`] } });
+          const p = Object.assign({}, permissions, { owners: [`some-other-user`] });
+          const data = Object.assign({}, defaultData, { permissions: p });
           const lang = await upsert(coll, data);
 
           await req.get(`${v}/languages/${lang.id}`)
@@ -827,10 +817,10 @@ module.exports = (req, v = ``) => {
         it(`200: retrieves public items`, testAsync(async function() {
 
           const data = Object.assign({}, defaultData, {
-            permissions: {
+            permissions: Object.assign({}, permissions, {
               owners: [`some-other-user`],
               public: true,
-            },
+            }),
             tid: `public item`,
           });
 
@@ -887,7 +877,8 @@ module.exports = (req, v = ``) => {
 
         it(`403: Forbidden (bad permissions)`, testAsync(async function() {
 
-          const data = Object.assign({}, defaultData, { permissions: { owners: [`some-other-user`] } });
+          const p    = Object.assign({}, permissions, { owners: [`some-other-user`] });
+          const data = Object.assign({}, defaultData, { permissions: p });
           const lang = await upsert(coll, data);
 
           await req.patch(`${v}/languages/${lang.id}`)

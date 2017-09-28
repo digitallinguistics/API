@@ -119,7 +119,7 @@ module.exports = (v = ``) => {
       it(`403: bad permissions on Language`, testAsync(async function() {
 
         const langData = Object.assign({}, lang, {
-          permissions: { owners: [`some-other-user`] },
+          permissions: Object.assign({}, permissions, { owners: [`some-other-user`] }),
         });
         delete langData.id;
         const language = await upsert(coll, langData);
@@ -285,7 +285,7 @@ module.exports = (v = ``) => {
 
         const data = Object.assign({}, defaultData, {
           tid: `bad permissions on Lexeme`,
-          permissions: { owners: [`some-other-user`] },
+          permissions: Object.assign({}, permissions, { owners: [`some-other-user`] }),
         });
 
         const lex = await upsert(coll, data);
@@ -427,7 +427,7 @@ module.exports = (v = ``) => {
 
         const data = Object.assign({}, defaultData, {
           tid: `bad permissions for Lexeme`,
-          permissions: { owners: [`some-other-user`] },
+          permissions: Object.assign({}, permissions, { owners: [`some-other-user`] }),
         });
 
         const lex = await upsert(coll, data);
@@ -488,10 +488,10 @@ module.exports = (v = ``) => {
 
         const data = Object.assign({}, defaultData, {
           tid: `public Lexeme`,
-          permissions: {
+          permissions: Object.assign({}, permissions, {
             owners: [`some-other-user`],
             public: true,
-          },
+          }),
         });
 
         const lex = await upsert(coll, data);
@@ -518,11 +518,11 @@ module.exports = (v = ``) => {
 
         const data = Object.assign({}, defaultData, {
           tid: `public Lexeme`,
-          permissions: {
+          permissions: Object.assign({}, permissions, {
             owners:  [`some-other-user`],
             public:  false,
             viewers: [config.testUser],
-          },
+          }),
         });
 
         const lex = await upsert(coll, data);
@@ -580,27 +580,27 @@ module.exports = (v = ``) => {
 
       const privateData = Object.assign({}, defaultData, {
         tid: `privateData`,
-        permissions: {
+        permissions: Object.assign({}, permissions, {
           owners: [`some-other-user`],
           public: false,
-        },
+        }),
       });
 
       const publicData = Object.assign({}, defaultData, {
         tid: `publicData`,
-        permissions: {
+        permissions: Object.assign({}, permissions, {
           owners: [`some-other-user`],
           public: true,
-        },
+        }),
       });
 
       const viewerData = Object.assign({}, defaultData, {
         tid: `viewerData`,
-        permissions: {
+        permissions: Object.assign({}, permissions, {
           owners:  [`some-other-user`],
           viewers: [config.testUser],
           public:  false,
-        },
+        }),
       });
 
       const ownerData = Object.assign({ tid: `ownerData` }, defaultData);
@@ -837,7 +837,7 @@ module.exports = (v = ``) => {
 
         const data = Object.assign({}, defaultData, {
           tid: `bad permissions for Lexeme`,
-          permissions: { owners: [`some-other-user`] },
+          permissions: Object.assign({}, permissions, { owners: [`some-other-user`] }),
         });
 
         const lex = await upsert(coll, data);
@@ -1089,7 +1089,7 @@ module.exports = (v = ``) => {
 
         const data = Object.assign({}, defaultData, {
           tid: `bad permissions for Lexeme`,
-          permissions: { owners: [`some-other-user`] },
+          permissions: Object.assign({}, permissions, { owners: [`some-other-user`] }),
         });
 
         const lex = await upsert(coll, data);
@@ -1099,19 +1099,6 @@ module.exports = (v = ``) => {
           fail(res);
         } catch (e) {
           expect(e.status).toBe(403);
-        }
-
-      }));
-
-      it(`404: Lexeme not found`, testAsync(async function() {
-
-        const data = Object.assign({}, defaultData, { id: uuid() });
-
-        try {
-          const { res } = await emit(`upsertLexeme`, data);
-          fail(res);
-        } catch (e) {
-          expect(e.status).toBe(404);
         }
 
       }));
