@@ -39,7 +39,7 @@
     "body-parser": "^1.17.2",
     "documentdb": "^1.12.2",
     "express": "^4.15.4",
-    "express-jwt": "^5.3.0",
+    "express-jwt": "^6.0.0",
     "express-rate-limit": "^2.9.0",
     "express-routemap": "^1.1.0",
     "helmet": "^3.8.1",
